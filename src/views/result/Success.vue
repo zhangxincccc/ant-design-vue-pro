@@ -60,30 +60,30 @@
 </template>
 
 <script>
-import { baseMixin } from '@/store/app-mixin'
+import { baseMixin } from '@/store/app-mixin';
 
 const directionType = {
   horizontal: 'horizontal',
   vertical: 'vertical'
-}
+};
 
 export default {
   name: 'Success',
   mixins: [baseMixin],
-  data () {
-    this.directionType = directionType
+  data() {
+    this.directionType = directionType;
     return {
       // title: this.$t('result.success.title'),
       // description: this.$t('result.success.description')
-    }
+    };
   },
   computed: {
-    result () {
+    result() {
       return {
       title: this.$t('result.success.title'),
       description: this.$t('result.success.description')
-      }
+      };
     }
   }
-}
+};
 </script>

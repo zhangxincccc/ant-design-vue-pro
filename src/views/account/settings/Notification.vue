@@ -9,15 +9,15 @@
 
 <script>
 export default {
-  data () {
+  data() {
     return {
       data: []
-    }
+    };
   },
   methods: {
 
   }
-}
+};
 </script>
 
 <style scoped>

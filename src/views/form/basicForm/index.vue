@@ -114,21 +114,21 @@
 <script>
 export default {
   name: 'BaseForm',
-  data () {
+  data() {
     return {
       form: this.$form.createForm(this)
-    }
+    };
   },
   methods: {
     // handler
-    handleSubmit (e) {
-      e.preventDefault()
+    handleSubmit(e) {
+      e.preventDefault();
       this.form.validateFields((err, values) => {
         if (!err) {
-          console.log('Received values of form: ', values)
+          console.log('Received values of form: ', values);
         }
-      })
+      });
     }
   }
-}
+};
 </script>

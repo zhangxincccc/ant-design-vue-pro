@@ -49,15 +49,15 @@
 </template>
 
 <script>
-import { RouteView } from '@/layouts'
-import { baseMixin } from '@/store/app-mixin'
+import { RouteView } from '@/layouts';
+import { baseMixin } from '@/store/app-mixin';
 
 export default {
   components: {
     RouteView
   },
   mixins: [baseMixin],
-  data () {
+  data() {
     return {
       // horizontal  inline
       mode: 'inline',
@@ -84,26 +84,26 @@ export default {
       },
 
       pageTitle: ''
-    }
+    };
   },
-  mounted () {
-    this.updateMenu()
+  mounted() {
+    this.updateMenu();
   },
   methods: {
-    onOpenChange (openKeys) {
-      this.openKeys = openKeys
+    onOpenChange(openKeys) {
+      this.openKeys = openKeys;
     },
-    updateMenu () {
-      const routes = this.$route.matched.concat()
-      this.selectedKeys = [ routes.pop().path ]
+    updateMenu() {
+      const routes = this.$route.matched.concat();
+      this.selectedKeys = [ routes.pop().path ];
     }
   },
   watch: {
-    '$route' (val) {
-      this.updateMenu()
+    '$route'(val) {
+      this.updateMenu();
     }
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

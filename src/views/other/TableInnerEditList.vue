@@ -116,14 +116,14 @@
 </template>
 
 <script>
-import { STable } from '@/components'
+import { STable } from '@/components';
 
 export default {
   name: 'TableList',
   components: {
     STable
   },
-  data () {
+  data() {
     return {
       // 高级搜索 展开/关闭
       advanced: false,
@@ -176,22 +176,22 @@ export default {
         return this.$http.get('/service', {
           params: Object.assign(parameter, this.queryParam)
         }).then(res => {
-          return res.result
-        })
+          return res.result;
+        });
       },
 
       selectedRowKeys: [],
       selectedRows: []
-    }
+    };
   },
   methods: {
 
-    handleChange (value, key, column, record) {
-      console.log(value, key, column)
-      record[column.dataIndex] = value
+    handleChange(value, key, column, record) {
+      console.log(value, key, column);
+      record[column.dataIndex] = value;
     },
-    edit (row) {
-      row.editable = true
+    edit(row) {
+      row.editable = true;
       // row = Object.assign({}, row)
     },
     // eslint-disable-next-line
@@ -202,31 +202,31 @@ export default {
         okText: '删除',
         okType: 'danger',
         cancelText: '取消',
-        onOk () {
-          console.log('OK')
+        onOk() {
+          console.log('OK');
           // 在这里调用删除接口
           return new Promise((resolve, reject) => {
-            setTimeout(Math.random() > 0.5 ? resolve : reject, 1000)
-          }).catch(() => console.log('Oops errors!'))
+            setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+          }).catch(() => console.log('Oops errors!'));
         },
-        onCancel () {
-          console.log('Cancel')
+        onCancel() {
+          console.log('Cancel');
         }
-      })
+      });
     },
-    save (row) {
-      row.editable = false
+    save(row) {
+      row.editable = false;
     },
-    cancel (row) {
-      row.editable = false
+    cancel(row) {
+      row.editable = false;
     },
 
-    onSelectChange (selectedRowKeys, selectedRows) {
-      this.selectedRowKeys = selectedRowKeys
-      this.selectedRows = selectedRows
+    onSelectChange(selectedRowKeys, selectedRows) {
+      this.selectedRowKeys = selectedRowKeys;
+      this.selectedRows = selectedRows;
     },
-    toggleAdvanced () {
-      this.advanced = !this.advanced
+    toggleAdvanced() {
+      this.advanced = !this.advanced;
     }
   },
   watch: {
@@ -243,7 +243,7 @@ export default {
       }
       */
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

@@ -81,25 +81,25 @@ export default {
       default: false
     }
   },
-  data () {
+  data() {
     return {
       form: this.$form.createForm(this)
-    }
+    };
   },
   methods: {
-    handleSubmit (e) {
-      e.preventDefault()
+    handleSubmit(e) {
+      e.preventDefault();
       this.form.validateFields((err, values) => {
         if (!err) {
           this.$notification['error']({
             message: 'Received values of form:',
             description: values
-          })
+          });
         }
-      })
+      });
     }
   }
-}
+};
 </script>
 
 <style scoped>

@@ -1,5 +1,5 @@
-import Mock from 'mockjs2'
-import { builder } from '../util'
+import Mock from 'mockjs2';
+import { builder } from '../util';
 
 const orgTree = () => {
   return builder([{
@@ -77,8 +77,8 @@ const orgTree = () => {
       }
       ]
     }]
-  }])
-}
+  }]);
+};
 
 const role = () => {
   return builder({
@@ -664,8 +664,8 @@ const role = () => {
     'pageNo': 0,
     'totalPage': 1,
     'totalCount': 5
-  })
-}
+  });
+};
 
 const permissionNoPager = () => {
   return builder([{
@@ -811,8 +811,8 @@ const permissionNoPager = () => {
       'get'
     ]
   }
-  ])
-}
+  ]);
+};
 
 const permissions = () => {
   return builder({
@@ -964,10 +964,10 @@ const permissions = () => {
     'pageNo': 0,
     'totalPage': 1,
     'totalCount': 5
-  })
-}
+  });
+};
 
-Mock.mock(/\/org\/tree/, 'get', orgTree)
-Mock.mock(/\/role/, 'get', role)
-Mock.mock(/\/permission\/no-pager/, 'get', permissionNoPager)
-Mock.mock(/\/permission/, 'get', permissions)
+Mock.mock(/\/org\/tree/, 'get', orgTree);
+Mock.mock(/\/role/, 'get', role);
+Mock.mock(/\/permission\/no-pager/, 'get', permissionNoPager);
+Mock.mock(/\/permission/, 'get', permissions);

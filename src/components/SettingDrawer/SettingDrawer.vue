@@ -171,51 +171,51 @@
 </template>
 
 <script>
-import SettingItem from './SettingItem'
-import config from '@/config/defaultSettings'
-import { updateTheme, updateColorWeak, colorList } from './settingConfig'
+import SettingItem from './SettingItem';
+import config from '@/config/defaultSettings';
+import { updateTheme, updateColorWeak, colorList } from './settingConfig';
 
 export default {
   components: {
     SettingItem
   },
   mixins: [],
-  data () {
+  data() {
     return {
       visible: false,
       colorList
-    }
+    };
   },
   watch: {
 
   },
-  mounted () {
-    updateTheme(this.primaryColor)
+  mounted() {
+    updateTheme(this.primaryColor);
     if (this.colorWeak !== config.colorWeak) {
-      updateColorWeak(this.colorWeak)
+      updateColorWeak(this.colorWeak);
     }
   },
   methods: {
-    showDrawer () {
-      this.visible = true
+    showDrawer() {
+      this.visible = true;
     },
-    onClose () {
-      this.visible = false
+    onClose() {
+      this.visible = false;
     },
-    toggle () {
-      this.visible = !this.visible
+    toggle() {
+      this.visible = !this.visible;
     },
-    onColorWeak (checked) {
-      this.$store.dispatch('ToggleWeak', checked)
-      updateColorWeak(checked)
+    onColorWeak(checked) {
+      this.$store.dispatch('ToggleWeak', checked);
+      updateColorWeak(checked);
     },
-    onMultiTab (checked) {
-      this.$store.dispatch('ToggleMultiTab', checked)
+    onMultiTab(checked) {
+      this.$store.dispatch('ToggleMultiTab', checked);
     },
-    handleMenuTheme (theme) {
-      this.$store.dispatch('ToggleTheme', theme)
+    handleMenuTheme(theme) {
+      this.$store.dispatch('ToggleTheme', theme);
     },
-    doCopy () {
+    doCopy() {
       // get current settings from mixin or this.$store.state.app, pay attention to the property name
       const text = `export default {
   primaryColor: '${this.primaryColor}', // primary color of ant design
@@ -228,44 +228,44 @@ export default {
   colorWeak: ${this.colorWeak},
   multiTab: ${this.multiTab},
   production: process.env.NODE_ENV === 'production' && process.env.VUE_APP_PREVIEW !== 'true'
-}`
+}`;
       this.$copyText(text).then(message => {
-        console.log('copy', message)
-        this.$message.success('复制完毕')
+        console.log('copy', message);
+        this.$message.success('复制完毕');
       }).catch(err => {
-        console.log('copy.err', err)
-        this.$message.error('复制失败')
-      })
+        console.log('copy.err', err);
+        this.$message.error('复制失败');
+      });
     },
-    handleLayout (mode) {
-      this.$store.dispatch('ToggleLayoutMode', mode)
+    handleLayout(mode) {
+      this.$store.dispatch('ToggleLayoutMode', mode);
       // 因为顶部菜单不能固定左侧菜单栏，所以强制关闭
-      this.handleFixSiderbar(false)
+      this.handleFixSiderbar(false);
     },
-    handleContentWidthChange (type) {
-      this.$store.dispatch('ToggleContentWidth', type)
+    handleContentWidthChange(type) {
+      this.$store.dispatch('ToggleContentWidth', type);
     },
-    changeColor (color) {
+    changeColor(color) {
       if (this.primaryColor !== color) {
-        this.$store.dispatch('ToggleColor', color)
-        updateTheme(color)
+        this.$store.dispatch('ToggleColor', color);
+        updateTheme(color);
       }
     },
-    handleFixedHeader (fixed) {
-      this.$store.dispatch('ToggleFixedHeader', fixed)
+    handleFixedHeader(fixed) {
+      this.$store.dispatch('ToggleFixedHeader', fixed);
     },
-    handleFixedHeaderHidden (autoHidden) {
-      this.$store.dispatch('ToggleFixedHeaderHidden', autoHidden)
+    handleFixedHeaderHidden(autoHidden) {
+      this.$store.dispatch('ToggleFixedHeaderHidden', autoHidden);
     },
-    handleFixSiderbar (fixed) {
+    handleFixSiderbar(fixed) {
       if (this.layoutMode === 'topmenu') {
-        this.$store.dispatch('ToggleFixSiderbar', false)
-        return
+        this.$store.dispatch('ToggleFixSiderbar', false);
+        return;
       }
-      this.$store.dispatch('ToggleFixSiderbar', fixed)
+      this.$store.dispatch('ToggleFixSiderbar', fixed);
     }
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

@@ -82,10 +82,10 @@
 </template>
 
 <script>
-import moment from 'moment'
-import { TagSelect, StandardFormRow, Ellipsis, AvatarList } from '@/components'
-const TagSelectOption = TagSelect.Option
-const AvatarListItem = AvatarList.Item
+import moment from 'moment';
+import { TagSelect, StandardFormRow, Ellipsis, AvatarList } from '@/components';
+const TagSelectOption = TagSelect.Option;
+const AvatarListItem = AvatarList.Item;
 
 export default {
   components: {
@@ -96,34 +96,34 @@ export default {
     TagSelectOption,
     StandardFormRow
   },
-  data () {
+  data() {
     return {
       data: [],
       form: this.$form.createForm(this),
       loading: true
-    }
+    };
   },
   filters: {
-    fromNow (date) {
-      return moment(date).fromNow()
+    fromNow(date) {
+      return moment(date).fromNow();
     }
   },
-  mounted () {
-    this.getList()
+  mounted() {
+    this.getList();
   },
   methods: {
-    handleChange (value) {
-      console.log(`selected ${value}`)
+    handleChange(value) {
+      console.log(`selected ${value}`);
     },
-    getList () {
+    getList() {
       this.$http.get('/list/article', { params: { count: 8 } }).then(res => {
-        console.log('res', res)
-        this.data = res.result
-        this.loading = false
-      })
+        console.log('res', res);
+        this.data = res.result;
+        this.loading = false;
+      });
     }
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

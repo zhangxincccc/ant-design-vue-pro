@@ -50,66 +50,66 @@
 <script>
 export default {
   name: 'TestWork',
-  data () {
+  data() {
     return {
       visible: false,
       visible2: false
-    }
+    };
   },
-  created () {
-    this.form = this.$form.createForm(this)
-    this.form2 = this.$form.createForm(this)
+  created() {
+    this.form = this.$form.createForm(this);
+    this.form2 = this.$form.createForm(this);
   },
   methods: {
-    handleCloseCurrentTab () {
-      this.$multiTab.closeCurrentPage() // or this.$multiTab.close()
+    handleCloseCurrentTab() {
+      this.$multiTab.closeCurrentPage(); // or this.$multiTab.close()
     },
-    handleOpenTab () {
-      this.$multiTab.open('/features/task')
+    handleOpenTab() {
+      this.$multiTab.open('/features/task');
     },
 
-    handleOpenLoading () {
-      this.$nextTick(function () {
-        console.log('this', this)
-        console.log('this.$refs.tInput', this.$refs.tInput)
-      })
-      this.$loading.show()
+    handleOpenLoading() {
+      this.$nextTick(function() {
+        console.log('this', this);
+        console.log('this.$refs.tInput', this.$refs.tInput);
+      });
+      this.$loading.show();
       setTimeout(() => {
-        this.$loading.hide()
-      }, 5000)
+        this.$loading.hide();
+      }, 5000);
     },
-    handleOpenLoadingCustomTip () {
-      this.$loading.show({ tip: '自定义提示语' })
+    handleOpenLoadingCustomTip() {
+      this.$loading.show({ tip: '自定义提示语' });
       setTimeout(() => {
-        this.$loading.hide()
-      }, 5000)
+        this.$loading.hide();
+      }, 5000);
     },
 
     // confirm
-    confirm (e) {
-      e.stopPropagation()
-      const { path } = this.$route
+    confirm(e) {
+      e.stopPropagation();
+      const { path } = this.$route;
       this.form.validateFields((err, values) => {
         if (!err) {
-          this.$multiTab.rename(path, values.tabName)
-          this.visible = false
+          this.$multiTab.rename(path, values.tabName);
+          this.visible = false;
         }
-      })
+      });
     },
-    cancel () {
-      this.visible = false
+    cancel() {
+      this.visible = false;
     },
-    confirm2 (e) {
-      e.stopPropagation()
+    confirm2(e) {
+      e.stopPropagation();
       this.form2.validateFields((err, values) => {
         if (!err) {
-          this.$multiTab.rename(values.tabKey, values.tabName)
-          this.visible2 = false
+          this.$multiTab.rename(values.tabKey, values.tabName);
+          this.visible2 = false;
         }
-      })
+      });
     }
   }
-}
+};
 </script>
 
 <style scoped>

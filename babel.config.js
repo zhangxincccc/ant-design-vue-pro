@@ -1,8 +1,8 @@
-const IS_PROD = ['production', 'prod'].includes(process.env.NODE_ENV)
+const IS_PROD = ['production', 'prod'].includes(process.env.NODE_ENV);
 
-const plugins = []
+const plugins = [];
 if (IS_PROD) {
-  plugins.push('transform-remove-console')
+  plugins.push('transform-remove-console');
 }
 
 // lazy load ant-design-vue
@@ -11,7 +11,7 @@ plugins.push(['import', {
   'libraryName': 'ant-design-vue',
   'libraryDirectory': 'es',
   'style': true // `style: true` 会加载 less 文件
-}])
+}]);
 
 module.exports = {
   presets: [
@@ -25,4 +25,4 @@ module.exports = {
     ]
   ],
   plugins
-}
+};

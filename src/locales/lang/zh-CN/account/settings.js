@@ -54,4 +54,4 @@ export default {
   'account.settings.notification.todo-description': '待办任务将以站内信的形式通知',
   'account.settings.settings.open': '开',
   'account.settings.settings.close': '关'
-}
+};

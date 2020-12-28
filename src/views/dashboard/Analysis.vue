@@ -212,7 +212,7 @@
 </template>
 
 <script>
-import moment from 'moment'
+import moment from 'moment';
 import {
   ChartCard,
   MiniArea,
@@ -223,36 +223,36 @@ import {
   Trend,
   NumberInfo,
   MiniSmoothArea
-} from '@/components'
-import { baseMixin } from '@/store/app-mixin'
+} from '@/components';
+import { baseMixin } from '@/store/app-mixin';
 
-const barData = []
-const barData2 = []
+const barData = [];
+const barData2 = [];
 for (let i = 0; i < 12; i += 1) {
   barData.push({
     x: `${i + 1}月`,
     y: Math.floor(Math.random() * 1000) + 200
-  })
+  });
   barData2.push({
     x: `${i + 1}月`,
     y: Math.floor(Math.random() * 1000) + 200
-  })
+  });
 }
 
-const rankList = []
+const rankList = [];
 for (let i = 0; i < 7; i++) {
   rankList.push({
     name: '白鹭岛 ' + (i + 1) + ' 号店',
     total: 1234.56 - i * 100
-  })
+  });
 }
 
-const searchUserData = []
+const searchUserData = [];
 for (let i = 0; i < 7; i++) {
   searchUserData.push({
     x: moment().add(i, 'days').format('YYYY-MM-DD'),
     y: Math.ceil(Math.random() * 10)
-  })
+  });
 }
 const searchUserScale = [
   {
@@ -264,9 +264,9 @@ const searchUserScale = [
     alias: '用户数',
     min: 0,
     max: 10
-  }]
+  }];
 
-const searchData = []
+const searchData = [];
 for (let i = 0; i < 50; i += 1) {
   searchData.push({
     index: i + 1,
@@ -274,10 +274,10 @@ for (let i = 0; i < 50; i += 1) {
     count: Math.floor(Math.random() * 1000),
     range: Math.floor(Math.random() * 100),
     status: Math.floor((Math.random() * 10) % 2)
-  })
+  });
 }
 
-const DataSet = require('@antv/data-set')
+const DataSet = require('@antv/data-set');
 
 const sourceData = [
   { item: '家用电器', count: 32.2 },
@@ -286,22 +286,22 @@ const sourceData = [
   { item: '服饰箱包', count: 13 },
   { item: '母婴产品', count: 9 },
   { item: '其他', count: 7.8 }
-]
+];
 
 const pieScale = [{
   dataKey: 'percent',
   min: 0,
   formatter: '.0%'
-}]
+}];
 
-const dv = new DataSet.View().source(sourceData)
+const dv = new DataSet.View().source(sourceData);
 dv.transform({
   type: 'percent',
   field: 'count',
   dimension: 'item',
   as: 'percent'
-})
-const pieData = dv.rows
+});
+const pieData = dv.rows;
 
 export default {
   name: 'Analysis',
@@ -317,7 +317,7 @@ export default {
     NumberInfo,
     MiniSmoothArea
   },
-  data () {
+  data() {
     return {
       loading: true,
       rankList,
@@ -338,10 +338,10 @@ export default {
         stroke: '#fff',
         lineWidth: 1
       }
-    }
+    };
   },
   computed: {
-    searchTableColumns () {
+    searchTableColumns() {
         return [
       {
         dataIndex: 'index',
@@ -363,15 +363,15 @@ export default {
         sorter: (a, b) => a.range - b.range,
         scopedSlots: { customRender: 'range' }
       }
-      ]
+      ];
     }
   },
-  created () {
+  created() {
     setTimeout(() => {
-      this.loading = !this.loading
-    }, 1000)
+      this.loading = !this.loading;
+    }, 1000);
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

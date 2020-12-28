@@ -32,20 +32,20 @@
 <script>
 export default {
   name: 'Step3',
-  data () {
+  data() {
     return {
       loading: false
-    }
+    };
   },
   methods: {
-    finish () {
-      this.$emit('finish')
+    finish() {
+      this.$emit('finish');
     },
-    toOrderList () {
-      this.$router.push('/list/table-list')
+    toOrderList() {
+      this.$router.push('/list/table-list');
     }
   }
-}
+};
 </script>
 <style lang="less" scoped>
   .information {

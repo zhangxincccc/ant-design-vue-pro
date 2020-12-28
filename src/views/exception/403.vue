@@ -12,9 +12,9 @@
 export default {
   name: 'Exception403',
   methods: {
-    toHome () {
-      this.$router.push({ path: '/' })
+    toHome() {
+      this.$router.push({ path: '/' });
     }
   }
-}
+};
 </script>

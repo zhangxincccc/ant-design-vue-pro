@@ -55,4 +55,4 @@ export default {
   'form.basic-form.confirm-password.placeholder': '确认密码',
   'form.basic-form.phone-number.placeholder': '手机号',
   'form.basic-form.verification-code.placeholder': '验证码'
-}
+};

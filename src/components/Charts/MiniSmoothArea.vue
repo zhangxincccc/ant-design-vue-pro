@@ -27,12 +27,12 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
       height: 100
-    }
+    };
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

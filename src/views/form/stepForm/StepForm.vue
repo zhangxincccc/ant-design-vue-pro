@@ -20,9 +20,9 @@
 </template>
 
 <script>
-import Step1 from './Step1'
-import Step2 from './Step2'
-import Step3 from './Step3'
+import Step1 from './Step1';
+import Step2 from './Step2';
+import Step3 from './Step3';
 
 export default {
   name: 'StepForm',
@@ -31,31 +31,31 @@ export default {
     Step2,
     Step3
   },
-  data () {
+  data() {
     return {
       currentTab: 0,
       // form
       form: null
-    }
+    };
   },
   methods: {
 
     // handler
-    nextStep () {
+    nextStep() {
       if (this.currentTab < 2) {
-        this.currentTab += 1
+        this.currentTab += 1;
       }
     },
-    prevStep () {
+    prevStep() {
       if (this.currentTab > 0) {
-        this.currentTab -= 1
+        this.currentTab -= 1;
       }
     },
-    finish () {
-      this.currentTab = 0
+    finish() {
+      this.currentTab = 0;
     }
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

@@ -96,17 +96,17 @@
 </template>
 
 <script>
-import pick from 'lodash.pick'
+import pick from 'lodash.pick';
 
 const stepForms = [
   ['name', 'desc'],
   ['target', 'template', 'type'],
   ['time', 'frequency']
-]
+];
 
 export default {
   name: 'StepByStepModal',
-  data () {
+  data() {
     return {
       labelCol: {
         xs: { span: 24 },
@@ -122,51 +122,51 @@ export default {
       mdl: {},
 
       form: this.$form.createForm(this)
-    }
+    };
   },
   methods: {
-    edit (record) {
-      this.visible = true
-      const { form: { setFieldsValue } } = this
+    edit(record) {
+      this.visible = true;
+      const { form: { setFieldsValue } } = this;
       this.$nextTick(() => {
-        setFieldsValue(pick(record, []))
-      })
+        setFieldsValue(pick(record, []));
+      });
     },
-    handleNext (step) {
-      const { form: { validateFields } } = this
-      const currentStep = step + 1
+    handleNext(step) {
+      const { form: { validateFields } } = this;
+      const currentStep = step + 1;
       if (currentStep <= 2) {
         // stepForms
         validateFields(stepForms[ this.currentStep ], (errors, values) => {
           if (!errors) {
-            this.currentStep = currentStep
+            this.currentStep = currentStep;
           }
-        })
-        return
+        });
+        return;
       }
       // last step
-      this.confirmLoading = true
+      this.confirmLoading = true;
       validateFields((errors, values) => {
-        console.log('errors:', errors, 'val:', values)
+        console.log('errors:', errors, 'val:', values);
         if (!errors) {
-          console.log('values:', values)
+          console.log('values:', values);
           setTimeout(() => {
-            this.confirmLoading = false
-            this.$emit('ok', values)
-          }, 1500)
+            this.confirmLoading = false;
+            this.$emit('ok', values);
+          }, 1500);
         } else {
-          this.confirmLoading = false
+          this.confirmLoading = false;
         }
-      })
+      });
     },
-    backward () {
-      this.currentStep--
+    backward() {
+      this.currentStep--;
     },
-    handleCancel () {
+    handleCancel() {
       // clear form & currentStep
-      this.visible = false
-      this.currentStep = 0
+      this.visible = false;
+      this.currentStep = 0;
     }
   }
-}
+};
 </script>

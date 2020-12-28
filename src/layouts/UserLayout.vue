@@ -30,18 +30,18 @@
 </template>
 
 <script>
-import { deviceMixin } from '@/store/device-mixin'
+import { deviceMixin } from '@/store/device-mixin';
 
 export default {
   name: 'UserLayout',
   mixins: [deviceMixin],
-  mounted () {
-    document.body.classList.add('userLayout')
+  mounted() {
+    document.body.classList.add('userLayout');
   },
-  beforeDestroy () {
-    document.body.classList.remove('userLayout')
+  beforeDestroy() {
+    document.body.classList.remove('userLayout');
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

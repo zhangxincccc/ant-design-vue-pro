@@ -3,4 +3,4 @@ export default {
   save: 'Save',
   'submit.ok': 'Submit successfully',
   'save.ok': 'Saved successfully'
-}
+};

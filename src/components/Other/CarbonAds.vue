@@ -1,33 +1,33 @@
 <script>
-const carbonUrl = '//cdn.carbonads.com/carbon.js?serve=CK7DL2JW&placement=antdvcom'
+const carbonUrl = '//cdn.carbonads.com/carbon.js?serve=CK7DL2JW&placement=antdvcom';
 export default {
   props: {
     isMobile: Boolean
   },
   watch: {
-    $route (e, t) {
-      const adId = '#carbonads'
+    $route(e, t) {
+      const adId = '#carbonads';
       // if(isGitee) {
       //   adId = '#cf';
       // }
       if (e.path !== t.path && this.$el.querySelector(adId)) {
-        this.$el.innerHTML = ''
-        this.load()
+        this.$el.innerHTML = '';
+        this.load();
       }
-      this.adInterval && clearInterval(this.adInterval)
+      this.adInterval && clearInterval(this.adInterval);
       this.adInterval = setInterval(() => {
         if (!this.$el.querySelector(adId)) {
-          this.$el.innerHTML = ''
-          this.load()
+          this.$el.innerHTML = '';
+          this.load();
         }
-      }, 20000)
+      }, 20000);
     }
   },
-  mounted () {
-    this.load()
+  mounted() {
+    this.load();
   },
   methods: {
-    load () {
+    load() {
       // if(isGitee) {
       //   axios.get('https://api.codefund.app/properties/162/funder.html?template=horizontal')
       //   .then(function (response) {
@@ -35,17 +35,17 @@ export default {
       //   });
       // } else
       if (carbonUrl) {
-        const e = document.createElement('script')
-        e.id = '_carbonads_js'
-        e.src = carbonUrl
-        this.$el.appendChild(e)
+        const e = document.createElement('script');
+        e.id = '_carbonads_js';
+        e.src = carbonUrl;
+        this.$el.appendChild(e);
       }
     }
   },
-  render () {
-    return <div id="carbon-ads" class={this.isMobile ? 'carbon-mobile' : ''} />
+  render() {
+    return <div id="carbon-ads" class={this.isMobile ? 'carbon-mobile' : ''} />;
   }
-}
+};
 </script>
 <style lang="less">
 #carbon-ads {

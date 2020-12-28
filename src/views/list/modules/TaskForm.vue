@@ -39,9 +39,9 @@
 </template>
 
 <script>
-import pick from 'lodash.pick'
+import pick from 'lodash.pick';
 
-const fields = ['title', 'startAt', 'owner', 'description']
+const fields = ['title', 'startAt', 'owner', 'description'];
 
 export default {
   name: 'TaskForm',
@@ -51,7 +51,7 @@ export default {
       default: null
     }
   },
-  data () {
+  data() {
     return {
       labelCol: {
         xs: { span: 24 },
@@ -62,33 +62,33 @@ export default {
         sm: { span: 13 }
       },
       form: this.$form.createForm(this)
-    }
+    };
   },
-  mounted () {
-    this.record && this.form.setFieldsValue(pick(this.record, fields))
+  mounted() {
+    this.record && this.form.setFieldsValue(pick(this.record, fields));
   },
   methods: {
-    onOk () {
-      console.log('监听了 modal ok 事件')
+    onOk() {
+      console.log('监听了 modal ok 事件');
       return new Promise(resolve => {
-        resolve(true)
-      })
+        resolve(true);
+      });
     },
-    onCancel () {
-      console.log('监听了 modal cancel 事件')
+    onCancel() {
+      console.log('监听了 modal cancel 事件');
       return new Promise(resolve => {
-        resolve(true)
-      })
+        resolve(true);
+      });
     },
-    handleSubmit () {
-      const { form: { validateFields } } = this
-      this.visible = true
+    handleSubmit() {
+      const { form: { validateFields } } = this;
+      this.visible = true;
       validateFields((errors, values) => {
         if (!errors) {
-          console.log('values', values)
+          console.log('values', values);
         }
-      })
+      });
     }
   }
-}
+};
 </script>

@@ -1,23 +1,23 @@
-const path = require('path')
-const webpack = require('webpack')
-const GitRevisionPlugin = require('git-revision-webpack-plugin')
-const GitRevision = new GitRevisionPlugin()
-const buildDate = JSON.stringify(new Date().toLocaleString())
-const createThemeColorReplacerPlugin = require('./config/plugin.config')
+const path = require('path');
+const webpack = require('webpack');
+const GitRevisionPlugin = require('git-revision-webpack-plugin');
+const GitRevision = new GitRevisionPlugin();
+const buildDate = JSON.stringify(new Date().toLocaleString());
+const createThemeColorReplacerPlugin = require('./config/plugin.config');
 
-function resolve (dir) {
-  return path.join(__dirname, dir)
+function resolve(dir) {
+  return path.join(__dirname, dir);
 }
 
 // check Git
-function getGitHash () {
+function getGitHash() {
   try {
-    return GitRevision.version()
+    return GitRevision.version();
   } catch (e) {}
-  return 'unknown'
+  return 'unknown';
 }
 
-const isProd = process.env.NODE_ENV === 'production'
+const isProd = process.env.NODE_ENV === 'production';
 
 const assetsCDN = {
   // webpack build externals
@@ -35,7 +35,7 @@ const assetsCDN = {
     '//cdn.jsdelivr.net/npm/vuex@3.1.1/dist/vuex.min.js',
     '//cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js'
   ]
-}
+};
 
 // vue.config.js
 const vueConfig = {
@@ -54,12 +54,11 @@ const vueConfig = {
     externals: isProd ? assetsCDN.externals : {}
   },
 
-  chainWebpack: (config) => {
-    config.resolve.alias
-      .set('@$', resolve('src'))
+  chainWebpack: config => {
+    config.resolve.alias.set('@$', resolve('src'));
 
-    const svgRule = config.module.rule('svg')
-    svgRule.uses.clear()
+    const svgRule = config.module.rule('svg');
+    svgRule.uses.clear();
     svgRule
       .oneOf('inline')
       .resourceQuery(/inline/)
@@ -72,15 +71,15 @@ const vueConfig = {
       .loader('file-loader')
       .options({
         name: 'assets/[name].[hash:8].[ext]'
-      })
+      });
 
     // if prod is on
     // assets require on cdn
     if (isProd) {
       config.plugin('html').tap(args => {
-        args[0].cdn = assetsCDN
-        return args
-      })
+        args[0].cdn = assetsCDN;
+        return args;
+      });
     }
   },
 
@@ -118,13 +117,13 @@ const vueConfig = {
   lintOnSave: undefined,
   // babel-loader no-ignore node_modules/*
   transpileDependencies: []
-}
+};
 
 // preview.pro.loacg.com only do not use in your production;
 if (process.env.VUE_APP_PREVIEW === 'true') {
-  console.log('VUE_APP_PREVIEW', true)
+  console.log('VUE_APP_PREVIEW', true);
   // add `ThemeColorReplacer` plugin to webpack plugins
-  vueConfig.configureWebpack.plugins.push(createThemeColorReplacerPlugin())
+  vueConfig.configureWebpack.plugins.push(createThemeColorReplacerPlugin());
 }
 
 module.exports = vueConfig

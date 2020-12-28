@@ -1,70 +1,70 @@
-import Modal from 'ant-design-vue/es/modal'
+import Modal from 'ant-design-vue/es/modal';
 export default (Vue) => {
-  function dialog (component, componentProps, modalProps) {
-    const _vm = this
-    modalProps = modalProps || {}
+  function dialog(component, componentProps, modalProps) {
+    const _vm = this;
+    modalProps = modalProps || {};
     if (!_vm || !_vm._isVue) {
-      return
+      return;
     }
-    let dialogDiv = document.querySelector('body>div[type=dialog]')
+    let dialogDiv = document.querySelector('body>div[type=dialog]');
     if (!dialogDiv) {
-      dialogDiv = document.createElement('div')
-      dialogDiv.setAttribute('type', 'dialog')
-      document.body.appendChild(dialogDiv)
+      dialogDiv = document.createElement('div');
+      dialogDiv.setAttribute('type', 'dialog');
+      document.body.appendChild(dialogDiv);
     }
 
-    const handle = function (checkFunction, afterHandel) {
+    const handle = function(checkFunction, afterHandel) {
       if (checkFunction instanceof Function) {
-        const res = checkFunction()
+        const res = checkFunction();
         if (res instanceof Promise) {
           res.then(c => {
-            c && afterHandel()
-          })
+            c && afterHandel();
+          });
         } else {
-          res && afterHandel()
+          res && afterHandel();
         }
       } else {
         // checkFunction && afterHandel()
-        checkFunction || afterHandel()
+        checkFunction || afterHandel();
       }
-    }
+    };
 
     const dialogInstance = new Vue({
-      data () {
+      data() {
         return {
           visible: true
-        }
+        };
       },
       router: _vm.$router,
       store: _vm.$store,
-      mounted () {
+      mounted() {
         this.$on('close', (v) => {
-          this.handleClose()
-        })
+          this.handleClose();
+        });
       },
       methods: {
-        handleClose () {
+        handleClose() {
           handle(this.$refs._component.onCancel, () => {
-            this.visible = false
-            this.$refs._component.$emit('close')
-            this.$refs._component.$emit('cancel')
-            dialogInstance.$destroy()
-          })
+            this.visible = false;
+            this.$refs._component.$emit('close');
+            this.$refs._component.$emit('cancel');
+            dialogInstance.$destroy();
+          });
         },
-        handleOk () {
+        handleOk() {
           handle(this.$refs._component.onOK || this.$refs._component.onOk, () => {
-            this.visible = false
-            this.$refs._component.$emit('close')
-            this.$refs._component.$emit('ok')
-            dialogInstance.$destroy()
-          })
+            this.visible = false;
+            this.$refs._component.$emit('close');
+            this.$refs._component.$emit('ok');
+            dialogInstance.$destroy();
+          });
         }
       },
-      render: function (h) {
-        const that = this
-        const modalModel = modalProps && modalProps.model
+      render: function(h) {
+        const that = this;
+        const modalModel = modalProps && modalProps.model;
         if (modalModel) {
-          delete modalProps.model
+          delete modalProps.model;
         }
         const ModalProps = Object.assign({}, modalModel && { model: modalModel } || {}, {
           attrs: Object.assign({}, {
@@ -76,17 +76,17 @@ export default (Vue) => {
             ...(modalProps.on || modalProps)
           }, {
             ok: () => {
-              that.handleOk()
+              that.handleOk();
             },
             cancel: () => {
-              that.handleClose()
+              that.handleClose();
             }
           })
-        })
+        });
 
-        const componentModel = componentProps && componentProps.model
+        const componentModel = componentProps && componentProps.model;
         if (componentModel) {
-          delete componentProps.model
+          delete componentProps.model;
         }
         const ComponentProps = Object.assign({}, componentModel && { model: componentModel } || {}, {
           ref: '_component',
@@ -96,18 +96,18 @@ export default (Vue) => {
           on: Object.assign({}, {
             ...((componentProps && componentProps.on) || componentProps)
           })
-        })
+        });
 
-        return h(Modal, ModalProps, [h(component, ComponentProps)])
+        return h(Modal, ModalProps, [h(component, ComponentProps)]);
       }
-    }).$mount(dialogDiv)
+    }).$mount(dialogDiv);
   }
 
   Object.defineProperty(Vue.prototype, '$dialog', {
     get: () => {
-      return function () {
-        dialog.apply(this, arguments)
-      }
+      return function() {
+        dialog.apply(this, arguments);
+      };
     }
-  })
-}
+  });
+};

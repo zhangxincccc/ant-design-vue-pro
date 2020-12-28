@@ -461,11 +461,11 @@ const columns = [
     key: 'action',
     scopedSlots: { customRender: 'operation' }
   }
-]
+];
 
 export default {
   name: 'BigForm',
-  data () {
+  data() {
     return {
       showSubmit: true,
       form1: this.$form.createForm(this),
@@ -496,46 +496,46 @@ export default {
           editable: false,
           department: '财务部'
         }]
-    }
+    };
   },
-  mounted () {
+  mounted() {
     // 加 10 个表单行
     new Array(10).fill(0).forEach(() => {
-      this.newMember()
-    })
+      this.newMember();
+    });
   },
   methods: {
-    handleForm1Submit (e) {
-      e.preventDefault()
-      this.form1.validateFields()
+    handleForm1Submit(e) {
+      e.preventDefault();
+      this.form1.validateFields();
     },
-    handleForm2Submit (e) {
-      e.preventDefault()
-      this.form2.validateFields()
+    handleForm2Submit(e) {
+      e.preventDefault();
+      this.form2.validateFields();
     },
 
-    handleChange (value, key, column) {
-      const target = this.data.find(item => key === item.key)
+    handleChange(value, key, column) {
+      const target = this.data.find(item => key === item.key);
       if (target) {
-        target[column] = value
+        target[column] = value;
       }
     },
 
-    toggle (record) {
+    toggle(record) {
 
     },
-    saveRow (record) {
+    saveRow(record) {
 
     },
-    cancel (key) {
+    cancel(key) {
 
     },
-    remove (key) {
-      this.data = this.data.filter(item => item.key !== key)
+    remove(key) {
+      this.data = this.data.filter(item => item.key !== key);
     },
 
-    newMember () {
-      const length = this.data.length
+    newMember() {
+      const length = this.data.length;
       this.data.push({
         key: length === 0 ? '1' : (parseInt(this.data[length - 1].key) + 1).toString(),
         name: '',
@@ -543,10 +543,10 @@ export default {
         department: '',
         editable: true,
         isNew: true
-      })
+      });
     }
   }
-}
+};
 </script>
 
 <style scoped>

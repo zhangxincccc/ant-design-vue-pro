@@ -11,26 +11,26 @@
 </template>
 
 <script>
-import IconSelector from '@/components/IconSelector'
+import IconSelector from '@/components/IconSelector';
 
 export default {
   name: 'IconSelectorView',
   components: {
     IconSelector
   },
-  data () {
+  data() {
     return {
       currentSelectedIcon: 'pause-circle'
-    }
+    };
   },
   methods: {
-    handleIconChange (icon) {
-      console.log('change Icon', icon)
-      this.$message.info(<span>选中图标 <code>{icon}</code></span>)
+    handleIconChange(icon) {
+      console.log('change Icon', icon);
+      this.$message.info(<span>选中图标 <code>{icon}</code></span>);
     },
-    changeIcon (type) {
-      this.currentSelectedIcon = type
+    changeIcon(type) {
+      this.currentSelectedIcon = type;
     }
   }
-}
+};
 </script>

@@ -1,4 +1,4 @@
-import { mapState } from 'vuex'
+import { mapState } from 'vuex';
 
 const deviceMixin = {
   computed: {
@@ -6,6 +6,6 @@ const deviceMixin = {
       isMobile: state => state.app.isMobile
     })
   }
-}
+};
 
-export { deviceMixin }
+export { deviceMixin };

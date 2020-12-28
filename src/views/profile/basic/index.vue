@@ -45,13 +45,13 @@
 </template>
 
 <script>
-import { STable } from '@/components'
+import { STable } from '@/components';
 
 export default {
   components: {
     STable
   },
-  data () {
+  data() {
     return {
       goodsColumns: [
         {
@@ -130,10 +130,10 @@ export default {
             pageNo: 1,
             totalPage: 1,
             totalCount: 10
-          })
+          });
         }).then(res => {
-          return res
-        })
+          return res;
+        });
       },
 
       scheduleColumns: [
@@ -213,30 +213,30 @@ export default {
             pageNo: 1,
             totalPage: 1,
             totalCount: 10
-          })
+          });
         }).then(res => {
-          return res
-        })
+          return res;
+        });
       }
-    }
+    };
   },
   filters: {
-    statusFilter (status) {
+    statusFilter(status) {
       const statusMap = {
         'processing': '进行中',
         'success': '完成',
         'failed': '失败'
-      }
-      return statusMap[status]
+      };
+      return statusMap[status];
     }
   },
   computed: {
-    title () {
-      return this.$route.meta.title
+    title() {
+      return this.$route.meta.title;
     }
   }
 
-}
+};
 </script>
 
 <style lang="less" scoped>

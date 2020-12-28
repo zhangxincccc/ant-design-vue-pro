@@ -1,8 +1,8 @@
-import Mock from 'mockjs2'
-import { builder } from '../util'
+import Mock from 'mockjs2';
+import { builder } from '../util';
 
 const info = (options) => {
-  console.log('options', options)
+  console.log('options', options);
   const userInfo = {
     'id': '4291d7da9005377ec9aec4a71ea837f',
     'name': '天野远子',
@@ -19,7 +19,7 @@ const info = (options) => {
     'deleted': 0,
     'roleId': 'admin',
     'role': {}
-  }
+  };
   // role
   const roleObj = {
     'id': 'admin',
@@ -330,7 +330,7 @@ const info = (options) => {
       'actionList': null,
       'dataAccess': null
     }]
-  }
+  };
 
   roleObj.permissions.push({
     'roleId': 'admin',
@@ -364,11 +364,11 @@ const info = (options) => {
     }],
     'actionList': null,
     'dataAccess': null
-  })
+  });
 
-  userInfo.role = roleObj
-  return builder(userInfo)
-}
+  userInfo.role = roleObj;
+  return builder(userInfo);
+};
 
 const userNav = (options) => {
   const nav = [
@@ -750,11 +750,11 @@ const userNav = (options) => {
       },
       'component': 'NotificationSettings'
     }
-  ]
-  const json = builder(nav)
-  console.log('json', json)
-  return json
-}
+  ];
+  const json = builder(nav);
+  console.log('json', json);
+  return json;
+};
 
-Mock.mock(/\/api\/user\/info/, 'get', info)
-Mock.mock(/\/api\/user\/nav/, 'get', userNav)
+Mock.mock(/\/api\/user\/info/, 'get', info);
+Mock.mock(/\/api\/user\/nav/, 'get', userNav);

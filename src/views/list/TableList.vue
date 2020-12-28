@@ -119,12 +119,12 @@
 </template>
 
 <script>
-import moment from 'moment'
-import { STable, Ellipsis } from '@/components'
-import { getRoleList, getServiceList } from '@/api/manage'
+import moment from 'moment';
+import { STable, Ellipsis } from '@/components';
+import { getRoleList, getServiceList } from '@/api/manage';
 
-import StepByStepModal from './modules/StepByStepModal'
-import CreateForm from './modules/CreateForm'
+import StepByStepModal from './modules/StepByStepModal';
+import CreateForm from './modules/CreateForm';
 
 const columns = [
   {
@@ -163,7 +163,7 @@ const columns = [
     width: '150px',
     scopedSlots: { customRender: 'action' }
   }
-]
+];
 
 const statusMap = {
   0: {
@@ -182,7 +182,7 @@ const statusMap = {
     status: 'error',
     text: '异常'
   }
-}
+};
 
 export default {
   name: 'TableList',
@@ -192,8 +192,8 @@ export default {
     CreateForm,
     StepByStepModal
   },
-  data () {
-    this.columns = columns
+  data() {
+    this.columns = columns;
     return {
       // create model
       visible: false,
@@ -205,114 +205,114 @@ export default {
       queryParam: {},
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
-        const requestParameters = Object.assign({}, parameter, this.queryParam)
-        console.log('loadData request parameters:', requestParameters)
+        const requestParameters = Object.assign({}, parameter, this.queryParam);
+        console.log('loadData request parameters:', requestParameters);
         return getServiceList(requestParameters)
           .then(res => {
-            return res.result
-          })
+            return res.result;
+          });
       },
       selectedRowKeys: [],
       selectedRows: []
-    }
+    };
   },
   filters: {
-    statusFilter (type) {
-      return statusMap[type].text
+    statusFilter(type) {
+      return statusMap[type].text;
     },
-    statusTypeFilter (type) {
-      return statusMap[type].status
+    statusTypeFilter(type) {
+      return statusMap[type].status;
     }
   },
-  created () {
-    getRoleList({ t: new Date() })
+  created() {
+    getRoleList({ t: new Date() });
   },
   computed: {
-    rowSelection () {
+    rowSelection() {
       return {
         selectedRowKeys: this.selectedRowKeys,
         onChange: this.onSelectChange
-      }
+      };
     }
   },
   methods: {
-    handleAdd () {
-      this.mdl = null
-      this.visible = true
+    handleAdd() {
+      this.mdl = null;
+      this.visible = true;
     },
-    handleEdit (record) {
-      this.visible = true
-      this.mdl = { ...record }
+    handleEdit(record) {
+      this.visible = true;
+      this.mdl = { ...record };
     },
-    handleOk () {
-      const form = this.$refs.createModal.form
-      this.confirmLoading = true
+    handleOk() {
+      const form = this.$refs.createModal.form;
+      this.confirmLoading = true;
       form.validateFields((errors, values) => {
         if (!errors) {
-          console.log('values', values)
+          console.log('values', values);
           if (values.id > 0) {
             // 修改 e.g.
             new Promise((resolve, reject) => {
               setTimeout(() => {
-                resolve()
-              }, 1000)
+                resolve();
+              }, 1000);
             }).then(res => {
-              this.visible = false
-              this.confirmLoading = false
+              this.visible = false;
+              this.confirmLoading = false;
               // 重置表单数据
-              form.resetFields()
+              form.resetFields();
               // 刷新表格
-              this.$refs.table.refresh()
+              this.$refs.table.refresh();
 
-              this.$message.info('修改成功')
-            })
+              this.$message.info('修改成功');
+            });
           } else {
             // 新增
             new Promise((resolve, reject) => {
               setTimeout(() => {
-                resolve()
-              }, 1000)
+                resolve();
+              }, 1000);
             }).then(res => {
-              this.visible = false
-              this.confirmLoading = false
+              this.visible = false;
+              this.confirmLoading = false;
               // 重置表单数据
-              form.resetFields()
+              form.resetFields();
               // 刷新表格
-              this.$refs.table.refresh()
+              this.$refs.table.refresh();
 
-              this.$message.info('新增成功')
-            })
+              this.$message.info('新增成功');
+            });
           }
         } else {
-          this.confirmLoading = false
+          this.confirmLoading = false;
         }
-      })
+      });
     },
-    handleCancel () {
-      this.visible = false
+    handleCancel() {
+      this.visible = false;
 
-      const form = this.$refs.createModal.form
-      form.resetFields() // 清理表单数据（可不做）
+      const form = this.$refs.createModal.form;
+      form.resetFields(); // 清理表单数据（可不做）
     },
-    handleSub (record) {
+    handleSub(record) {
       if (record.status !== 0) {
-        this.$message.info(`${record.no} 订阅成功`)
+        this.$message.info(`${record.no} 订阅成功`);
       } else {
-        this.$message.error(`${record.no} 订阅失败，规则已关闭`)
+        this.$message.error(`${record.no} 订阅失败，规则已关闭`);
       }
     },
-    onSelectChange (selectedRowKeys, selectedRows) {
-      this.selectedRowKeys = selectedRowKeys
-      this.selectedRows = selectedRows
+    onSelectChange(selectedRowKeys, selectedRows) {
+      this.selectedRowKeys = selectedRowKeys;
+      this.selectedRows = selectedRows;
     },
-    toggleAdvanced () {
-      this.advanced = !this.advanced
+    toggleAdvanced() {
+      this.advanced = !this.advanced;
     },
-    resetSearchForm () {
+    resetSearchForm() {
       this.queryParam = {
         date: moment(new Date())
-      }
+      };
     }
   }
-}
+};
 </script>

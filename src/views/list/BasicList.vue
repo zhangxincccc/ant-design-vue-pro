@@ -71,10 +71,10 @@
 
 <script>
 // 演示如何使用 this.$dialog 封装 modal 组件
-import TaskForm from './modules/TaskForm'
-import Info from './components/Info'
+import TaskForm from './modules/TaskForm';
+import Info from './components/Info';
 
-const data = []
+const data = [];
 data.push({
   title: 'Alipay',
   avatar: 'https://gw.alipayobjects.com/zos/rmsportal/WdGqmHpayyMjiEhcKoVE.png',
@@ -84,7 +84,7 @@ data.push({
   progress: {
     value: 90
   }
-})
+});
 data.push({
   title: 'Angular',
   avatar: 'https://gw.alipayobjects.com/zos/rmsportal/zOsKZmFRdUtvpqCImOVY.png',
@@ -94,7 +94,7 @@ data.push({
   progress: {
     value: 54
   }
-})
+});
 data.push({
   title: 'Ant Design',
   avatar: 'https://gw.alipayobjects.com/zos/rmsportal/dURIMkkrRFpPgTuzkwnB.png',
@@ -104,7 +104,7 @@ data.push({
   progress: {
     value: 66
   }
-})
+});
 data.push({
   title: 'Ant Design Pro',
   avatar: 'https://gw.alipayobjects.com/zos/rmsportal/sfjbOqnsXXJgNCjCzDBL.png',
@@ -114,7 +114,7 @@ data.push({
   progress: {
     value: 30
   }
-})
+});
 data.push({
   title: 'Bootstrap',
   avatar: 'https://gw.alipayobjects.com/zos/rmsportal/siCrBXXhmvTQGWPNLBow.png',
@@ -125,7 +125,7 @@ data.push({
     status: 'exception',
     value: 100
   }
-})
+});
 
 export default {
   name: 'StandardList',
@@ -133,27 +133,27 @@ export default {
     TaskForm,
     Info
   },
-  data () {
+  data() {
     return {
       data,
       status: 'all'
-    }
+    };
   },
   methods: {
-    add () {
+    add() {
       this.$dialog(TaskForm,
         // component props
         {
           record: {},
           on: {
-            ok () {
-              console.log('ok 回调')
+            ok() {
+              console.log('ok 回调');
             },
-            cancel () {
-              console.log('cancel 回调')
+            cancel() {
+              console.log('cancel 回调');
             },
-            close () {
-              console.log('modal close 回调')
+            close() {
+              console.log('modal close 回调');
             }
           }
         },
@@ -163,23 +163,23 @@ export default {
           width: 700,
           centered: true,
           maskClosable: false
-        })
+        });
     },
-    edit (record) {
-      console.log('record', record)
+    edit(record) {
+      console.log('record', record);
       this.$dialog(TaskForm,
         // component props
         {
           record,
           on: {
-            ok () {
-              console.log('ok 回调')
+            ok() {
+              console.log('ok 回调');
             },
-            cancel () {
-              console.log('cancel 回调')
+            cancel() {
+              console.log('cancel 回调');
             },
-            close () {
-              console.log('modal close 回调')
+            close() {
+              console.log('modal close 回调');
             }
           }
         },
@@ -189,10 +189,10 @@ export default {
           width: 700,
           centered: true,
           maskClosable: false
-        })
+        });
     }
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

@@ -94,9 +94,9 @@
 </template>
 
 <script>
-import { TagSelect, StandardFormRow, ArticleListContent } from '@/components'
-import IconText from './components/IconText'
-const TagSelectOption = TagSelect.Option
+import { TagSelect, StandardFormRow, ArticleListContent } from '@/components';
+import IconText from './components/IconText';
+const TagSelectOption = TagSelect.Option;
 
 const owners = [
   {
@@ -119,7 +119,7 @@ const owners = [
     id: 'ym',
     name: '姚明'
   }
-]
+];
 
 export default {
   components: {
@@ -129,45 +129,45 @@ export default {
     ArticleListContent,
     IconText
   },
-  data () {
+  data() {
     return {
       owners,
       loading: true,
       loadingMore: false,
       data: [],
       form: this.$form.createForm(this)
-    }
+    };
   },
-  mounted () {
-    this.getList()
+  mounted() {
+    this.getList();
   },
   methods: {
-    handleChange (value) {
-      console.log(`selected ${value}`)
+    handleChange(value) {
+      console.log(`selected ${value}`);
     },
-    getList () {
+    getList() {
       this.$http.get('/list/article').then(res => {
-        console.log('res', res)
-        this.data = res.result
-        this.loading = false
-      })
+        console.log('res', res);
+        this.data = res.result;
+        this.loading = false;
+      });
     },
-    loadMore () {
-      this.loadingMore = true
+    loadMore() {
+      this.loadingMore = true;
       this.$http.get('/list/article').then(res => {
-        this.data = this.data.concat(res.result)
+        this.data = this.data.concat(res.result);
       }).finally(() => {
-        this.loadingMore = false
-      })
+        this.loadingMore = false;
+      });
     },
-    setOwner () {
-      const { form: { setFieldsValue } } = this
+    setOwner() {
+      const { form: { setFieldsValue } } = this;
       setFieldsValue({
         owner: ['wzj']
-      })
+      });
     }
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

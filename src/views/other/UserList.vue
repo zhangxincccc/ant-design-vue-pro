@@ -162,15 +162,15 @@
 </template>
 
 <script>
-import pick from 'lodash.pick'
-import { STable } from '@/components'
-import { getRoleList, getServiceList } from '@/api/manage'
-import { PERMISSION_ENUM } from '@/core/permission/permission'
+import pick from 'lodash.pick';
+import { STable } from '@/components';
+import { getRoleList, getServiceList } from '@/api/manage';
+import { PERMISSION_ENUM } from '@/core/permission/permission';
 
 const STATUS = {
   1: '启用',
   2: '禁用'
-}
+};
 
 const columns = [
   {
@@ -197,14 +197,14 @@ const columns = [
     dataIndex: 'action',
     scopedSlots: { customRender: 'action' }
   }
-]
+];
 
 export default {
   name: 'TableList',
   components: {
     STable
   },
-  data () {
+  data() {
     return {
       description: '列表使用场景：后台管理中的权限管理以及角色管理，可用于基于 RBAC 设计的角色权限控制，颗粒度细到每一个操作类型。',
 
@@ -230,86 +230,86 @@ export default {
       loadData: parameter => {
         return getRoleList(parameter)
           .then(res => {
-            console.log('getRoleList', res)
+            console.log('getRoleList', res);
             // 展开全部行
-            this.expandedRowKeys = res.result.data.map(item => item.id)
-            return res.result
-          })
+            this.expandedRowKeys = res.result.data.map(item => item.id);
+            return res.result;
+          });
       },
 
       expandedRowKeys: [],
       selectedRowKeys: [],
       selectedRows: []
-    }
+    };
   },
   filters: {
-    statusFilter (key) {
-      return STATUS[key]
+    statusFilter(key) {
+      return STATUS[key];
     },
-    permissionFilter (key) {
-      const permission = PERMISSION_ENUM[key]
-      return permission && permission.label
+    permissionFilter(key) {
+      const permission = PERMISSION_ENUM[key];
+      return permission && permission.label;
     }
   },
-  created () {
+  created() {
     getServiceList().then(res => {
-      console.log('getServiceList.call()', res)
-    })
+      console.log('getServiceList.call()', res);
+    });
 
     getRoleList().then(res => {
-      console.log('getRoleList.call()', res)
-    })
+      console.log('getRoleList.call()', res);
+    });
   },
   methods: {
-    handleEdit (record) {
-      this.visible = true
-      console.log('record', record)
+    handleEdit(record) {
+      this.visible = true;
+      console.log('record', record);
 
-      const checkboxGroup = {}
+      const checkboxGroup = {};
       this.permissions = record.permissions.map(permission => {
-        const groupKey = `permissions.${permission.permissionId}`
-        checkboxGroup[groupKey] = permission.actionList
+        const groupKey = `permissions.${permission.permissionId}`;
+        checkboxGroup[groupKey] = permission.actionList;
         const actionsOptions = permission.actionEntitySet.map(action => {
           return {
             label: action.describe,
             value: action.action,
             defaultCheck: action.defaultCheck
-          }
-        })
+          };
+        });
         return {
           ...permission,
           actionsOptions
-        }
-      })
+        };
+      });
 
       this.$nextTick(() => {
-        console.log('permissions', this.permissions)
-        console.log('checkboxGroup', checkboxGroup)
+        console.log('permissions', this.permissions);
+        console.log('checkboxGroup', checkboxGroup);
 
-        this.form.setFieldsValue(pick(record, ['id', 'status', 'describe', 'name']))
-        this.form.setFieldsValue(checkboxGroup)
-      })
+        this.form.setFieldsValue(pick(record, ['id', 'status', 'describe', 'name']));
+        this.form.setFieldsValue(checkboxGroup);
+      });
     },
-    handleOk (e) {
-      e.preventDefault()
+    handleOk(e) {
+      e.preventDefault();
       this.form.validateFields((err, values) => {
-        console.log(err, values)
-      })
+        console.log(err, values);
+      });
     },
-    onChange (selectedRowKeys, selectedRows) {
-      this.selectedRowKeys = selectedRowKeys
-      this.selectedRows = selectedRows
+    onChange(selectedRowKeys, selectedRows) {
+      this.selectedRowKeys = selectedRowKeys;
+      this.selectedRows = selectedRows;
     },
-    handleExpand (expanded, record) {
-      console.log('expanded', expanded, record)
+    handleExpand(expanded, record) {
+      console.log('expanded', expanded, record);
       if (expanded) {
-        this.expandedRowKeys.push(record.id)
+        this.expandedRowKeys.push(record.id);
       } else {
-        this.expandedRowKeys = this.expandedRowKeys.filter(item => record.id !== item)
+        this.expandedRowKeys = this.expandedRowKeys.filter(item => record.id !== item);
       }
     },
-    toggleAdvanced () {
-      this.advanced = !this.advanced
+    toggleAdvanced() {
+      this.advanced = !this.advanced;
     }
   },
   watch: {
@@ -326,7 +326,7 @@ export default {
       }
       */
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

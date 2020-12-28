@@ -87,8 +87,8 @@
 </template>
 
 <script>
-import moment from 'moment'
-import pick from 'lodash.pick'
+import moment from 'moment';
+import pick from 'lodash.pick';
 
 export default {
   name: 'TableEdit',
@@ -98,7 +98,7 @@ export default {
       default: ''
     }
   },
-  data () {
+  data() {
     return {
       labelCol: {
         xs: { span: 24 },
@@ -116,45 +116,45 @@ export default {
       },
       form: this.$form.createForm(this),
       id: 0
-    }
+    };
   },
   // beforeCreate () {
   //   this.form = this.$form.createForm(this)
   // },
-  mounted () {
+  mounted() {
     this.$nextTick(() => {
-      this.loadEditInfo(this.record)
-    })
+      this.loadEditInfo(this.record);
+    });
   },
   methods: {
-    handleGoBack () {
-      this.$emit('onGoBack')
+    handleGoBack() {
+      this.$emit('onGoBack');
     },
-    handleSubmit () {
-      const { form: { validateFields } } = this
+    handleSubmit() {
+      const { form: { validateFields } } = this;
       validateFields((err, values) => {
         if (!err) {
           // eslint-disable-next-line no-console
-          console.log('Received values of form: ', values)
+          console.log('Received values of form: ', values);
         }
-      })
+      });
     },
-    handleGetInfo () {
+    handleGetInfo() {
 
     },
-    loadEditInfo (data) {
-      const { form } = this
+    loadEditInfo(data) {
+      const { form } = this;
       // ajax
-      console.log(`将加载 ${this.id} 信息到表单`)
+      console.log(`将加载 ${this.id} 信息到表单`);
       new Promise((resolve) => {
-        setTimeout(resolve, 1500)
+        setTimeout(resolve, 1500);
       }).then(() => {
-        const formData = pick(data, ['no', 'callNo', 'status', 'description', 'updatedAt'])
-        formData.updatedAt = moment(data.updatedAt)
-        console.log('formData', formData)
-        form.setFieldsValue(formData)
-      })
+        const formData = pick(data, ['no', 'callNo', 'status', 'description', 'updatedAt']);
+        formData.updatedAt = moment(data.updatedAt);
+        console.log('formData', formData);
+        form.setFieldsValue(formData);
+      });
     }
   }
-}
+};
 </script>

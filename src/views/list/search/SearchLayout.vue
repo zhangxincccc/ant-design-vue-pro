@@ -21,18 +21,18 @@
 const getActiveKey = (path) => {
   switch (path) {
     case '/list/search/article':
-      return '1'
+      return '1';
     case '/list/search/project':
-      return '2'
+      return '2';
     case '/list/search/application':
-      return '3'
+      return '3';
     default:
-      return '1'
+      return '1';
   }
-}
+};
 export default {
   name: 'SearchLayout',
-  data () {
+  data() {
     return {
       tabList: [
         { key: '1', tab: '文章' },
@@ -41,34 +41,34 @@ export default {
       ],
       tabActiveKey: '1',
       search: true
-    }
+    };
   },
-  created () {
-    this.tabActiveKey = getActiveKey(this.$route.path)
+  created() {
+    this.tabActiveKey = getActiveKey(this.$route.path);
 
     this.$watch('$route', (val) => {
-      this.tabActiveKey = getActiveKey(val.path)
-    })
+      this.tabActiveKey = getActiveKey(val.path);
+    });
   },
   methods: {
-    handleTabChange (key) {
-      this.tabActiveKey = key
+    handleTabChange(key) {
+      this.tabActiveKey = key;
       switch (key) {
         case '1':
-          this.$router.push('/list/search/article')
-          break
+          this.$router.push('/list/search/article');
+          break;
         case '2':
-          this.$router.push('/list/search/project')
-          break
+          this.$router.push('/list/search/project');
+          break;
         case '3':
-          this.$router.push('/list/search/application')
-          break
+          this.$router.push('/list/search/application');
+          break;
         default:
-          this.$router.push('/workplace')
+          this.$router.push('/workplace');
       }
     }
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

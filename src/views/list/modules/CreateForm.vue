@@ -22,10 +22,10 @@
 </template>
 
 <script>
-import pick from 'lodash.pick'
+import pick from 'lodash.pick';
 
 // 表单字段
-const fields = ['description', 'id']
+const fields = ['description', 'id'];
 
 export default {
   props: {
@@ -42,7 +42,7 @@ export default {
       default: () => null
     }
   },
-  data () {
+  data() {
     this.formLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -52,21 +52,21 @@ export default {
         xs: { span: 24 },
         sm: { span: 13 }
       }
-    }
+    };
     return {
       form: this.$form.createForm(this)
-    }
+    };
   },
-  created () {
-    console.log('custom modal created')
+  created() {
+    console.log('custom modal created');
 
     // 防止表单未注册
-    fields.forEach(v => this.form.getFieldDecorator(v))
+    fields.forEach(v => this.form.getFieldDecorator(v));
 
     // 当 model 发生改变时，为表单设置值
     this.$watch('model', () => {
-      this.model && this.form.setFieldsValue(pick(this.model, fields))
-    })
+      this.model && this.form.setFieldsValue(pick(this.model, fields));
+    });
   }
-}
+};
 </script>

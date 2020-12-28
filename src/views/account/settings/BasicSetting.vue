@@ -46,13 +46,13 @@
 </template>
 
 <script>
-import AvatarModal from './AvatarModal'
+import AvatarModal from './AvatarModal';
 
 export default {
   components: {
     AvatarModal
   },
-  data () {
+  data() {
     return {
       // cropper
       preview: {},
@@ -71,14 +71,14 @@ export default {
         fixed: true,
         fixedNumber: [1, 1]
       }
-    }
+    };
   },
   methods: {
-    setavatar (url) {
-      this.option.img = url
+    setavatar(url) {
+      this.option.img = url;
     }
   }
-}
+};
 </script>
 
 <style lang="less" scoped>
