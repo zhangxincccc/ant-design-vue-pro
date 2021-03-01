@@ -10,7 +10,7 @@ import {
   TOGGLE_COLOR, TOGGLE_MULTI_TAB
 } from '@/store/mutation-types';
 import { printANSI } from '@/utils/screenLog';
-import defaultSettings from '@/config/defaultSettings';
+import defaultSettings from '@/config/default-settings';
 
 export default function Initializer() {
   printANSI(); // 请自行移除该行.  please remove this line

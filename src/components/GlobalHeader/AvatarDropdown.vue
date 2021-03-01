@@ -44,10 +44,10 @@ export default {
   },
   methods: {
     handleToCenter() {
-      this.$router.push({ path: '/account/center' });
+      this.$router.push({ path: '/demos/account/center' });
     },
     handleToSettings() {
-      this.$router.push({ path: '/account/settings' });
+      this.$router.push({ path: '/demos/account/settings' });
     },
     handleLogout(e) {
       Modal.confirm({

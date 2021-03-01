@@ -1,5 +1,5 @@
 <template>
-  <a-result status="404" title="404" :sub-title="$t('exception.404')">
+  <a-result status="500" title="500" :sub-title="$t('exception.500')">
     <template #extra>
       <a-button type="primary" @click="toHome">
         {{ $t('exception.back.home') }}
@@ -9,12 +9,12 @@
 </template>
 
 <script>
-export default {
-  name: 'ErrorPage404',
-  methods: {
-    toHome() {
-      this.$router.push({ path: '/' });
+  export default {
+    name: 'ErrorPage500',
+    methods: {
+      toHome() {
+        this.$router.push({ path: '/' });
+      }
     }
-  }
-};
+  };
 </script>
