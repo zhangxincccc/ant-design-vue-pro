@@ -88,6 +88,7 @@ const TagSelectOption = TagSelect.Option;
 const AvatarListItem = AvatarList.Item;
 
 export default {
+  name: 'SearchProjects',
   components: {
     AvatarList,
     AvatarListItem,

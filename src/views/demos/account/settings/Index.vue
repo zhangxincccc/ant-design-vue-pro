@@ -11,27 +11,27 @@
             @openChange="onOpenChange"
           >
             <a-menu-item key="/account/settings/basic">
-              <router-link :to="{ name: 'BasicSettings' }">
+              <router-link :to="{ name: 'AccountBasicSettings' }">
                 {{ $t('account.settings.menuMap.basic') }}
               </router-link>
             </a-menu-item>
             <a-menu-item key="/account/settings/security">
-              <router-link :to="{ name: 'SecuritySettings' }">
+              <router-link :to="{ name: 'AccountSecuritySettings' }">
                 {{ $t('account.settings.menuMap.security') }}
               </router-link>
             </a-menu-item>
             <a-menu-item key="/account/settings/custom">
-              <router-link :to="{ name: 'CustomSettings' }">
+              <router-link :to="{ name: 'AccountCustomSettings' }">
                 {{ $t('account.settings.menuMap.custom') }}
               </router-link>
             </a-menu-item>
             <a-menu-item key="/account/settings/binding">
-              <router-link :to="{ name: 'BindingSettings' }">
+              <router-link :to="{ name: 'AccountBindingSettings' }">
                 {{ $t('account.settings.menuMap.binding') }}
               </router-link>
             </a-menu-item>
             <a-menu-item key="/account/settings/notification">
-              <router-link :to="{ name: 'NotificationSettings' }">
+              <router-link :to="{ name: 'AccountNotificationSettings' }">
                 {{ $t('account.settings.menuMap.notification') }}
               </router-link>
             </a-menu-item>
@@ -53,6 +53,7 @@ import { RouteView } from '@/layouts';
 import { baseMixin } from '@/store/app-mixin';
 
 export default {
+  name: 'AccountSettings',
   components: {
     RouteView
   },

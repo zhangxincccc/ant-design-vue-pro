@@ -13,7 +13,7 @@ export default {
   render() {
     const { $route: { meta }, $store: { getters } } = this;
     const inKeep = (
-      <keep-alive>
+      <keep-alive include={getters.cacheViews}>
         <router-view />
       </keep-alive>
     );

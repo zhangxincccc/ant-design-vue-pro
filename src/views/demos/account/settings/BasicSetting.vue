@@ -49,6 +49,7 @@
 import AvatarModal from './AvatarModal';
 
 export default {
+  name: 'AccountBasicSettings',
   components: {
     AvatarModal
   },

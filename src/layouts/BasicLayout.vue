@@ -48,6 +48,7 @@
     <template v-slot:footerRender>
       <global-footer />
     </template>
+    <multi-tab v-if="multiTab"></multi-tab>
     <router-view />
   </pro-layout>
 </template>
@@ -63,7 +64,7 @@ import RightContent from '@/components/GlobalHeader/RightContent';
 import GlobalFooter from '@/components/GlobalFooter';
 import Ads from '@/components/Other/CarbonAds';
 import LogoSvg from '../assets/logo.svg?inline';
-
+import MultiTab from '@/components/MultiTab';
 export default {
   name: 'BasicLayout',
   components: {
@@ -71,7 +72,8 @@ export default {
     RightContent,
     GlobalFooter,
     LogoSvg,
-    Ads
+    Ads,
+    MultiTab
   },
   data() {
     return {
@@ -110,7 +112,8 @@ export default {
   computed: {
     ...mapState({
       // 动态主路由
-      mainMenu: state => state.permission.addRouters
+      mainMenu: state => state.permission.addRouters,
+      multiTab: (state) => state.app.multiTab
     })
   },
   created() {

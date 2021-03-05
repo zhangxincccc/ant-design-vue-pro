@@ -12,6 +12,8 @@ export const TOGGLE_COLOR = 'color';
 export const TOGGLE_WEAK = 'weak';
 export const TOGGLE_MULTI_TAB = 'multi_tab';
 export const APP_LANGUAGE = 'app_language';
+export const ADD_CACHED_VIEWS = 'add_cached_views';
+export const REMOVE_CACHED_VIEWS = 'removed_cache_views';
 
 export const CONTENT_WIDTH_TYPE = {
   Fluid: 'Fluid',

@@ -128,7 +128,7 @@ data.push({
 });
 
 export default {
-  name: 'StandardList',
+  name: 'BasicList',
   components: {
     TaskForm,
     Info

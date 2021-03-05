@@ -1,6 +1,6 @@
 <script>
 import events from './events';
-
+import { mapActions } from 'vuex';
 export default {
   name: 'MultiTab',
   data() {
@@ -13,36 +13,45 @@ export default {
   },
   created() {
     // bind event
-    events.$on('open', val => {
-      if (!val) {
-        throw new Error(`multi-tab: open tab ${val} err`);
-      }
-      this.activeKey = val;
-    }).$on('close', val => {
-      if (!val) {
-        this.closeThat(this.activeKey);
-        return;
-      }
-      this.closeThat(val);
-    }).$on('rename', ({ key, name }) => {
-      console.log('rename', key, name);
-      try {
-        const item = this.pages.find(item => item.path === key);
-        item.meta.customTitle = name;
-        this.$forceUpdate();
-      } catch (e) {
-      }
-    });
+    events
+      .$on('open', val => {
+        if (!val) {
+          throw new Error(`multi-tab: open tab ${val} err`);
+        }
+        this.activeKey = val;
+      })
+      .$on('close', val => {
+        if (!val) {
+          this.closeThat(this.activeKey);
+          return;
+        }
+        this.closeThat(val);
+      })
+      .$on('rename', ({ key, name }) => {
+        console.log('rename', key, name);
+        try {
+          const item = this.pages.find(item => item.path === key);
+          item.meta.customTitle = name;
+          this.$forceUpdate();
+        } catch (e) {}
+      });
 
     this.pages.push(this.$route);
     this.fullPathList.push(this.$route.fullPath);
     this.selectedLastPath();
+    this.addCachedView(this.$route);
   },
   methods: {
+    ...mapActions(['addCachedView', 'removeCachedView']),
     onEdit(targetKey, action) {
       this[action](targetKey);
     },
     remove(targetKey) {
+      const view = this.pages.find(page => page.fullPath === targetKey);
+      console.log(view);
+      if (view) {
+        this.removeCachedView(view);
+      }
       this.pages = this.pages.filter(page => page.fullPath !== targetKey);
       this.fullPathList = this.fullPathList.filter(path => path !== targetKey);
       // 判断当前标签是否关闭，若关闭则跳转到最后一个还存在的标签页
@@ -77,7 +86,7 @@ export default {
     },
     closeRight(e) {
       const currentIndex = this.fullPathList.indexOf(e);
-      if (currentIndex < (this.fullPathList.length - 1)) {
+      if (currentIndex < this.fullPathList.length - 1) {
         this.fullPathList.forEach((item, index) => {
           if (index > currentIndex) {
             this.remove(item);
@@ -100,7 +109,15 @@ export default {
     },
     renderTabPaneMenu(e) {
       return (
-        <a-menu {...{ on: { click: ({ key, item, domEvent }) => { this.closeMenuClick(key, e); } } }}>
+        <a-menu
+          {...{
+            on: {
+              click: ({ key, item, domEvent }) => {
+                this.closeMenuClick(key, e);
+              }
+            }
+          }}
+        >
           <a-menu-item key="closeThat">关闭当前标签</a-menu-item>
           <a-menu-item key="closeRight">关闭右侧</a-menu-item>
           <a-menu-item key="closeLeft">关闭左侧</a-menu-item>
@@ -111,28 +128,32 @@ export default {
     // render
     renderTabPane(title, keyPath) {
       const menu = this.renderTabPaneMenu(keyPath);
-
+      const titleI18n = this.$t(title);
       return (
         <a-dropdown overlay={menu} trigger={['contextmenu']}>
-          <span style={{ userSelect: 'none' }}>{ title }</span>
+          <span style={{ userSelect: 'none' }}>{titleI18n || title}</span>
         </a-dropdown>
       );
     }
   },
   watch: {
-    '$route': function(newVal) {
+    $route: function(newVal) {
       this.activeKey = newVal.fullPath;
       if (this.fullPathList.indexOf(newVal.fullPath) < 0) {
         this.fullPathList.push(newVal.fullPath);
         this.pages.push(newVal);
       }
+      this.addCachedView(newVal);
     },
     activeKey: function(newPathKey) {
       this.$router.push({ path: newPathKey });
     }
   },
   render() {
-    const { onEdit, $data: { pages } } = this;
+    const {
+      onEdit,
+      $data: { pages }
+    } = this;
     const panes = pages.map(page => {
       return (
         <a-tab-pane
@@ -151,7 +172,8 @@ export default {
             type={'editable-card'}
             v-model={this.activeKey}
             tabBarStyle={{ background: '#FFF', margin: 0, paddingLeft: '16px', paddingTop: '1px' }}
-            {...{ on: { edit: onEdit } }}>
+            {...{ on: { edit: onEdit } }}
+          >
             {panes}
           </a-tabs>
         </div>

@@ -12,7 +12,9 @@ import {
   TOGGLE_WEAK,
   TOGGLE_MULTI_TAB,
   // i18n
-  APP_LANGUAGE
+  APP_LANGUAGE,
+  ADD_CACHED_VIEWS,
+  REMOVE_CACHED_VIEWS
 } from '@/store/mutation-types';
 import { loadLanguageAsync } from '@/locales';
 
@@ -30,7 +32,8 @@ const app = {
     weak: false,
     multiTab: true,
     lang: 'en-US',
-    _antLocale: {}
+    _antLocale: {},
+    cacheViews: []
   },
   mutations: {
     [SIDEBAR_TYPE]: (state, type) => {
@@ -80,17 +83,42 @@ const app = {
     [TOGGLE_MULTI_TAB]: (state, bool) => {
       storage.set(TOGGLE_MULTI_TAB, bool);
       state.multiTab = bool;
+    },
+    [ADD_CACHED_VIEWS]: (state, view) => {
+      if (!state.cacheViews.includes(view.name)) {
+        state.cacheViews.push(view.name);
+      }
+    },
+    [REMOVE_CACHED_VIEWS]: (state, view) => {
+      const index = state.cacheViews.indexOf(view.name);
+      if (index > -1) {
+        state.cacheViews.splice(index, 1);
+      }
     }
   },
   actions: {
     setLang({ commit }, lang) {
       return new Promise((resolve, reject) => {
         commit(APP_LANGUAGE, lang);
-        loadLanguageAsync(lang).then(() => {
-          resolve();
-        }).catch((e) => {
-          reject(e);
-        });
+        loadLanguageAsync(lang)
+          .then(() => {
+            resolve();
+          })
+          .catch(e => {
+            reject(e);
+          });
+      });
+    },
+    addCachedView({ commit }, view) {
+      return new Promise((resolve, reject) => {
+        commit(ADD_CACHED_VIEWS, view);
+        resolve();
+      });
+    },
+    removeCachedView({ commit }, view) {
+      return new Promise((resolve, reject) => {
+        commit(REMOVE_CACHED_VIEWS, view);
+        resolve();
       });
     }
   }

@@ -1,10 +1,10 @@
 // eslint-disable-next-line
 import { bxAnaalyse, demos } from '@/core/icons';
-
-const RouteView = {
-  name: 'RouteView',
-  render: h => h('router-view')
-};
+import { RouteView } from '@/layouts';
+// const RouteView = {
+//   name: 'RouteView',
+//   render: h => h('router-view')
+// };
 
 export const demosRouter = {
   path: '/demos',
@@ -78,7 +78,7 @@ export const demosRouter = {
       children: [
         {
           path: '/demos/list/table-list/:pageNo([1-9]\\d*)?',
-          name: 'TableListWrapper',
+          name: 'TableList',
           hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
           component: () => import('@/views/demos/list/TableList'),
           meta: { title: 'menu.list.table-list', keepAlive: true, permission: ['demos:list:table'] }
@@ -106,19 +106,19 @@ export const demosRouter = {
               path: '/demos/list/search/article',
               name: 'SearchArticles',
               component: () => import('../views/demos/list/search/Article'),
-              meta: { title: 'menu.list.search-list.articles', permission: ['demos:list:search:article'] }
+              meta: { title: 'menu.list.search-list.articles', keepAlive: true, permission: ['demos:list:search:article'] }
             },
             {
               path: '/demos/list/search/project',
               name: 'SearchProjects',
               component: () => import('../views/demos/list/search/Projects'),
-              meta: { title: 'menu.list.search-list.projects', permission: ['demos:list:search:project'] }
+              meta: { title: 'menu.list.search-list.projects', keepAlive: true, permission: ['demos:list:search:project'] }
             },
             {
               path: '/demos/list/search/application',
               name: 'SearchApplications',
               component: () => import('../views/demos/list/search/Applications'),
-              meta: { title: 'menu.list.search-list.applications', permission: ['demos:list:search:application'] }
+              meta: { title: 'menu.list.search-list.applications', keepAlive: true, permission: ['demos:list:search:application'] }
             }
           ]
         }
@@ -220,13 +220,13 @@ export const demosRouter = {
       children: [
         {
           path: '/demos/account/center',
-          name: 'center',
+          name: 'AccountCenter',
           component: () => import('@/views/demos/account/center'),
           meta: { title: 'menu.account.center', keepAlive: true, permission: ['demos:account:center'] }
         },
         {
           path: '/demos/account/settings',
-          name: 'settings',
+          name: 'AccountSettings',
           component: () => import('@/views/demos/account/settings/Index'),
           meta: { title: 'menu.account.settings', hideHeader: true, permission: ['demos:account:settings'] },
           redirect: '/demos/account/settings/basic',
@@ -234,7 +234,7 @@ export const demosRouter = {
           children: [
             {
               path: '/demos/account/settings/basic',
-              name: 'BasicSettings',
+              name: 'AccountBasicSettings',
               component: () => import('@/views/demos/account/settings/BasicSetting'),
               meta: {
                 title: 'account.settings.menuMap.basic',
@@ -244,7 +244,7 @@ export const demosRouter = {
             },
             {
               path: '/demos/account/settings/security',
-              name: 'SecuritySettings',
+              name: 'AccountSecuritySettings',
               component: () => import('@/views/demos/account/settings/Security'),
               meta: {
                 title: 'account.settings.menuMap.security',
@@ -255,7 +255,7 @@ export const demosRouter = {
             },
             {
               path: '/demos/account/settings/custom',
-              name: 'CustomSettings',
+              name: 'AccountCustomSettings',
               component: () => import('@/views/demos/account/settings/Custom'),
               meta: {
                 title: 'account.settings.menuMap.custom',
@@ -266,7 +266,7 @@ export const demosRouter = {
             },
             {
               path: '/demos/account/settings/binding',
-              name: 'BindingSettings',
+              name: 'AccountBindingSettings',
               component: () => import('@/views/demos/account/settings/Binding'),
               meta: {
                 title: 'account.settings.menuMap.binding',
@@ -277,7 +277,7 @@ export const demosRouter = {
             },
             {
               path: '/demos/account/settings/notification',
-              name: 'NotificationSettings',
+              name: 'AccountNotificationSettings',
               component: () => import('@/views/demos/account/settings/Notification'),
               meta: {
                 title: 'account.settings.menuMap.notification',

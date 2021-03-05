@@ -122,6 +122,7 @@ const owners = [
 ];
 
 export default {
+  name: 'SearchArticles',
   components: {
     TagSelect,
     TagSelectOption,

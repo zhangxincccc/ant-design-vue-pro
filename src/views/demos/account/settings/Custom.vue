@@ -40,6 +40,7 @@ const themeMap = {
 };
 
 export default {
+  name: 'AccountCustomSettings',
   mixins: [baseMixin],
   data() {
     return {

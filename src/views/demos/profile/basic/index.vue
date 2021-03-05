@@ -48,6 +48,7 @@
 import { STable } from '@/components';
 
 export default {
+  name: 'ProfileBasic',
   components: {
     STable
   },

@@ -105,6 +105,7 @@ import { AppPage, ArticlePage, ProjectPage } from './page';
 import { mapGetters } from 'vuex';
 
 export default {
+  name: 'AccountCenter',
   components: {
     RouteView,
     PageView,

@@ -11,7 +11,8 @@ const getters = {
   permissions: state => state.user.permissions,
   userInfo: state => state.user.info,
   addRouters: state => state.permission.addRouters,
-  multiTab: state => state.app.multiTab
+  multiTab: state => state.app.multiTab,
+  cacheViews: state => state.app.cacheViews
 };
 
 export default getters;

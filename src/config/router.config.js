@@ -6,14 +6,19 @@ import { demosRouter } from '@/config/demos-router.config';
 //   name: 'RouteView',
 //   render: h => h('router-view')
 // };
-
+/*
+注意：
+如果启用多标签页，请确保路由名称与组件名称一致，否则keep-alive会失效
+多标签页请尽量避免使用三级路由，keep-alive存在问题
+*/
+export const defaultPage = '/demos/dashboard/workplace';
 export const asyncRouterMap = [
   {
     path: '/',
     name: 'index',
     component: BasicLayout,
     meta: { title: 'menu.home' },
-    redirect: '/demos/dashboard/workplace', // 首页跳转地址
+    redirect: defaultPage, // 首页跳转地址
     children: [
       // 其他路由请在这里添加
       // ...

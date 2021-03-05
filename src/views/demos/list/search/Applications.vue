@@ -105,6 +105,7 @@ const TagSelectOption = TagSelect.Option;
 const AvatarListItem = AvatarList.AvatarItem;
 
 export default {
+  name: 'SearchApplications',
   components: {
     AvatarList,
     AvatarListItem,

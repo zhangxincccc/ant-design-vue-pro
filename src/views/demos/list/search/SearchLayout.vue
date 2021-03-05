@@ -13,11 +13,12 @@
         </a-input-search>
       </div>
     </template>
-    <router-view />
+    <route-view/>
   </page-header-wrapper>
 </template>
 
 <script>
+import { RouteView } from '@/layouts';
 const getActiveKey = (path) => {
   switch (path) {
     case '/demos/list/search/article':
@@ -32,6 +33,9 @@ const getActiveKey = (path) => {
 };
 export default {
   name: 'SearchLayout',
+  components: {
+    RouteView
+  },
   data() {
     return {
       tabList: [
