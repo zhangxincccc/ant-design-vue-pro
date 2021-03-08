@@ -10,10 +10,24 @@ export default {
   data() {
     return {};
   },
+  computed: {
+    cacheViews() {
+      const { $store: { getters } } = this;
+      const caches = [];
+      getters.cacheViews.forEach(v => {
+        v.matched.forEach(m => {
+          if (!caches.includes(m.components.default.name)) {
+            caches.push(m.components.default.name);
+          }
+        });
+      });
+      return caches;
+    }
+  },
   render() {
     const { $route: { meta }, $store: { getters } } = this;
     const inKeep = (
-      <keep-alive include={getters.cacheViews}>
+      <keep-alive include={this.cacheViews}>
         <router-view />
       </keep-alive>
     );

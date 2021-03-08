@@ -48,7 +48,6 @@ export default {
     },
     remove(targetKey) {
       const view = this.pages.find(page => page.fullPath === targetKey);
-      console.log(view);
       if (view) {
         this.removeCachedView(view);
       }

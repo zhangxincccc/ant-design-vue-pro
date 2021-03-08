@@ -85,12 +85,13 @@ const app = {
       state.multiTab = bool;
     },
     [ADD_CACHED_VIEWS]: (state, view) => {
-      if (!state.cacheViews.includes(view.name)) {
-        state.cacheViews.push(view.name);
+      console.log(view);
+      if (!state.cacheViews.find(v => v.name === view.name)) {
+        state.cacheViews.push(view);
       }
     },
     [REMOVE_CACHED_VIEWS]: (state, view) => {
-      const index = state.cacheViews.indexOf(view.name);
+      const index = state.cacheViews.findIndex(v => v.name === view.name);
       if (index > -1) {
         state.cacheViews.splice(index, 1);
       }
