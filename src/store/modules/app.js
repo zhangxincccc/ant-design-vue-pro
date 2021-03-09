@@ -86,14 +86,44 @@ const app = {
     },
     [ADD_CACHED_VIEWS]: (state, view) => {
       console.log(view);
-      if (!state.cacheViews.find(v => v.name === view.name)) {
+      if (!state.cacheViews.find(v => v.fullPath === view.fullPath)) {
         state.cacheViews.push(view);
       }
     },
     [REMOVE_CACHED_VIEWS]: (state, view) => {
-      const index = state.cacheViews.findIndex(v => v.name === view.name);
-      if (index > -1) {
-        state.cacheViews.splice(index, 1);
+      const viewIndex = state.cacheViews.findIndex(v => v.fullPath === view.fullPath);
+      const removedView = state.cacheViews.find(v => v.fullPath === view.fullPath);
+      console.log('removedView=', removedView);
+      if (viewIndex > -1) {
+        state.cacheViews.splice(viewIndex, 1);
+        const view = removedView.matched[removedView.matched.length - 1];
+        const $vnode = view.instances.default.$vnode;
+        if ($vnode && $vnode.data.keepAlive) {
+          if (
+            $vnode.parent &&
+            $vnode.parent.componentInstance &&
+            $vnode.parent.componentInstance.cache
+          ) {
+            if ($vnode.componentOptions) {
+              const key =
+                $vnode.key == null
+                  ? $vnode.componentOptions.Ctor.cid +
+                  ($vnode.componentOptions.tag ? `::${$vnode.componentOptions.tag}` : '')
+                  : $vnode.key;
+              const cache = $vnode.parent.componentInstance.cache;
+              const keys = $vnode.parent.componentInstance.keys;
+              if (cache[key]) {
+                if (keys.length) {
+                  const index = keys.indexOf(key);
+                  if (index > -1) {
+                    keys.splice(index, 1);
+                  }
+                }
+                delete cache[key];
+              }
+            }
+          }
+        }
       }
     }
   },
