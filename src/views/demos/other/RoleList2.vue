@@ -13,48 +13,60 @@
       </a-col>
       <a-col :md="20">
         <div style="max-width: 800px">
-          <a-divider v-if="isMobile()" />
+          <a-divider v-if="isMobile" />
           <div v-if="mdl.id">
             <h3>角色：{{ mdl.name }}</h3>
           </div>
-          <a-form :form="form" :layout="isMobile() ? 'vertical' : 'horizontal'">
+          <a-form :form="form" :layout="isMobile ? 'vertical' : 'horizontal'">
             <a-form-item label="唯一键">
-              <a-input v-decorator="[ 'id', {rules: [{ required: true, message: 'Please input unique key!' }]} ]" placeholder="请填写唯一键" />
+              <a-input
+                v-decorator="['id', { rules: [{ required: true, message: 'Please input unique key!' }] }]"
+                placeholder="请填写唯一键"
+              />
             </a-form-item>
 
             <a-form-item label="角色名称">
-              <a-input v-decorator="[ 'name', {rules: [{ required: true, message: 'Please input role name!' }]} ]" placeholder="请填写角色名称" />
+              <a-input
+                v-decorator="['name', { rules: [{ required: true, message: 'Please input role name!' }] }]"
+                placeholder="请填写角色名称"
+              />
             </a-form-item>
 
             <a-form-item label="状态">
-              <a-select v-decorator="[ 'status', {rules: []} ]">
+              <a-select v-decorator="['status', { rules: [] }]">
                 <a-select-option :value="1">正常</a-select-option>
                 <a-select-option :value="2">禁用</a-select-option>
               </a-select>
             </a-form-item>
 
             <a-form-item label="备注说明">
-              <a-textarea :row="3" v-decorator="[ 'describe', {rules: [{ required: true, message: 'Please input role name!' }]} ]" placeholder="请填写角色名称" />
+              <a-textarea
+                :row="3"
+                v-decorator="['describe', { rules: [{ required: true, message: 'Please input role name!' }] }]"
+                placeholder="请填写角色名称"
+              />
             </a-form-item>
 
             <a-form-item label="拥有权限">
               <a-row :gutter="16" v-for="(permission, index) in permissions" :key="index">
-                <a-col :xl="4" :lg="24">
-                  {{ permission.name }}：
-                </a-col>
+                <a-col :xl="4" :lg="24"> {{ permission.name }}： </a-col>
                 <a-col :xl="20" :lg="24">
                   <a-checkbox
                     v-if="permission.actionsOptions.length > 0"
                     :indeterminate="permission.indeterminate"
                     :checked="permission.checkedAll"
-                    @change="onChangeCheckAll($event, permission)">
+                    @change="onChangeCheckAll($event, permission)"
+                  >
                     全选
                   </a-checkbox>
-                  <a-checkbox-group :options="permission.actionsOptions" v-model="permission.selected" @change="onChangeCheck(permission)" />
+                  <a-checkbox-group
+                    :options="permission.actionsOptions"
+                    v-model="permission.selected"
+                    @change="onChangeCheck(permission)"
+                  />
                 </a-col>
               </a-row>
             </a-form-item>
-
           </a-form>
         </div>
       </a-col>
@@ -65,9 +77,15 @@
 <script>
 import pick from 'lodash.pick';
 import { getRoleList, getPermissions } from '@/api/manage';
-import { actionToObject } from '@/utils/permissions';
 import { baseMixin } from '@/store/app-mixin';
-
+function actionToObject(json) {
+  try {
+    return JSON.parse(json);
+  } catch (e) {
+    console.log('err', e.message);
+  }
+  return [];
+}
 export default {
   name: 'RoleList',
   mixins: [baseMixin],
@@ -82,7 +100,7 @@ export default {
     };
   },
   created() {
-    getRoleList().then((res) => {
+    getRoleList().then(res => {
       this.roles = res.result.data;
       this.roles.push({
         id: '-1',
@@ -130,7 +148,8 @@ export default {
     },
 
     onChangeCheck(permission) {
-      permission.indeterminate = !!permission.selected.length && (permission.selected.length < permission.actionsOptions.length);
+      permission.indeterminate =
+        !!permission.selected.length && permission.selected.length < permission.actionsOptions.length;
       permission.checkedAll = permission.selected.length === permission.actionsOptions.length;
     },
     onChangeCheckAll(e, permission) {
@@ -164,6 +183,4 @@ export default {
 };
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -56,7 +56,7 @@ const app = {
     autoHideHeader: false,
     color: '',
     weak: false,
-    multiTab: true,
+    multiTab: false,
     lang: 'en-US',
     _antLocale: {},
     cacheViews: []
