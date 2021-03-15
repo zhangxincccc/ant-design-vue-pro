@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import { bxAnaalyse, demos } from '@/core/icons';
+import { bxAnalyse, demos, system } from '@/core/icons';
 import { RouteView, PageView } from '@/layouts';
 // const RouteView = {
 //   name: 'RouteView',
@@ -19,7 +19,7 @@ export const demosRouter = {
       name: 'dashboard',
       redirect: '/demos/dashboard/workplace',
       component: RouteView,
-      meta: { title: 'menu.dashboard', keepAlive: true, icon: bxAnaalyse, permission: ['demos:dashboard'] },
+      meta: { title: 'menu.dashboard', keepAlive: true, icon: bxAnalyse, permission: ['demos:dashboard'] },
       children: [
         {
           path: '/demos/dashboard/analysis/:pageNo([1-9]\\d*)?',
@@ -192,19 +192,19 @@ export const demosRouter = {
         {
           path: '/demos/exception/403',
           name: 'Exception403',
-          component: () => import(/* webpackChunkName: "fail" */ '@/views/demos/exception/403'),
+          component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/403'),
           meta: { title: 'menu.exception.not-permission', permission: ['demos:exception:403'] }
         },
         {
           path: '/demos/exception/404',
           name: 'Exception404',
-          component: () => import(/* webpackChunkName: "fail" */ '@/views/demos/exception/404'),
+          component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/404'),
           meta: { title: 'menu.exception.not-find', permission: ['demos:exception:404'] }
         },
         {
           path: '/demos/exception/500',
           name: 'Exception500',
-          component: () => import(/* webpackChunkName: "fail" */ '@/views/demos/exception/500'),
+          component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/500'),
           meta: { title: 'menu.exception.server-error', permission: ['demos:exception:500'] }
         }
       ]
