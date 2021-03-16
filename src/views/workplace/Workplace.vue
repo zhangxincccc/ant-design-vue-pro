@@ -134,7 +134,7 @@ import { getRoleList, getServiceList } from '@/api/manage';
 const DataSet = require('@antv/data-set');
 
 export default {
-  name: 'DemoWorkplace',
+  name: 'Workplace',
   components: {
     PageHeaderWrapper,
     Radar

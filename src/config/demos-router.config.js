@@ -35,7 +35,7 @@ export const demosRouter = {
         },
         {
           path: '/demos/dashboard/workplace',
-          name: 'Workplace',
+          name: 'DemoWorkplace',
           component: () => import('@/views/demos/dashboard/Workplace'),
           meta: { title: 'menu.dashboard.workplace', keepAlive: true, permission: ['demos:dashboard:workplace'] }
         }

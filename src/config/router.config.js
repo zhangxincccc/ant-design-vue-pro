@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import { BasicLayout, RouteView, UserLayout } from '@/layouts';
-import { system, organization } from '@/core/icons';
+import { workplace, system, organization } from '@/core/icons';
 import { demosRouter } from '@/config/demos-router.config';
 
 // const RouteView = {
@@ -9,10 +9,9 @@ import { demosRouter } from '@/config/demos-router.config';
 // };
 /*
 注意：
-如果启用多标签页，请确保路由名称与组件名称一致，否则keep-alive会失效
 多标签页请尽量避免使用三级路由，keep-alive存在问题
 */
-export const defaultPage = '/demos/dashboard/workplace';
+export const defaultPage = '/workplace';
 export const asyncRouterMap = [
   {
     path: '/',
@@ -21,6 +20,22 @@ export const asyncRouterMap = [
     meta: { title: 'menu.home' },
     redirect: defaultPage, // 首页跳转地址
     children: [
+      {
+        path: '/workplace', // 工作台
+        name: 'workplace',
+        component: RouteView,
+        hideChildrenInMenu: true,
+        redirect: '/workplace/index',
+        meta: { title: 'menu.workplace', icon: workplace, permission: ['system'] },
+        children: [
+          {
+            path: '/workplace/index',
+            name: 'Workplace',
+            component: () => import('@/views/workplace/Workplace'),
+            meta: { title: 'menu.workplace', icon: workplace, hidden: true }
+          }
+        ]
+      },
       // 其他路由请在这里添加
       // ...
       {
