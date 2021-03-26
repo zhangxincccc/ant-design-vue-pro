@@ -2,7 +2,8 @@
 
 html,
 body,
-#app, #root {
+#app,
+#root {
   height: 100%;
 }
 
@@ -44,7 +45,6 @@ ol {
 }
 // 数据列表 搜索条件
 .table-page-search-wrapper {
-
   .ant-form-inline {
     .ant-form-item {
       display: flex;
@@ -60,7 +60,7 @@ ol {
       > .ant-form-item-label {
         line-height: 32px;
         padding-right: 8px;
-        width: auto;
+        //width: auto;
       }
       .ant-form-item-control {
         height: 32px;
@@ -75,8 +75,8 @@ ol {
     white-space: nowrap;
   }
 }
-.ant-pro-multi-tab-wrapper{
-  padding: 6px 0 16px 0
+.ant-pro-multi-tab-wrapper {
+  padding: 6px 0 16px 0;
 }
 
 @media (max-width: @screen-xs) {
@@ -93,5 +93,11 @@ ol {
         }
       }
     }
+  }
+}
+.topmenu {
+  .ant-pro-multi-tab-wrapper {
+    max-width: 100%;
+    margin: 0 0;
   }
 }

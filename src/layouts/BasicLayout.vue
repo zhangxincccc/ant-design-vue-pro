@@ -7,7 +7,11 @@
     :handleMediaQuery="handleMediaQuery"
     :handleCollapse="handleCollapse"
     :i18nRender="i18nRender"
+    :siderWidth="220"
+    :collapsedWidth="50"
     v-bind="settings"
+    :topMenu="topMenu"
+    @top-menu-select="handleTopMenuSelect"
   >
     <!-- Ads begin
       广告代码 真实项目中请移除
@@ -55,6 +59,7 @@
 
 <script>
 import { SettingDrawer, updateTheme } from '@ant-design-vue/pro-layout';
+// import SettingDrawer from '@/components/SettingDrawer';
 import { i18nRender } from '@/locales';
 import { mapState } from 'vuex';
 import { CONTENT_WIDTH_TYPE, SIDEBAR_TYPE, TOGGLE_MOBILE_TYPE } from '@/store/mutation-types';
@@ -106,7 +111,8 @@ export default {
       query: {},
 
       // 是否手机模式
-      isMobile: false
+      isMobile: false,
+      topMenu: null
     };
   },
   computed: {
@@ -119,6 +125,7 @@ export default {
   created() {
     const routes = this.mainMenu.find(item => item.path === '/');
     this.menus = (routes && routes.children) || [];
+    console.log(this.menus);
     // 处理侧栏收起状态
     this.$watch('collapsed', () => {
       this.$store.commit(SIDEBAR_TYPE, this.collapsed);
@@ -163,21 +170,23 @@ export default {
       this.collapsed = val;
     },
     handleSettingChange({ type, value }) {
-      console.log('type', type, value);
       type && (this.settings[type] = value);
       switch (type) {
         case 'contentWidth':
           this.settings[type] = value;
           break;
         case 'layout':
-          if (value === 'sidemenu') {
+          if (value === 'sidemenu' || value === 'mix') {
             this.settings.contentWidth = CONTENT_WIDTH_TYPE.Fluid;
           } else {
             this.settings.fixSiderbar = false;
-            this.settings.contentWidth = CONTENT_WIDTH_TYPE.Fixed;
+            this.settings.contentWidth = CONTENT_WIDTH_TYPE.Fluid;
           }
           break;
       }
+    },
+    handleTopMenuSelect(menu) {
+      this.topMenu = menu;
     }
   }
 };

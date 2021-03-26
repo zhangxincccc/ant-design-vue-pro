@@ -9,7 +9,7 @@ import { demosRouter } from '@/config/demos-router.config';
 // };
 /*
 注意：
-多标签页请尽量避免使用三级路由，keep-alive存在问题
+多标签页请尽量避免使用三级路由，多标签页存在问题
 */
 export const defaultPage = '/workplace';
 export const asyncRouterMap = [
@@ -21,20 +21,10 @@ export const asyncRouterMap = [
     redirect: defaultPage, // 首页跳转地址
     children: [
       {
-        path: '/workplace', // 工作台
-        name: 'workplace',
-        component: RouteView,
-        hideChildrenInMenu: true,
-        redirect: '/workplace/index',
-        meta: { title: 'menu.workplace', icon: workplace, permission: ['system'] },
-        children: [
-          {
-            path: '/workplace/index',
-            name: 'Workplace',
-            component: () => import('@/views/workplace/Workplace'),
-            meta: { title: 'menu.workplace', icon: workplace, hidden: true }
-          }
-        ]
+        path: '/workplace',
+        name: 'Workplace',
+        component: () => import('@/views/workplace/Workplace'),
+        meta: { title: 'menu.workplace', icon: workplace }
       },
       // 其他路由请在这里添加
       // ...

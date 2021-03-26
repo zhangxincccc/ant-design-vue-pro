@@ -92,6 +92,8 @@ const vueConfig = {
 
           // 'primary-color': '#F5222D',
           // 'link-color': '#F5222D',
+          'layout-header-height': '48px',
+          'menu-collapsed-width': '48px',
           'border-radius-base': '2px'
         },
         // DO NOT REMOVE THIS LINE

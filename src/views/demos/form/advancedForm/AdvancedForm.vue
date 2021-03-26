@@ -54,7 +54,7 @@
     </a-card>
 
     <!-- fixed footer toolbar -->
-    <footer-tool-bar :is-mobile="isMobile" :collapsed="sideCollapsed">
+    <footer-tool-bar :is-mobile="isMobile" :collapsed="sideCollapsed" :sider-width='208'>
       <span class="popover-wrapper">
         <a-popover title="表单校验信息" overlayClassName="antd-pro-pages-forms-style-errorPopover" trigger="click" :getPopupContainer="trigger => trigger.parentNode">
           <template slot="content">
