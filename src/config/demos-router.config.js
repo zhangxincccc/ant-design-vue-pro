@@ -9,7 +9,7 @@ import { RouteView, PageView } from '@/layouts';
 export const demosRouter = {
   path: '/demos',
   name: 'demos',
-  redirect: '/demos/dashboard/workplace',
+  redirect: '/demos/dashboard',
   component: RouteView,
   meta: { title: 'menu.demos', keepAlive: true, icon: demos, permission: ['demos:dashboard'] },
   children: [
@@ -17,7 +17,7 @@ export const demosRouter = {
     {
       path: '/demos/dashboard',
       name: 'dashboard',
-      redirect: '/demos/dashboard/workplace',
+      redirect: '/demos/dashboard/analysis',
       component: RouteView,
       meta: { title: 'menu.dashboard', keepAlive: true, icon: bxAnalyse, permission: ['demos:dashboard'] },
       children: [
@@ -32,12 +32,6 @@ export const demosRouter = {
           path: 'https://www.baidu.com/',
           name: 'Monitor',
           meta: { title: 'menu.dashboard.monitor', target: '_blank' }
-        },
-        {
-          path: '/demos/dashboard/workplace',
-          name: 'DemoWorkplace',
-          component: () => import('@/views/demos/dashboard/Workplace'),
-          meta: { title: 'menu.dashboard.workplace', keepAlive: true, permission: ['demos:dashboard:workplace'] }
         }
       ]
     },
