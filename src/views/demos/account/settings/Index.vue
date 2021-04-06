@@ -49,7 +49,8 @@
 </template>
 
 <script>
-import { RouteView } from '@/layouts';
+import { RouteView } from '@ant-design-vue/pro-layout';
+
 import { baseMixin } from '@/store/app-mixin';
 
 export default {

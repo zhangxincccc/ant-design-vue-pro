@@ -12,37 +12,9 @@ import {
   TOGGLE_WEAK,
   TOGGLE_MULTI_TAB,
   // i18n
-  APP_LANGUAGE,
-  ADD_CACHED_VIEWS,
-  REMOVE_CACHED_VIEWS
+  APP_LANGUAGE
 } from '@/store/mutation-types';
 import { loadLanguageAsync } from '@/locales';
-
-function removeViewCache(removedView) {
-  const view = removedView.matched[removedView.matched.length - 1];
-  const $vnode = view.instances.default.$vnode;
-  if ($vnode && $vnode.data.keepAlive) {
-    if ($vnode.parent && $vnode.parent.componentInstance && $vnode.parent.componentInstance.cache) {
-      if ($vnode.componentOptions) {
-        const key =
-          $vnode.key == null
-            ? $vnode.componentOptions.Ctor.cid + ($vnode.componentOptions.tag ? `::${$vnode.componentOptions.tag}` : '')
-            : $vnode.key;
-        const cache = $vnode.parent.componentInstance.cache;
-        const keys = $vnode.parent.componentInstance.keys;
-        if (cache[key]) {
-          if (keys.length) {
-            const index = keys.indexOf(key);
-            if (index > -1) {
-              keys.splice(index, 1);
-            }
-          }
-          delete cache[key];
-        }
-      }
-    }
-  }
-}
 
 const app = {
   state: {
@@ -107,22 +79,8 @@ const app = {
       storage.set(APP_LANGUAGE, lang);
     },
     [TOGGLE_MULTI_TAB]: (state, bool) => {
-      storage.set(TOGGLE_MULTI_TAB, bool);
       state.multiTab = bool;
-    },
-    [ADD_CACHED_VIEWS]: (state, view) => {
-      console.log(view);
-      if (!state.cacheViews.find(v => v.fullPath === view.fullPath)) {
-        state.cacheViews.push(view);
-      }
-    },
-    [REMOVE_CACHED_VIEWS]: (state, view) => {
-      const viewIndex = state.cacheViews.findIndex(v => v.fullPath === view.fullPath);
-      const removedView = state.cacheViews.find(v => v.fullPath === view.fullPath);
-      if (viewIndex > -1) {
-        state.cacheViews.splice(viewIndex, 1);
-        removeViewCache(removedView);
-      }
+      storage.set(TOGGLE_MULTI_TAB, bool);
     }
   },
   actions: {
@@ -136,18 +94,6 @@ const app = {
           .catch(e => {
             reject(e);
           });
-      });
-    },
-    addCachedView({ commit }, view) {
-      return new Promise((resolve, reject) => {
-        commit(ADD_CACHED_VIEWS, view);
-        resolve();
-      });
-    },
-    removeCachedView({ commit }, view) {
-      return new Promise((resolve, reject) => {
-        commit(REMOVE_CACHED_VIEWS, view);
-        resolve();
       });
     }
   }

@@ -52,24 +52,22 @@
     <template v-slot:footerRender>
       <global-footer />
     </template>
-    <multi-tab v-if="multiTab"></multi-tab>
     <router-view />
   </pro-layout>
 </template>
 
 <script>
-import { SettingDrawer, updateTheme } from '@ant-design-vue/pro-layout';
+import { SettingDrawer, updateTheme, RouteView } from '@ant-design-vue/pro-layout';
 // import SettingDrawer from '@/components/SettingDrawer';
 import { i18nRender } from '@/locales';
 import { mapState } from 'vuex';
-import { CONTENT_WIDTH_TYPE, SIDEBAR_TYPE, TOGGLE_MOBILE_TYPE } from '@/store/mutation-types';
+import { CONTENT_WIDTH_TYPE, SIDEBAR_TYPE, TOGGLE_MOBILE_TYPE, TOGGLE_MULTI_TAB } from '@/store/mutation-types';
 
 import defaultSettings from '@/config/default-settings';
 import RightContent from '@/components/GlobalHeader/RightContent';
 import GlobalFooter from '@/components/GlobalFooter';
 import Ads from '@/components/Other/CarbonAds';
 import LogoSvg from '../assets/logo.svg?inline';
-import MultiTab from '@/components/MultiTab';
 export default {
   name: 'BasicLayout',
   components: {
@@ -78,7 +76,7 @@ export default {
     GlobalFooter,
     LogoSvg,
     Ads,
-    MultiTab
+    RouteView
   },
   data() {
     return {
@@ -105,7 +103,8 @@ export default {
         colorWeak: defaultSettings.colorWeak,
 
         hideHintAlert: false,
-        hideCopyButton: false
+        hideCopyButton: false,
+        multiTab: defaultSettings.multiTab
       },
       // 媒体查询
       query: {},
@@ -119,13 +118,12 @@ export default {
     ...mapState({
       // 动态主路由
       mainMenu: state => state.permission.addRouters,
-      multiTab: (state) => state.app.multiTab
+      multiTab: state => state.app.multiTab
     })
   },
   created() {
     const routes = this.mainMenu.find(item => item.path === '/');
     this.menus = (routes && routes.children) || [];
-    console.log(this.menus);
     // 处理侧栏收起状态
     this.$watch('collapsed', () => {
       this.$store.commit(SIDEBAR_TYPE, this.collapsed);
@@ -182,6 +180,9 @@ export default {
             this.settings.fixSiderbar = false;
             this.settings.contentWidth = CONTENT_WIDTH_TYPE.Fluid;
           }
+          break;
+        case 'multiTab':
+          this.$store.commit(TOGGLE_MULTI_TAB, value);
           break;
       }
     },

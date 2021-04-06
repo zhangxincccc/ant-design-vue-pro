@@ -10,6 +10,7 @@ export default {
     'app.setting.fixedsidebar': 'Fixed Sidebar',
     'app.setting.sidemenu': 'Side Menu Layout',
     'app.setting.topmenu': 'Top Menu Layout',
+    'app.setting.mix': 'Mix Menu Layout',
     'app.setting.content-width.fixed': 'Fixed',
     'app.setting.content-width.fluid': 'Fluid',
     'app.setting.othersettings': 'Other Settings',
@@ -17,6 +18,7 @@ export default {
     'app.setting.copy': 'Copy Setting',
     'app.setting.loading': 'Loading theme',
     'app.setting.copyinfo': 'copy success，please replace defaultSettings in src/models/setting.js',
-    'app.setting.production.hint': 'Setting panel shows in development environment only, please manually modify'
-
+    'app.setting.production.hint': 'Setting panel shows in development environment only, please manually modify',
+    'app.setting.autosplitmenus': 'Auto Split Menus',
+    'app.setting.multitab': 'Multi Tab'
 };

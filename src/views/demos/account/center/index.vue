@@ -99,7 +99,9 @@
 </template>
 
 <script>
-import { PageView, RouteView } from '@/layouts';
+import { PageView } from '@/layouts';
+import { RouteView } from '@ant-design-vue/pro-layout';
+
 import { AppPage, ArticlePage, ProjectPage } from './page';
 
 import { mapGetters } from 'vuex';

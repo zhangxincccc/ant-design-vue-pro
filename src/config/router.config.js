@@ -1,5 +1,7 @@
 // eslint-disable-next-line
-import { BasicLayout, RouteView, UserLayout } from '@/layouts';
+import { BasicLayout,  UserLayout } from '@/layouts';
+import { RouteView } from '@ant-design-vue/pro-layout';
+
 import { workplace, system, organization } from '@/core/icons';
 import { demosRouter } from '@/config/demos-router.config';
 
@@ -49,7 +51,7 @@ export const asyncRouterMap = [
           }
         ]
       },
-      demosRouter // 如果不需要示例，请删除这里
+      demosRouter
     ]
   },
   {

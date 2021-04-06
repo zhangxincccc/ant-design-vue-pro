@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { RouteView } from '@/layouts';
+import { RouteView } from '@ant-design-vue/pro-layout';
 const getActiveKey = (path) => {
   switch (path) {
     case '/demos/list/search/article':
