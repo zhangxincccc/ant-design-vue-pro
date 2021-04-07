@@ -104,7 +104,8 @@ export default {
 
         hideHintAlert: false,
         hideCopyButton: false,
-        multiTab: defaultSettings.multiTab
+        multiTab: defaultSettings.multiTab,
+        autoSplitMenus: defaultSettings.autoSplitMenus
       },
       // 媒体查询
       query: {},
