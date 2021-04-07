@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@ant-design-vue/pro-layout@1.0.8-19":
-  version "1.0.8-19"
-  resolved "http://43.239.120.231:11381/repository/npm-hangar/@ant-design-vue/pro-layout/-/pro-layout-1.0.8-19.tgz#65d61d6c2d7da0c6ebcce74c548c5ac8cc2f9dc9"
-  integrity sha512-YVgUojbRTW+bVLlA2ZvKwnGJvJMh+M4gIknzyIQkgbPa2u9p3KnjXaAnHgLCosa3zZagFdkFNMQtjPjVcj9w6w==
+"@ant-design-vue/pro-layout@1.0.8-20":
+  version "1.0.8-20"
+  resolved "http://43.239.120.231:11381/repository/npm-hangar/@ant-design-vue/pro-layout/-/pro-layout-1.0.8-20.tgz#900984a0a9a14b497a97275d721f37a3d288240a"
+  integrity sha512-UuwehKDBD+WrXNW75ru1PaNoDTxYaeI85Aydgqfcg+w3+o6GTC8nKA/ycSOxH+oLTesK2qiVLhWDi1lyfemLpQ==
   dependencies:
     ant-design-vue "^1.6.2"
     classnames "^2.2.6"
