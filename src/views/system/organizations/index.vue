@@ -82,7 +82,7 @@
         </a-dropdown>
       </div>
 
-      <s-table
+      <h-table
         ref="table"
         size="default"
         rowKey="id"
@@ -115,7 +115,7 @@
             <a @click="handleSub(record)">订阅报警</a>
           </template>
         </span>
-      </s-table>
+      </h-table>
 
       <create-form
         ref="createModal"
@@ -132,7 +132,7 @@
 
 <script>
 import moment from 'moment';
-import { STable, Ellipsis } from '@/components';
+import { HTable, Ellipsis } from '@/components';
 import { getRoleList } from '@/api/manage';
 
 import StepByStepModal from '@/views/demos/list/modules/StepByStepModal';
@@ -198,7 +198,7 @@ const statusMap = {
 export default {
   name: 'OrganizationList',
   components: {
-    STable,
+    HTable,
     Ellipsis,
     CreateForm,
     StepByStepModal

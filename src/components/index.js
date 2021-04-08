@@ -19,6 +19,7 @@ import NumberInfo from '@/components/NumberInfo';
 import Tree from '@/components/Tree/Tree';
 import Trend from '@/components/Trend';
 import STable from '@/components/Table';
+import HTable from '@/components/HTable';
 import IconSelector from '@/components/IconSelector';
 import TagSelect from '@/components/TagSelect';
 import StandardFormRow from '@/components/StandardFormRow';
@@ -45,6 +46,7 @@ export {
   NumberInfo,
   Tree,
   STable,
+  HTable,
   IconSelector,
   TagSelect,
   StandardFormRow,
