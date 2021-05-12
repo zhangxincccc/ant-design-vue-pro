@@ -1,4 +1,5 @@
 export const ACCESS_TOKEN = 'Access-Token';
+export const ENUM_MAP = 'enum_map';
 
 export const SIDEBAR_TYPE = 'sidebar_type';
 export const TOGGLE_MOBILE_TYPE = 'is_mobile';
