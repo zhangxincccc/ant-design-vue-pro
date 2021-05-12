@@ -18,7 +18,7 @@ const enums = {
                 commit('SET_ENUM_MAP', map);
             } else {
                 enumsAll().then(res => {
-                    storage.set(ENUM_MAP, res.data, 7 * 24 * 60 * 60 * 1000);
+                    storage.set(ENUM_MAP, res.data);
                     commit('SET_ENUM_MAP', res.data);
                 });
             }

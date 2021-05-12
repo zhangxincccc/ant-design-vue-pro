@@ -13,7 +13,7 @@ const getters = {
   addRouters: state => state.permission.addRouters,
   multiTab: state => state.app.multiTab,
   cacheViews: state => state.app.cacheViews,
-  enumMap: state => state.systemEnum.enumMap
+  enumMap: state => state.enums.map
 };
 
 export default getters;
