@@ -1599,6 +1599,45 @@ export const listEnumsByTypeURL = function(parameters = {}) {
   return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
 }
 /**
+ * 成功：code=200，data对象为包含枚举信息的列表，失败：code!=200
+ * request: enumsAll
+ * url: enumsAllURL
+ * method: enumsAll_TYPE
+ * raw_url: enumsAll_RAW_URL
+ */
+ export const enumsAll = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/enums/all'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('get', domain + path, body, queryParameters, form, config)
+}
+export const enumsAll_RAW_URL = function() {
+  return '/api/enums/all'
+}
+export const enumsAll_TYPE = function() {
+  return 'get'
+}
+export const enumsAllURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/enums/all'
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
  * 排序属性：stringProperty,longProperty,enumProperty,isEnable,createTime
  成功：code=200，data对象为包含分页信息的示例列表，失败：code!=200
  * request: listExamples
