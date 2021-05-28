@@ -38,16 +38,17 @@ function hasRole(roles, route) {
 }
 
 function filterAsyncRouter(routerMap, permissions) {
-  const accessedRouters = routerMap.filter(route => {
-    if (hasPermission(permissions, route)) {
-      if (route.children && route.children.length) {
-        route.children = filterAsyncRouter(route.children, permissions);
+  const result = [];
+  routerMap.forEach(route => {
+    const newRoute = Object.assign({}, route);
+    if (hasPermission(permissions, newRoute)) {
+      result.push(newRoute);
+      if (newRoute.children && newRoute.children.length) {
+        newRoute.children = filterAsyncRouter(newRoute.children, permissions);
       }
-      return true;
     }
-    return false;
   });
-  return accessedRouters;
+  return result;
 }
 
 const permission = {
