@@ -8,7 +8,7 @@ import router from './router';
 import store from './store/';
 import i18n from './locales';
 import { VueAxios } from './utils/request';
-import ProLayout, { PageHeaderWrapper } from '@ant-design-vue/pro-layout';
+import ProLayout, { PageHeaderWrapper } from '@hangar/pro-layout';
 import themePluginConfig from '../config/themePluginConfig';
 import '@/layouts/scrollbar.less'; // progress bar custom style
 

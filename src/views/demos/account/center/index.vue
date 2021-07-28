@@ -100,7 +100,7 @@
 
 <script>
 import { PageView } from '@/layouts';
-import { RouteView } from '@ant-design-vue/pro-layout';
+import { RouteView } from '@hangar/pro-layout';
 
 import { AppPage, ArticlePage, ProjectPage } from './page';
 

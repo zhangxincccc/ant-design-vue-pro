@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import { SettingDrawer, updateTheme, RouteView } from '@ant-design-vue/pro-layout';
+import { SettingDrawer, updateTheme, RouteView } from '@hangar/pro-layout';
 // import SettingDrawer from '@/components/SettingDrawer';
 import { i18nRender } from '@/locales';
 import { mapState } from 'vuex';

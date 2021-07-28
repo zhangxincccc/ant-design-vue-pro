@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import { BasicLayout,  UserLayout } from '@/layouts';
-import { RouteView } from '@ant-design-vue/pro-layout';
+import { RouteView } from '@hangar/pro-layout';
 
 import { workplace, system, organization } from '@/core/icons';
 import { demosRouter } from '@/config/demos-router.config';

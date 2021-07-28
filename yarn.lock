@@ -2,20 +2,6 @@
 # yarn lockfile v1
 
 
-"@ant-design-vue/pro-layout@1.0.8-21":
-  version "1.0.8-21"
-  resolved "http://43.239.120.231:11381/repository/npm-hangar/@ant-design-vue/pro-layout/-/pro-layout-1.0.8-21.tgz#6dd27d6e1b46df22486ea40ba3384e62eb3a92a2"
-  integrity sha512-/Bmc40mcu3Tzw+rCRqaWYBf87FHZTKRUwJQc17cf45q1TSrdtMfhkzRX6szwkFL9tzx6/qy39qI32XdDtZO27Q==
-  dependencies:
-    ant-design-vue "^1.6.2"
-    classnames "^2.2.6"
-    insert-css "^2.0.0"
-    lodash "^4.17.15"
-    omit.js "^1.0.2"
-    umi-request "^1.2.11"
-    vue-container-query "^0.1.0"
-    vue-copy-to-clipboard "^1.0.3"
-
 "@ant-design/colors@^3.1.0", "@ant-design/colors@^3.2.1":
   version "3.2.2"
   resolved "https://registry.npm.taobao.org/@ant-design/colors/download/@ant-design/colors-3.2.2.tgz#5ad43d619e911f3488ebac303d606e66a8423903"
@@ -955,6 +941,20 @@
   dependencies:
     exec-sh "^0.3.2"
     minimist "^1.2.0"
+
+"@hangar/pro-layout@^1.0.9":
+  version "1.0.9"
+  resolved "http://43.239.120.231:11381/repository/npm-hangar/@hangar/pro-layout/-/pro-layout-1.0.9.tgz#bdba3c8f372adfca8c76cfc249cf50d3fc71272a"
+  integrity sha512-hA2u28O5I9A81H0LoFhTdi3AWPUZ9dbJRQRpjg2/k2RJbDqMUm4ki0FCdP/mywgAMNDreoc1lXsKutf9pA04+A==
+  dependencies:
+    ant-design-vue "^1.6.2"
+    classnames "^2.2.6"
+    insert-css "^2.0.0"
+    lodash "^4.17.15"
+    omit.js "^1.0.2"
+    umi-request "^1.2.11"
+    vue-container-query "^0.1.0"
+    vue-copy-to-clipboard "^1.0.3"
 
 "@hapi/address@2.x.x":
   version "2.1.4"
