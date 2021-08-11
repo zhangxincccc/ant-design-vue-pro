@@ -1,7 +1,7 @@
 // eslint-disable-next-line
 import { bxAnalyse, demos, system } from '@/core/icons';
 import { PageView } from '@/layouts';
-import { RouteView } from '@ant-design-vue/pro-layout';
+import { RouteView } from '@hangar/pro-layout';
 
 // const RouteView = {
 //   name: 'RouteView',

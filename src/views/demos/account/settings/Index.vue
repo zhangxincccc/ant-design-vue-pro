@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { RouteView } from '@ant-design-vue/pro-layout';
+import { RouteView } from '@hangar/pro-layout';
 
 import { baseMixin } from '@/store/app-mixin';
 
