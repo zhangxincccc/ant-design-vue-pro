@@ -6,8 +6,8 @@ import { welcome } from '@/utils/util';
 
 const user = {
   state: {
-    token: '',
-    name: '',
+    options: ['5', '7', '10'],
+    page: 10,
     welcome: '',
     avatar: '',
     roles: [],
