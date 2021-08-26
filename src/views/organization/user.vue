@@ -15,7 +15,7 @@
           ></span>
         </div>
         <div class="userList-content">
-          <a-tree :tree-data="departmentTreeData" :default-expand-all="openOrEndTreeFlag" @select="onSelect"> </a-tree>
+          <a-tree :tree-data="departmentTreeData" @select="onSelect" :expanded-keys="expandedKeys"> </a-tree>
         </div>
       </div>
       <div class="userMain">
@@ -373,7 +373,7 @@ export default {
   name: 'User',
   data() {
     return {
-      openOrEndTreeFlag: true,
+      expandedKeys: ['1-1'],
       addOrEdit: 1, // 判断新增或编辑
       userVisible: false,
       listSearch: undefined, // 部门列表搜索
@@ -470,12 +470,11 @@ export default {
     },
     // 展开部门树形结构
     openTree() {
-      this.openOrEndTreeFlag = true;
+      this.expandedKeys = ['1', '1-1'];
     },
     // 关闭部门树形结构
     endTree() {
-      console.log(222);
-      this.openOrEndTreeFlag = false;
+      this.expandedKeys = [];
     },
     // 关闭弹框
     handleOk(e) {
