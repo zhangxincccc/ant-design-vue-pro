@@ -359,7 +359,7 @@ export default {
     },
     // 点击表格搜索条件的查询
     handleSearchTable() {
-      this.pageNumber = 1;
+      this.currentPage = 1;
       this.pageSize = 10;
       this.userLoading = true;
       this.getUserTableData();
