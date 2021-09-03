@@ -44,10 +44,9 @@ export default {
   name: 'AccountCenter',
   data() {
     return {
-      expandedKeys: [],
-      selectIdArray: [],
-      selectParentIdArray: [],
-      selectData: [], // 选中的数据
+      expandedKeys: [], // 控制树结构展开折叠数据组
+      selectIdArray: [], // 搜索条件命中的节点ID
+      departmentTreeSelectData: [], // 树结构选中的数据
       departmentListSearch: '', // 部门列表搜索
       departmentTreeData: [] // 部门树形结构数据
     };
@@ -140,8 +139,8 @@ export default {
     },
     // 选择部门列表数据
     handleSelect(selectedKeys, info) {
-      this.selectData = selectedKeys;
-      this.$emit('getDepartnebtData', this.selectData);
+      this.departmentTreeSelectData = selectedKeys;
+      this.$emit('getDepartnebtData', this.departmentTreeSelectData);
     }
   }
 };
