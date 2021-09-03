@@ -67,27 +67,36 @@ export const asyncRouterMap = [{
             keepAlive: true
             //  permission: ['system:organizations']
           }
-        }]
-      },
-      {
-        path: '/organization',
-        name: 'organization',
-        component: RouteView,
-        redirect: '/organization/user',
-        meta: {
-          title: '业务组件',
-          icon: workplace
         },
-        children: [{
-          path: '/organization/user',
+        {
+          path: '/system/user',
           name: 'user',
-          component: () => import('@/views/organization/user'),
+          component: () => import('@/views/system/user'),
           meta: {
             title: '用户管理',
             icon: workplace
           }
         }]
       },
+      // {
+      //   path: '/organization',
+      //   name: 'organization',
+      //   component: RouteView,
+      //   redirect: '/organization/user',
+      //   meta: {
+      //     title: '业务组件',
+      //     icon: workplace
+      //   },
+      //   children: [{
+      //     path: '/organization/user',
+      //     name: 'user',
+      //     component: () => import('@/views/organization/user'),
+      //     meta: {
+      //       title: '用户管理',
+      //       icon: workplace
+      //     }
+      //   }]
+      // },
       demosRouter
     ]
   },

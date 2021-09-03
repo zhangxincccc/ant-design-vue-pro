@@ -4,7 +4,7 @@ const GitRevisionPlugin = require('git-revision-webpack-plugin');
 const GitRevision = new GitRevisionPlugin();
 const buildDate = JSON.stringify(new Date().toLocaleString());
 const createThemeColorReplacerPlugin = require('./config/plugin.config');
-const url = 'http://localhost:9998';
+const url = 'http://localhost:9999';
 
 function resolve(dir) {
   return path.join(__dirname, dir);

@@ -17,6 +17,12 @@ const errorHandler = error => {
         description: data.message
       });
     }
+    if (error.response.status === 500) {
+      notification.error({
+        message: 'Forbidden',
+        description: data.message
+      });
+    }
     if (error.response.status === 401 && !(data.result && data.result.isLogin)) {
       notification.error({
         message: 'Unauthorized',
