@@ -10,7 +10,7 @@
             <p style="cursor: pointer;" @click="endTree">折叠全部</p>
           </template>
           <a-icon type="menu-unfold" /> </a-popover
-        ></span>
+      ></span>
     </div>
     <div class="departmentListContent">
       <a-tree
@@ -41,7 +41,7 @@
 <script>
 import * as api from '@/api/api';
 export default {
-  name: 'AccountCenter',
+  name: 'TreeListComponents',
   data() {
     return {
       expandedKeys: [], // 控制树结构展开折叠数据组
@@ -61,20 +61,17 @@ export default {
         if (res.code === 200) {
           this.departmentTreeData = res.data;
           this.openTree();
-          this.$emit('getDepartentTreeData', this.departmentTreeData);
+          this.$emit('getDepartmentTreeData', this.departmentTreeData);
         }
       });
     },
     // 利用递归获取到所有的节点code
     getTreeData(arr) {
       arr.forEach(res => {
-        if (res.children) {
-          this.expandedKeys.push(res.code);
-          res.scopedSlots = { title: 'title' }; // 用来搜索变色
-          this.getTreeData(res.children);
-        } else {
+        this.expandedKeys.push(res.id);
           res.scopedSlots = { title: 'title' };
-          this.expandedKeys.push(res.code);
+        if (res.children) {
+          this.getTreeData(res.children);
         }
       });
     },
@@ -140,7 +137,7 @@ export default {
     // 选择部门列表数据
     handleSelect(selectedKeys, info) {
       this.departmentTreeSelectData = selectedKeys;
-      this.$emit('getDepartnebtData', this.departmentTreeSelectData);
+      this.$emit('getDepartmentData', this.departmentTreeSelectData);
     }
   }
 };

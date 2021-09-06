@@ -56,27 +56,30 @@ export const asyncRouterMap = [{
           icon: system,
           permission: ['system']
         },
+
         children: [{
-          path: '/system/organizations',
-          name: 'organizations',
-          hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
-          component: () => import('@/views/system/organizations/index'),
-          meta: {
-            title: 'menu.system.organizations',
-            icon: organization,
-            keepAlive: true
-            //  permission: ['system:organizations']
+            path: '/system/organizations',
+            name: 'organizations',
+            hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
+            component: () => import('@/views/system/organizations/index'),
+            meta: {
+              title: 'menu.system.organizations',
+              icon: organization,
+              keepAlive: true
+              //  permission: ['system:organizations']
+            }
+          },
+          {
+            path: '/system/user',
+            name: 'user',
+            component: () => import('@/views/system/user'),
+            meta: {
+              title: '用户管理',
+              permission: ['system:users'],
+              icon: workplace
+            }
           }
-        },
-        {
-          path: '/system/user',
-          name: 'user',
-          component: () => import('@/views/system/user'),
-          meta: {
-            title: '用户管理',
-            icon: workplace
-          }
-        }]
+        ]
       },
       // {
       //   path: '/organization',

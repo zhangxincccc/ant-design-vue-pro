@@ -3,8 +3,8 @@
     <div class="user">
       <div class="userList">
         <department-list
-          @getDepartnebtData="getDepartnebtData"
-          @getDepartentTreeData="getDepartentTreeData"
+          @getDepartmentData="getDepartmentData"
+          @getDepartmentTreeData="getDepartmentTreeData"
         ></department-list>
       </div>
       <div class="userMain">
@@ -108,9 +108,7 @@
                 <span v-for="item in roles" :key="item.id"> {{ item.name }} <span style="padding:0 5px;"></span> </span>
               </template>
               <template slot="action" slot-scope="text, record">
-                <a slot="action" href="javascript:;" @click="handleEndOrOpen(record)">{{
-                  record.isEnable == 1 ? '停用' : '启用'
-                }}</a>
+                <a slot="action" href="javascript:;">{{ record.isEnable == 1 ? '停用' : '启用' }}</a>
                 <a slot="action" href="javascript:;" @click="handleEdit(record)" style="margin-left:5px">编辑</a>
                 <a-popconfirm
                   slot="action"
@@ -133,6 +131,7 @@
             :total="totalPage"
             show-size-changer
             :page-size="pageSize"
+            @change="getCurrentPage"
             @showSizeChange="onShowSizeChange"
           >
           </a-pagination>
@@ -140,7 +139,7 @@
       </div>
       <a-modal
         v-model="formUserVisible"
-        :title="addOrEdit == 1 ? '新增账号' : '编辑账号'"
+        :title="addOrEdit == 1 ? '新增用户' : '编辑用户'"
         @cancel="handleOk"
         :confirm-loading="formButtonDisableFlag"
         @ok="onSubmit"
@@ -286,12 +285,6 @@ export default {
     departmentList
   },
   watch: {
-    // 监听页码
-    currentPage(val) {
-      this.userLoading = true;
-      this.currentPage = val;
-      this.getUserTableData();
-    },
     // 解决删除分页最后一条没数据的BUG
     totalPage() {
       if (this.totalPage === (this.currentPage - 1) * this.pageSize && this.totalPage !== 0) {
@@ -306,11 +299,11 @@ export default {
   },
   methods: {
     // 获取子组件部门列表数据
-    getDepartentTreeData(val) {
+    getDepartmentTreeData(val) {
       this.formTreeData = val;
     },
     // 获取子组件部门列表选中数据
-    getDepartnebtData(val) {
+    getDepartmentData(val) {
       this.pageNumber = 1;
       this.pageSize = 10;
       this.userLoading = true;
@@ -438,6 +431,12 @@ export default {
         }
       });
     },
+    // 获取分页页数
+    getCurrentPage(pageNumber) {
+      this.userLoading = true;
+      this.currentPage = pageNumber;
+      this.getUserTableData();
+    },
     // 获取分页下拉第几页展示几个
     onShowSizeChange(currentPage, pageSize) {
       this.userLoading = true;
@@ -465,8 +464,6 @@ export default {
       this.addOrEdit = 2;
       this.formUserVisible = true;
     },
-    // 更改停用启用状态
-    handleEndOrOpen(val) {},
     // 表单邮箱验证
     sendEmail() {
       var regEmail = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;

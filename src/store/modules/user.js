@@ -6,8 +6,8 @@ import { welcome } from '@/utils/util';
 
 const user = {
   state: {
-    options: ['5', '7', '10'],
-    page: 10,
+    options: ['5', '7', '10'], // 统一配置分页的选择条数
+    page: 10, // 统一配置分页的默认一页条数
     welcome: '',
     avatar: '',
     roles: [],
