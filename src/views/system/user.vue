@@ -471,9 +471,9 @@ export default {
      * @param {object} userAddParam 编辑的对象参数
      */
 
-    userUpdate(userAddParam) {
+    userUpdate(userEditParam) {
       api
-        .updateUser({ body: userAddParam, id: this.tableRowId })
+        .updateUser({ body: userEditParam, id: this.tableRowId })
         .then(res => {
           if (res.code === 200) {
             this.updata(res);
