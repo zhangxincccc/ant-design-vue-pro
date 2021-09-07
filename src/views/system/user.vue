@@ -128,7 +128,7 @@
             v-model="currentPage"
             show-quick-jumper
             :page-size-options="pageSizeOptions"
-            :total="totalPage"
+            :total="userTableTotal"
             show-size-changer
             :page-size="pageSize"
             @change="getCurrentPage"
@@ -152,7 +152,7 @@
             <a-input v-model="form.loginName" placeholder="请输入登录名" />
           </a-form-model-item>
           <a-form-model-item ref="email" label="邮箱" prop="email">
-            <a-input v-model="form.email" placeholder="请输入邮箱" @blur="sendEmail" />
+            <a-input v-model="form.email" placeholder="请输入邮箱" />
           </a-form-model-item>
           <a-form-model-item label="角色" prop="role">
             <a-select
@@ -202,7 +202,7 @@
 <script>
 import * as api from '@/api/api';
 import moment from 'moment';
-import departmentList from '../../components/departmentList/index';
+import departmentList from './components/DepartmentTreeList/index';
 const columns = [
   {
     title: '序号',
@@ -243,12 +243,21 @@ const tableData = [];
 export default {
   name: 'User',
   data() {
+    const validateEmail = (rule, value, callback) => {
+      const regEmail = rule.reg;
+      if (value !== undefined && !regEmail.test(value)) {
+        this.form.email = undefined;
+        callback(new Error('邮箱格式不正确'));
+      } else {
+        callback();
+      }
+    };
     return {
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
       userLoading: false, // loading
       userTableParam: {}, // 表格搜索绑定
       advanced: false, // 高级搜索 展开/关闭
-      addOrEdit: 1, // 判断新增或编辑
+      addOrEdit: 1, // 判断新增或编辑（1为新增2为编辑）
       formUserVisible: false, // 控制表单弹框
       userRole: [], // 角色绑定
       userRoleArray: [], // 角色下拉数组
@@ -256,23 +265,30 @@ export default {
       tableData, // 表格数据
       columns, // 表格头部
       tableRowId: undefined, // 表格单条数据的ID
-      pageSizeOptions: this.$store.state.user.options, // 分页下拉
+      pageSizeOptions: this.$store.state.user.defaultPaginationOptions, // 分页下拉
       currentPage: 1, // 默认分页当前页
-      pageSize: this.$store.state.user.page, // 一页展示多少条数据
-      totalPage: 0, // 表格数据总数
+      pageSize: this.$store.state.user.defaultPaginationPagesize, // 一页展示多少条数据
+      userTableTotal: 0, // 表格数据总数
       labelCol: { span: 4 },
       wrapperCol: { span: 14 },
       form: {
         // 表单数据
         loginName: undefined,
         name: undefined, // 名字
-        email: '', // 邮箱
+        email: undefined, // 邮箱
         role: [], // 角色
-        status: '1', // 编辑状态下的状态选择
+        status: '1', // 状态
         department: undefined // 所属部门
       },
       rules: {
         // 规则验证
+        email: [
+          {
+            validator: validateEmail,
+            reg: /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/,
+            trigger: 'blur'
+          }
+        ],
         loginName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         role: [{ required: true, message: '请选择角色', trigger: 'change' }],
@@ -285,12 +301,27 @@ export default {
     departmentList
   },
   watch: {
-    // 解决删除分页最后一条没数据的BUG
-    totalPage() {
-      if (this.totalPage === (this.currentPage - 1) * this.pageSize && this.totalPage !== 0) {
+    /**
+     * @description: 解决删除分页最后一条没数据的BUG
+     * 思路：先获取当前的表格数据总数this.userTableTotal
+     * 在获取除了当前页数据外的表格总数this.getExceptCurrentPageTableTotalData
+     * 如果这两个数相等 说明删除的是当前页最后一条数据 然后使当前页-1 请求数据就可以了
+     */
+
+    userTableTotal() {
+      if (this.userTableTotal === this.getExceptCurrentPageTableTotalData && this.userTableTotal !== 0) {
         this.currentPage -= 1;
         this.getUserTableData();
       }
+    }
+  },
+  computed: {
+    /**
+     * @description: 获取去掉当前页的表格总数
+     */
+
+    getExceptCurrentPageTableTotalData: function() {
+      return (this.currentPage - 1) * this.pageSize;
     }
   },
   created() {
@@ -298,43 +329,59 @@ export default {
     this.getUserRoleData(); // 获取角色数据列表
   },
   methods: {
-    // 获取子组件部门列表数据
-    getDepartmentTreeData(val) {
-      this.formTreeData = val;
+    /**
+     * @description: 获取子组件部门列表数据
+     * @param {array} departmentData 部门列表数组
+     */
+
+    getDepartmentTreeData(departmentData) {
+      this.formTreeData = departmentData;
     },
-    // 获取子组件部门列表选中数据
-    getDepartmentData(val) {
+    /**
+     * @description: 获取子组件部门列表选中数据
+     * @param {array} selectDepartmentData 部门列表选中数据组
+     */
+
+    getDepartmentData(selectDepartmentData) {
       this.pageNumber = 1;
       this.pageSize = 10;
       this.userLoading = true;
-      this.getUserTableData(val[0]);
+      this.getUserTableData(selectDepartmentData[0]);
     },
-    // 获取表格数据
-    getUserTableData(val) {
-      const obj = {
-        pageNumber: Number(this.currentPage) - 1,
-        pageSize: this.pageSize,
-        searchName: this.userTableParam.userName,
-        searchUsername: this.userTableParam.userLoginName,
-        searchDepartmentId: this.userTableParam.userDepartment || val,
-        searchIsEnable: this.userTableParam.userStatus
-      };
-      api.listUsers(obj).then(res => {
-        if (res.code === 200 && res.data.content) {
-          this.tableData = res.data.content;
-          this.tableData.forEach(res => {
-            res.createTime = moment(res.createTime).format('YYYY-MM-DD HH:mm');
-          });
-          this.totalPage = res.data.totalElements;
-          this.userLoading = false;
-        } else {
-          this.totalPage = res.data.totalElements;
-          this.tableData = [];
-          this.userLoading = false;
-        }
-      });
+    /**
+     * @description: 获取表格数据
+     * @param {string} selectDepartmentDataId 选中部门的ID
+     */
+
+    getUserTableData(selectDepartmentDataId) {
+      api
+        .listUsers({
+          pageNumber: Number(this.currentPage) - 1,
+          pageSize: this.pageSize,
+          searchName: this.userTableParam.userName,
+          searchUsername: this.userTableParam.userLoginName,
+          searchDepartmentId: this.userTableParam.userDepartment || selectDepartmentDataId,
+          searchIsEnable: this.userTableParam.userStatus
+        })
+        .then(res => {
+          if (res.code === 200 && res.data.content) {
+            this.tableData = res.data.content;
+            this.tableData.forEach(res => {
+              res.createTime = moment(res.createTime).format('YYYY-MM-DD HH:mm');
+            });
+            this.userTableTotal = res.data.totalElements;
+            this.userLoading = false;
+          } else {
+            this.userTableTotal = res.data.totalElements;
+            this.tableData = [];
+            this.userLoading = false;
+          }
+        });
     },
-    // 获取角色数据列表
+    /**
+     * @description: 获取角色数据列表
+     */
+
     getUserRoleData() {
       api.listRoles().then(res => {
         if (res.code === 200) {
@@ -342,22 +389,31 @@ export default {
         }
       });
     },
-    // 控制搜索条件的展示隐藏
+    /**
+     * @description:控制搜索条件的展示隐藏
+     */
     toggleAdvanced() {
       this.advanced = !this.advanced;
     },
-    // 选中的角色ID
-    handleChange(value) {
-      this.userRole = value;
+    /**
+     * @description: 选中的角色ID
+     * @param {array} selectRoleIdArray 角色下拉选中的数组
+     */
+    handleChange(selectRoleIdArray) {
+      this.userRole = selectRoleIdArray;
     },
-    // 点击表格搜索条件的查询
+    /**
+     * @description:点击表格搜索条件的查询
+     */
     handleSearchTable() {
       this.currentPage = 1;
       this.pageSize = 10;
       this.userLoading = true;
       this.getUserTableData();
     },
-    // 保存弹框数据
+    /**
+     * @description:新增编辑弹框 （提交数据）
+     */
     onSubmit() {
       this.$refs.userRuleForm.validate(valid => {
         if (valid) {
@@ -370,7 +426,8 @@ export default {
             };
             rolesArray.push(obj);
           });
-          const obj = {
+          // 新增编辑需要的参数
+          const userAddOrEditParam = {
             username: this.form.loginName,
             name: this.form.name,
             email: this.form.email === '' ? undefined : this.form.email,
@@ -383,46 +440,70 @@ export default {
           };
           // 新增
           if (this.addOrEdit === 1) {
-            api
-              .createUser({ body: obj })
-              .then(res => {
-                if (res.code === 201) {
-                  this.updata(res);
-                }
-              })
-              .catch(() => {
-                this.formButtonDisableFlag = false;
-              });
+            this.userAdd(userAddOrEditParam);
           } else {
             // 编辑
-            api
-              .updateUser({ body: obj, id: this.tableRowId })
-              .then(res => {
-                if (res.code === 200) {
-                  this.updata(res);
-                }
-              })
-              .catch(() => {
-                this.formButtonDisableFlag = false;
-              });
+            this.userUpdate(userAddOrEditParam);
           }
         } else {
           return false;
         }
       });
     },
-    // 数据更新后共同的代码
-    updata(res) {
-      this.$message.success(res.message);
+    /**
+     * @description: 用户新增
+     * @param {object} userAddParam 新增的对象参数
+     */
+    userAdd(userAddParam) {
+      api
+        .createUser({ body: userAddParam })
+        .then(res => {
+          if (res.code === 201) {
+            this.updata(res);
+          }
+        })
+        .catch(() => {
+          this.formButtonDisableFlag = false;
+        });
+    },
+    /**
+     * @description: 用户编辑
+     * @param {object} userAddParam 编辑的对象参数
+     */
+
+    userUpdate(userAddParam) {
+      api
+        .updateUser({ body: userAddParam, id: this.tableRowId })
+        .then(res => {
+          if (res.code === 200) {
+            this.updata(res);
+          }
+        })
+        .catch(() => {
+          this.formButtonDisableFlag = false;
+        });
+    },
+
+    /**
+     * @description: 数据更新后共同的代码
+     * @param {object} formSuccessData 用户新增编辑请求成功后返回的对象
+     */
+
+    updata(formSuccessData) {
+      this.$message.success(formSuccessData.message);
       this.formUserVisible = false;
       this.formButtonDisableFlag = false;
       this.clearFormData();
       this.userLoading = true;
       this.getUserTableData();
     },
-    // 点击删除
-    handleDelete(val) {
-      api.deleteUserById({ id: val.id }).then(res => {
+    /**
+     * @description: 删除表格数据的某一条
+     * @param {object} userTableRowData 某一条表格数据对象
+     */
+
+    handleDelete(userTableRowData) {
+      api.deleteUserById({ id: userTableRowData.id }).then(res => {
         if (res.code === 200) {
           this.$message.success(res.message);
           this.formUserVisible = false;
@@ -431,53 +512,65 @@ export default {
         }
       });
     },
-    // 获取分页页数
+    /**
+     * @description: 获取分页页数改变后的值
+     * @param {string} pageNumber UI框架自带
+     */
+
     getCurrentPage(pageNumber) {
       this.userLoading = true;
       this.currentPage = pageNumber;
       this.getUserTableData();
     },
-    // 获取分页下拉第几页展示几个
+
+    /**
+     * @description: 获取分页下拉第几页展示几个
+     * @param {string} currentPage UI框架自带
+     * @param {string} pageSize UI框架自带
+     */
+
     onShowSizeChange(currentPage, pageSize) {
       this.userLoading = true;
       this.pageSize = pageSize;
       this.currentPage = currentPage;
       this.getUserTableData();
     },
-    // 新增账号
+    /**
+     * @description:新增账号
+     */
     addAccount() {
       this.addOrEdit = 1;
       this.formUserVisible = true;
     },
-    // 点击编辑
-    handleEdit(val) {
+    /**
+     * @description: 点击表格数据某一条的编辑
+     * @param {object} userTableRowData 某一条表格数据对象
+     */
+
+    handleEdit(userTableRowData) {
       this.form.role = [];
-      val.roles.forEach(res => {
+      userTableRowData.roles.forEach(res => {
         this.form.role.push(res.id);
       });
-      this.tableRowId = val.id;
-      this.form.loginName = val.username;
-      this.form.name = val.name;
-      this.form.email = val.email ? val.email : '';
-      this.form.status = String(val.isEnable);
-      this.form.department = val.department.id;
+      this.tableRowId = userTableRowData.id;
+      this.form.loginName = userTableRowData.username;
+      this.form.name = userTableRowData.name;
+      this.form.email = userTableRowData.email ? userTableRowData.email : '';
+      this.form.status = String(userTableRowData.isEnable);
+      this.form.department = userTableRowData.department.id;
       this.addOrEdit = 2;
       this.formUserVisible = true;
     },
-    // 表单邮箱验证
-    sendEmail() {
-      var regEmail = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
-      if (this.form.email !== '' && !regEmail.test(this.form.email)) {
-        this.$message.error('邮箱格式不正确');
-        this.form.email = '';
-      }
-    },
-    // 关闭弹框
-    handleOk(e) {
+    /**
+     * @description:关闭弹窗
+     */
+    handleOk() {
       this.formUserVisible = false;
       this.clearFormData();
     },
-    // 数据新增编辑完成过后清空
+    /**
+     * @description:数据新增编辑完成过后清空
+     */
     clearFormData() {
       this.$refs.userRuleForm.resetFields();
       this.form.name = undefined;

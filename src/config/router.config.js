@@ -1,4 +1,3 @@
-// eslint-disable-next-line
 import {
   BasicLayout,
   UserLayout
@@ -14,14 +13,6 @@ import {
 import {
   demosRouter
 } from '@/config/demos-router.config';
-// const RouteView = {
-//   name: 'RouteView',
-//   render: (h) => h('router-view')
-// };
-// const RouteView = {
-//   name: 'RouteView',
-//   render: h => h('router-view')
-// };
 /*
 注意：
 多标签页请尽量避免使用三级路由，多标签页存在问题
@@ -81,25 +72,6 @@ export const asyncRouterMap = [{
           }
         ]
       },
-      // {
-      //   path: '/organization',
-      //   name: 'organization',
-      //   component: RouteView,
-      //   redirect: '/organization/user',
-      //   meta: {
-      //     title: '业务组件',
-      //     icon: workplace
-      //   },
-      //   children: [{
-      //     path: '/organization/user',
-      //     name: 'user',
-      //     component: () => import('@/views/organization/user'),
-      //     meta: {
-      //       title: '用户管理',
-      //       icon: workplace
-      //     }
-      //   }]
-      // },
       demosRouter
     ]
   },
