@@ -14,6 +14,7 @@
     </div>
     <div class="departmentListContent">
       <a-tree
+        ref="tree"
         :replaceFields="{
           title: 'name',
           key: 'id'
@@ -160,8 +161,6 @@ export default {
     },
     /**
      * @description: 关闭部门树形结构
-     * @param {*}
-     * @return {*}
      */
 
     endTree() {

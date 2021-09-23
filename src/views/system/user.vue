@@ -3,11 +3,13 @@
     <div class="user">
       <div class="userList">
         <department-list
+          ref="childComponent"
           @getDepartmentData="getDepartmentData"
           @getDepartmentTreeData="getDepartmentTreeData"
         ></department-list>
       </div>
       <div class="userMain">
+        <a-spin tip="加载中..." class="position" v-if="userLoading"> </a-spin>
         <div class="userMainSearch">
           <div class="table-page-search-wrapper">
             <a-form layout="inline">
@@ -19,20 +21,8 @@
                 </a-col>
 
                 <a-col :md="8" :sm="24">
-                  <a-form-item label="所属部门">
-                    <a-tree-select
-                      allowClear
-                      :replaceFields="{
-                        title: 'name',
-                        value: 'id'
-                      }"
-                      v-model="userTableParam.userDepartment"
-                      :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                      :tree-data="formTreeData"
-                      placeholder="请选择所属部门"
-                      tree-default-expand-all
-                    >
-                    </a-tree-select>
+                  <a-form-item label="创建日期">
+                    <a-range-picker allowClear v-model="userTableParam.userDate" />
                   </a-form-item>
                 </a-col>
                 <template v-if="advanced">
@@ -54,16 +44,16 @@
                     </a-form-item>
                   </a-col>
                   <a-col :md="8" :sm="24">
+                    <a-form-item label="登录名">
+                      <a-input v-model="userTableParam.userLoginName" placeholder="请输入" allowClear />
+                    </a-form-item>
+                  </a-col>
+                  <a-col :md="8" :sm="24">
                     <a-form-item label="状态">
                       <a-select v-model="userTableParam.userStatus" placeholder="请选择" allowClear>
                         <a-select-option value="1">启用</a-select-option>
                         <a-select-option value="2">停用</a-select-option>
                       </a-select>
-                    </a-form-item>
-                  </a-col>
-                  <a-col :md="8" :sm="24">
-                    <a-form-item label="登录名">
-                      <a-input v-model="userTableParam.userLoginName" placeholder="请输入" allowClear />
                     </a-form-item>
                   </a-col>
                 </template>
@@ -83,15 +73,14 @@
         </div>
         <div class="userMainTable">
           <div class="userMainTableAdd">
-            <div>账号列表</div>
+            <div>用户列表</div>
             <div>
               <a-button type="primary" @click="addAccount">
-                新增账号
+                新增用户
               </a-button>
             </div>
           </div>
           <div class="userMainTableContent">
-            <a-spin tip="加载中..." class="position" v-if="userLoading"> </a-spin>
             <a-table
               :columns="columns"
               :data-source="tableData"
@@ -205,20 +194,8 @@ import moment from 'moment';
 import departmentList from './components/DepartmentTreeList/index';
 const columns = [
   {
-    title: '序号',
-    dataIndex: 'number'
-  },
-  {
     title: '用户名',
     dataIndex: 'name'
-  },
-  {
-    title: '登录名',
-    dataIndex: 'username'
-  },
-  {
-    title: '邮箱',
-    dataIndex: 'email'
   },
   {
     title: '创建时间',
@@ -230,6 +207,15 @@ const columns = [
     width: '20%',
     scopedSlots: { customRender: 'roles' }
   },
+  {
+    title: '登录名',
+    dataIndex: 'username'
+  },
+  {
+    title: '邮箱',
+    dataIndex: 'email'
+  },
+
   {
     title: '所属部门',
     dataIndex: 'department.name'
@@ -253,6 +239,7 @@ export default {
       }
     };
     return {
+      selectDepartmentFlagArray: [], // 接受部门列表子组件选中的ID数组 []为未选中状态 有值为选中状态
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
       userLoading: false, // loading
       userTableParam: {}, // 表格搜索绑定
@@ -287,12 +274,18 @@ export default {
             validator: validateEmail,
             reg: /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/,
             trigger: 'blur'
-          }
+          },
+          { max: 500, message: '邮箱长度不能大于500', trigger: 'blur' }
         ],
-        loginName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-        name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-        role: [{ required: true, message: '请选择角色', trigger: 'change' }],
-        department: [{ required: true, message: '请选择所属部门', trigger: 'change' }]
+        loginName: [
+          { required: true, message: '请输入登录名', trigger: 'blur' },
+          { min: 4, max: 50, message: '登录名长度应为4--50', trigger: 'blur' }
+        ],
+        name: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { max: 200, message: '用户名长度不能大于200', trigger: 'blur' }
+        ],
+        role: [{ required: true, message: '请选择角色', trigger: 'change' }]
       },
       formTreeData: [] // 下拉选择树结构数据
     };
@@ -346,22 +339,36 @@ export default {
       this.pageNumber = 1;
       this.pageSize = 10;
       this.userLoading = true;
-      this.getUserTableData(selectDepartmentData[0]);
+      this.selectDepartmentFlagArray = selectDepartmentData;
+      this.getUserTableData();
     },
     /**
      * @description: 获取表格数据
      * @param {string} selectDepartmentDataId 选中部门的ID
      */
 
-    getUserTableData(selectDepartmentDataId) {
+    getUserTableData() {
       api
         .listUsers({
           pageNumber: Number(this.currentPage) - 1,
           pageSize: this.pageSize,
           searchName: this.userTableParam.userName,
           searchUsername: this.userTableParam.userLoginName,
-          searchDepartmentId: this.userTableParam.userDepartment || selectDepartmentDataId,
-          searchIsEnable: this.userTableParam.userStatus
+          searchDepartmentId:
+            this.selectDepartmentFlagArray.length === 0 ? undefined : this.selectDepartmentFlagArray[0],
+          searchIsEnable: this.userTableParam.userStatus,
+          searchCreateDateBegin:
+            this.userTableParam.userDate === undefined
+              ? undefined
+              : this.userTableParam.userDate.length === 0
+              ? undefined
+              : moment(this.userTableParam.userDate[0]._d).format('YYYY-MM-DD'),
+          searchCreateDateEnd:
+            this.userTableParam.userDate === undefined
+              ? undefined
+              : this.userTableParam.userDate.length === 0
+              ? undefined
+              : moment(this.userTableParam.userDate[1]._d).format('YYYY-MM-DD')
         })
         .then(res => {
           if (res.code === 200 && res.data.content) {
@@ -432,7 +439,7 @@ export default {
             name: this.form.name,
             email: this.form.email === '' ? undefined : this.form.email,
             department: {
-              id: this.form.department
+              id: this.form.department === '' ? undefined : this.form.department
             },
             id: this.tableRowId === undefined ? undefined : this.tableRowId, // 编辑有ID新增无ID
             roles: rolesArray,
@@ -549,15 +556,19 @@ export default {
 
     handleEdit(userTableRowData) {
       this.form.role = [];
-      userTableRowData.roles.forEach(res => {
-        this.form.role.push(res.id);
-      });
+      if (userTableRowData.roles) {
+        userTableRowData.roles.forEach(res => {
+          this.form.role.push(res.id);
+        });
+      } else {
+        this.form.role = [];
+      }
       this.tableRowId = userTableRowData.id;
       this.form.loginName = userTableRowData.username;
       this.form.name = userTableRowData.name;
-      this.form.email = userTableRowData.email ? userTableRowData.email : '';
+      this.form.email = userTableRowData.email ? userTableRowData.email : undefined;
       this.form.status = String(userTableRowData.isEnable);
-      this.form.department = userTableRowData.department.id;
+      this.form.department = userTableRowData.department ? userTableRowData.department.id : undefined;
       this.addOrEdit = 2;
       this.formUserVisible = true;
     },
@@ -603,6 +614,17 @@ export default {
   .userMain {
     width: 79%;
     height: 100%;
+    position: relative;
+    .position {
+      width: 100%;
+      height: 100%;
+      background: white;
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
     .userMainSearch {
       width: 100%;
       padding: 10px;
@@ -650,17 +672,6 @@ export default {
         height: calc(100vh - 380px);
         padding: 10px;
         overflow: scroll;
-        position: relative;
-        .position {
-          width: 100%;
-          height: calc(100vh - 380px);
-          background: white;
-          position: absolute;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 999;
-        }
       }
       .userMainTableContent /deep/ .ant-table-tbody .ant-table-row:nth-child(2n) {
         background: #fafafa;
