@@ -93,7 +93,7 @@
               size="middle"
               :rowKey="
                 (record, index) => {
-                  return index;
+                  return record.id;
                 }
               "
               bordered
@@ -340,6 +340,7 @@ export default {
     }
   },
   created() {
+    this.userLoading = true;
     this.getUserTableData(); // 获取表格数据
     this.getUserRoleData(); // 获取角色数据列表
     this.getFormOrganizationsTree(); // 获取表单组织树结构数据
@@ -357,11 +358,8 @@ export default {
      * @param {array} selectedRowKeys 下标回值
      * @param {array} selectedRows 数据回值
      */
-    onSelectChange(selectedRowKeys, selectedRows) {
-      this.batchSelectIdArr = [];
-      selectedRows.forEach(res => {
-        this.batchSelectIdArr.push(res.id);
-      });
+    onSelectChange(selectedRowKeys) {
+      this.batchSelectIdArr = selectedRowKeys;
     },
 
     /**
