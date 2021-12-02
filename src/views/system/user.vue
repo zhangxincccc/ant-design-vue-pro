@@ -1,12 +1,8 @@
 <template>
   <page-header-wrapper :title="false">
     <div class="user">
-      <div class="userList">
-        <department-list
-          ref="childComponent"
-          @getDepartmentData="getDepartmentData"
-          @getDepartmentTreeData="getDepartmentTreeData"
-        ></department-list>
+      <div class="departmentList">
+        <department-list ref="childComponent" @getDepartmentData="getDepartmentData"></department-list>
       </div>
       <div class="userMain">
         <a-spin tip="加载中..." class="position" v-if="userLoading"> </a-spin>
@@ -19,7 +15,6 @@
                     <a-input v-model="userTableParam.userName" placeholder="请输入" allowClear />
                   </a-form-item>
                 </a-col>
-
                 <a-col :md="8" :sm="24">
                   <a-form-item label="创建日期">
                     <a-range-picker allowClear v-model="userTableParam.userDate" />
@@ -57,13 +52,13 @@
                     </a-form-item>
                   </a-col>
                 </template>
-                <a-col :md="8" :sm="24">
+                <a-col :md="8" :sm="24" style="display:flex;justify-content: flex-end">
                   <span>
                     <a-button style="margin-left: 30px" @click="() => (this.userTableParam = {})">重置</a-button>
                     <a-button style="margin-left: 8px" type="primary" @click="handleSearchTable()">查询</a-button>
                     <a @click="toggleAdvanced" style="margin-left: 8px">
                       {{ advanced ? '收起' : '展开' }}
-                      <a-icon :type="advanced ? 'up' : 'down'" />
+                      <a-icon :type="6 ? 'up' : 'down'" />
                     </a>
                   </span>
                 </a-col>
@@ -75,13 +70,23 @@
           <div class="userMainTableAdd">
             <div>用户列表</div>
             <div>
-              <a-button type="primary" @click="addAccount">
+              <a-button type="primary" class="buttonMargin" @click="handleBatchEnable">
+                批量启用
+              </a-button>
+              <a-button type="primary" class="buttonMargin">
+                批量停用
+              </a-button>
+              <a-button type="primary" class="buttonMargin">
+                批量删除
+              </a-button>
+              <a-button type="primary" @click="handleAddUser()">
                 新增用户
               </a-button>
             </div>
           </div>
           <div class="userMainTableContent">
             <a-table
+              :row-selection="rowSelection"
               :columns="columns"
               :data-source="tableData"
               :pagination="false"
@@ -93,12 +98,13 @@
               "
               bordered
             >
+              <span slot="name" slot-scope="text">{{ text }}</span>
               <template slot="roles" slot-scope="roles">
                 <span v-for="item in roles" :key="item.id"> {{ item.name }} <span style="padding:0 5px;"></span> </span>
               </template>
               <template slot="action" slot-scope="text, record">
                 <a slot="action" href="javascript:;">{{ record.isEnable == 1 ? '停用' : '启用' }}</a>
-                <a slot="action" href="javascript:;" @click="handleEdit(record)" style="margin-left:5px">编辑</a>
+                <a slot="action" href="javascript:;" @click="handleEditUser(record)" style="margin-left:5px">编辑</a>
                 <a-popconfirm
                   slot="action"
                   title="此操作将删除该条数据，是否继续?"
@@ -129,7 +135,7 @@
       <a-modal
         v-model="formUserVisible"
         :title="addOrEdit == 1 ? '新增用户' : '编辑用户'"
-        @cancel="handleOk"
+        @cancel="() => ((this.formUserVisible = false), this.clearFormData())"
         :confirm-loading="formButtonDisableFlag"
         @ok="onSubmit"
       >
@@ -156,6 +162,37 @@
               </a-select-option>
             </a-select>
           </a-form-model-item>
+          <a-form-model-item label="所属组织" prop="organizations">
+            <a-tree-select
+              :replaceFields="{
+                title: 'name',
+                value: 'id'
+              }"
+              v-model="form.organizations"
+              style="width: 100%"
+              @change="getUserTreeData"
+              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+              :tree-data="organizationsFormTreeData"
+              placeholder="请选择所属组织"
+              tree-default-expand-all
+            >
+            </a-tree-select>
+          </a-form-model-item>
+          <a-form-model-item label="所属部门" prop="department">
+            <a-tree-select
+              :replaceFields="{
+                title: 'name',
+                value: 'id'
+              }"
+              v-model="form.department"
+              style="width: 100%"
+              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+              :tree-data="departmentFormTreeData"
+              placeholder="请选择所属部门"
+              tree-default-expand-all
+            >
+            </a-tree-select>
+          </a-form-model-item>
           <a-form-model-item label="状态" prop="status">
             <a-radio-group v-model="form.status" button-style="solid">
               <a-radio-button value="1">
@@ -166,36 +203,22 @@
               </a-radio-button>
             </a-radio-group>
           </a-form-model-item>
-
-          <a-form-model-item label="所属部门" prop="department">
-            <a-tree-select
-              :replaceFields="{
-                title: 'name',
-                value: 'id'
-              }"
-              v-model="form.department"
-              style="width: 100%"
-              :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-              :tree-data="formTreeData"
-              placeholder="请选择所属部门"
-              tree-default-expand-all
-            >
-            </a-tree-select>
-          </a-form-model-item>
         </a-form-model>
       </a-modal>
     </div>
   </page-header-wrapper>
 </template>
-
 <script>
-import * as api from '@/api/api';
+import { listUsers, listRoles, deleteUserById, organizationsTree, createUser, updateUser } from '@/api/api';
 import moment from 'moment';
 import departmentList from './components/DepartmentTreeList/index';
+// 表单正则验证统一写在这里
+import { validateEmail } from '../../utils/validator';
 const columns = [
   {
     title: '用户名',
-    dataIndex: 'name'
+    dataIndex: 'name',
+    scopedSlots: { customRender: 'name' }
   },
   {
     title: '创建时间',
@@ -215,10 +238,13 @@ const columns = [
     title: '邮箱',
     dataIndex: 'email'
   },
-
   {
     title: '所属部门',
     dataIndex: 'department.name'
+  },
+  {
+    title: '所属组织',
+    dataIndex: 'organization.name'
   },
   {
     title: '操作',
@@ -229,21 +255,12 @@ const tableData = [];
 export default {
   name: 'User',
   data() {
-    const validateEmail = (rule, value, callback) => {
-      const regEmail = rule.reg;
-      if (value !== undefined && !regEmail.test(value)) {
-        this.form.email = undefined;
-        callback(new Error('邮箱格式不正确'));
-      } else {
-        callback();
-      }
-    };
     return {
       selectDepartmentFlagArray: [], // 接受部门列表子组件选中的ID数组 []为未选中状态 有值为选中状态
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
-      userLoading: false, // loading
-      userTableParam: {}, // 表格搜索绑定
-      advanced: false, // 高级搜索 展开/关闭
+      userLoading: false, // 页面加载数据loading
+      userTableParam: {}, // 表格搜索条件Input绑定
+      advanced: false, // 控制搜索条件的展开折叠
       addOrEdit: 1, // 判断新增或编辑（1为新增2为编辑）
       formUserVisible: false, // 控制表单弹框
       userRole: [], // 角色绑定
@@ -256,6 +273,7 @@ export default {
       currentPage: 1, // 默认分页当前页
       pageSize: this.$store.state.user.defaultPaginationPagesize, // 一页展示多少条数据
       userTableTotal: 0, // 表格数据总数
+      isOrganizations: 2, // 判断treeSelect选中时的数据是否带有isOrganization字段属性(1代表是属于部门 0代表属于组织 2代表全部)
       labelCol: { span: 4 },
       wrapperCol: { span: 14 },
       form: {
@@ -265,14 +283,15 @@ export default {
         email: undefined, // 邮箱
         role: [], // 角色
         status: '1', // 状态
-        department: undefined // 所属部门
+        department: undefined, // 所属部门
+        organizations: undefined // 所属组织
       },
       rules: {
         // 规则验证
         email: [
           {
-            validator: validateEmail,
-            reg: /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/,
+            validator: validateEmail.bind(this),
+            message: '请输入正确的邮箱',
             trigger: 'blur'
           },
           { max: 500, message: '邮箱长度不能大于500', trigger: 'blur' }
@@ -285,9 +304,12 @@ export default {
           { required: true, message: '请输入用户名', trigger: 'blur' },
           { max: 200, message: '用户名长度不能大于200', trigger: 'blur' }
         ],
-        role: [{ required: true, message: '请选择角色', trigger: 'change' }]
+        role: [{ required: true, message: '请选择角色', trigger: 'change' }],
+        organizations: [{ required: true, message: '请选择组织', trigger: 'change' }]
       },
-      formTreeData: [] // 下拉选择树结构数据
+      departmentFormTreeData: [], // 部门下拉选择树结构数据
+      organizationsFormTreeData: [], // 组织下拉选择树结构数据
+      batchSelectIdArr: [] // 批量选中的数据ID
     };
   },
   components: {
@@ -300,7 +322,6 @@ export default {
      * 在获取除了当前页数据外的表格总数this.getExceptCurrentPageTableTotalData
      * 如果这两个数相等 说明删除的是当前页最后一条数据 然后使当前页-1 请求数据就可以了
      */
-
     userTableTotal() {
       if (this.userTableTotal === this.getExceptCurrentPageTableTotalData && this.userTableTotal !== 0) {
         this.currentPage -= 1;
@@ -309,99 +330,122 @@ export default {
     }
   },
   computed: {
-    /**
-     * @description: 获取去掉当前页的表格总数
-     */
-
     getExceptCurrentPageTableTotalData: function() {
       return (this.currentPage - 1) * this.pageSize;
+    },
+    rowSelection() {
+      return {
+        onChange: this.onSelectChange
+      };
     }
   },
   created() {
     this.getUserTableData(); // 获取表格数据
     this.getUserRoleData(); // 获取角色数据列表
+    this.getFormOrganizationsTree(); // 获取表单组织树结构数据
   },
   methods: {
     /**
-     * @description: 获取子组件部门列表数据
-     * @param {array} departmentData 部门列表数组
+     * @description: 点击批量启用
      */
-
-    getDepartmentTreeData(departmentData) {
-      this.formTreeData = departmentData;
+    handleBatchEnable() {
+      console.log(this.batchSelectIdArr);
     },
+
+    /**
+     * @description: 表格复选框选中数据变化
+     * @param {array} selectedRowKeys 下标回值
+     * @param {array} selectedRows 数据回值
+     */
+    onSelectChange(selectedRowKeys, selectedRows) {
+      this.batchSelectIdArr = [];
+      selectedRows.forEach(res => {
+        this.batchSelectIdArr.push(res.id);
+      });
+    },
+
     /**
      * @description: 获取子组件部门列表选中数据
      * @param {array} selectDepartmentData 部门列表选中数据组
+     * @param {string} isOrganizations 判断是属于组织还是部门
      */
-
-    getDepartmentData(selectDepartmentData) {
+    getDepartmentData(selectDepartmentData, isOrganizations) {
       this.pageNumber = 1;
       this.pageSize = 10;
       this.userLoading = true;
       this.selectDepartmentFlagArray = selectDepartmentData;
+      this.isOrganizations = isOrganizations;
       this.getUserTableData();
     },
+
     /**
      * @description: 获取表格数据
-     * @param {string} selectDepartmentDataId 选中部门的ID
      */
-
     getUserTableData() {
-      api
-        .listUsers({
-          pageNumber: Number(this.currentPage) - 1,
-          pageSize: this.pageSize,
-          searchName: this.userTableParam.userName,
-          searchUsername: this.userTableParam.userLoginName,
-          searchDepartmentId:
-            this.selectDepartmentFlagArray.length === 0 ? undefined : this.selectDepartmentFlagArray[0],
-          searchIsEnable: this.userTableParam.userStatus,
-          searchCreateDateBegin:
-            this.userTableParam.userDate === undefined
-              ? undefined
-              : this.userTableParam.userDate.length === 0
-              ? undefined
-              : moment(this.userTableParam.userDate[0]._d).format('YYYY-MM-DD'),
-          searchCreateDateEnd:
-            this.userTableParam.userDate === undefined
-              ? undefined
-              : this.userTableParam.userDate.length === 0
-              ? undefined
-              : moment(this.userTableParam.userDate[1]._d).format('YYYY-MM-DD')
-        })
-        .then(res => {
-          if (res.code === 200 && res.data.content) {
-            this.tableData = res.data.content;
-            this.tableData.forEach(res => {
-              res.createTime = moment(res.createTime).format('YYYY-MM-DD HH:mm');
-            });
-            this.userTableTotal = res.data.totalElements;
-            this.userLoading = false;
-          } else {
-            this.userTableTotal = res.data.totalElements;
-            this.tableData = [];
-            this.userLoading = false;
-          }
-        });
+      listUsers({
+        pageNumber: Number(this.currentPage) - 1,
+        pageSize: this.pageSize,
+        searchName: this.userTableParam.userName,
+        searchUsername: this.userTableParam.userLoginName,
+        searchOrganizationId:
+          this.isOrganizations === 2
+            ? undefined
+            : this.isOrganizations === 0
+            ? this.selectDepartmentFlagArray[0]
+            : undefined,
+        searchDepartmentId:
+          this.isOrganizations === 2
+            ? undefined
+            : this.isOrganizations === 1
+            ? this.selectDepartmentFlagArray[0]
+            : undefined,
+        searchIsEnable: this.userTableParam.userStatus,
+        searchCreateDateBegin:
+          this.userTableParam.userDate === undefined
+            ? undefined
+            : this.userTableParam.userDate.length === 0
+            ? undefined
+            : moment(this.userTableParam.userDate[0]._d).format('YYYY-MM-DD'),
+        searchCreateDateEnd:
+          this.userTableParam.userDate === undefined
+            ? undefined
+            : this.userTableParam.userDate.length === 0
+            ? undefined
+            : moment(this.userTableParam.userDate[1]._d).format('YYYY-MM-DD')
+      }).then(res => {
+        if (res.code === 200 && res.data.content) {
+          this.tableData = res.data.content;
+          this.tableData.forEach(res => {
+            res.createTime = moment(res.createTime).format('YYYY-MM-DD HH:mm');
+          });
+          this.userTableTotal = res.data.totalElements;
+          this.userLoading = false;
+        } else {
+          this.userTableTotal = res.data.totalElements;
+          this.tableData = [];
+          this.userLoading = false;
+        }
+      });
     },
+
     /**
      * @description: 获取角色数据列表
      */
-
     getUserRoleData() {
-      api.listRoles().then(res => {
+      listRoles().then(res => {
         if (res.code === 200) {
           this.userRoleArray = res.data.content;
         }
       });
     },
+
     /**
      * @description:控制搜索条件的展示隐藏
      */
     toggleAdvanced() {
       this.advanced = !this.advanced;
     },
+
     /**
      * @description: 选中的角色ID
      * @param {array} selectRoleIdArray 角色下拉选中的数组
@@ -409,6 +453,7 @@ export default {
     handleChange(selectRoleIdArray) {
       this.userRole = selectRoleIdArray;
     },
+
     /**
      * @description:点击表格搜索条件的查询
      */
@@ -418,6 +463,19 @@ export default {
       this.userLoading = true;
       this.getUserTableData();
     },
+
+    /**
+     * @description: 树结构数据发生改变
+     * @param {object} organizationId 当前选中的组织ID
+     * @param {object} label 当前选中的组织name
+     * @param {object} currentlySelectedData 当前选中的数据
+     */
+    getUserTreeData(organizationId, label, currentlySelectedData) {
+      currentlySelectedData.triggerNode.dataRef.departments
+        ? (this.departmentFormTreeData = currentlySelectedData.triggerNode.dataRef.departments)
+        : (this.departmentFormTreeData = []);
+    },
+
     /**
      * @description:新增编辑弹框 （提交数据）
      */
@@ -438,9 +496,13 @@ export default {
             username: this.form.loginName,
             name: this.form.name,
             email: this.form.email === '' ? undefined : this.form.email,
+            organization: {
+              id: this.form.organizations === '' ? undefined : this.form.organizations
+            },
             department: {
               id: this.form.department === '' ? undefined : this.form.department
             },
+
             id: this.tableRowId === undefined ? undefined : this.tableRowId, // 编辑有ID新增无ID
             roles: rolesArray,
             isEnable: this.form.status
@@ -457,36 +519,35 @@ export default {
         }
       });
     },
+
     /**
      * @description: 用户新增
      * @param {object} userAddParam 新增的对象参数
      */
     userAdd(userAddParam) {
-      api
-        .createUser({ body: userAddParam })
+      createUser({ body: userAddParam })
         .then(res => {
           if (res.code === 201) {
-            this.updata(res);
+            this.formSuccessOperation(res);
           }
         })
-        .catch(() => {
+        .finally(() => {
           this.formButtonDisableFlag = false;
         });
     },
+
     /**
      * @description: 用户编辑
      * @param {object} userAddParam 编辑的对象参数
      */
-
     userUpdate(userEditParam) {
-      api
-        .updateUser({ body: userEditParam, id: this.tableRowId })
+      updateUser({ body: userEditParam, id: this.tableRowId })
         .then(res => {
           if (res.code === 200) {
-            this.updata(res);
+            this.formSuccessOperation(res);
           }
         })
-        .catch(() => {
+        .finally(() => {
           this.formButtonDisableFlag = false;
         });
     },
@@ -495,22 +556,20 @@ export default {
      * @description: 数据更新后共同的代码
      * @param {object} formSuccessData 用户新增编辑请求成功后返回的对象
      */
-
-    updata(formSuccessData) {
+    formSuccessOperation(formSuccessData) {
       this.$message.success(formSuccessData.message);
       this.formUserVisible = false;
-      this.formButtonDisableFlag = false;
       this.clearFormData();
       this.userLoading = true;
       this.getUserTableData();
     },
+
     /**
      * @description: 删除表格数据的某一条
      * @param {object} userTableRowData 某一条表格数据对象
      */
-
     handleDelete(userTableRowData) {
-      api.deleteUserById({ id: userTableRowData.id }).then(res => {
+      deleteUserById({ id: userTableRowData.id }).then(res => {
         if (res.code === 200) {
           this.$message.success(res.message);
           this.formUserVisible = false;
@@ -519,11 +578,11 @@ export default {
         }
       });
     },
+
     /**
      * @description: 获取分页页数改变后的值
      * @param {string} pageNumber UI框架自带
      */
-
     getCurrentPage(pageNumber) {
       this.userLoading = true;
       this.currentPage = pageNumber;
@@ -535,26 +594,59 @@ export default {
      * @param {string} currentPage UI框架自带
      * @param {string} pageSize UI框架自带
      */
-
     onShowSizeChange(currentPage, pageSize) {
       this.userLoading = true;
       this.pageSize = pageSize;
       this.currentPage = currentPage;
       this.getUserTableData();
     },
+
     /**
-     * @description:新增账号
+     * @description: 获取表单树结构数据
      */
-    addAccount() {
+    getFormOrganizationsTree() {
+      organizationsTree().then(res => {
+        if (res.code === 200) {
+          this.organizationsFormTreeData = res.data;
+          this.disabledFormTreeData(this.organizationsFormTreeData);
+          this.departmentFormTreeData = [];
+        }
+      });
+    },
+
+    /**
+     * @description: 新增用户
+     */
+    handleAddUser() {
       this.addOrEdit = 1;
       this.formUserVisible = true;
+
+      if (this.isOrganizations === 0) {
+        this.form.organizations = this.selectDepartmentFlagArray[0];
+      } else if (this.isOrganizations === 1) {
+      }
     },
+
+    /**
+     * @description: 利用递归找出停用状态的数据 添加disabled字段属性
+     * @param {array} formTreeData 组织树形结构数据
+     */
+    disabledFormTreeData(formTreeData) {
+      formTreeData.forEach(res => {
+        if (res.isEnable === 0) {
+          res.disabled = true;
+        }
+        if (res.children) {
+          this.disabledFormTreeData(res.children);
+        }
+      });
+    },
+
     /**
      * @description: 点击表格数据某一条的编辑
      * @param {object} userTableRowData 某一条表格数据对象
      */
-
-    handleEdit(userTableRowData) {
+    handleEditUser(userTableRowData) {
       this.form.role = [];
       if (userTableRowData.roles) {
         userTableRowData.roles.forEach(res => {
@@ -569,16 +661,11 @@ export default {
       this.form.email = userTableRowData.email ? userTableRowData.email : undefined;
       this.form.status = String(userTableRowData.isEnable);
       this.form.department = userTableRowData.department ? userTableRowData.department.id : undefined;
+      this.form.organizations = userTableRowData.organization ? userTableRowData.organization.id : undefined;
       this.addOrEdit = 2;
       this.formUserVisible = true;
     },
-    /**
-     * @description:关闭弹窗
-     */
-    handleOk() {
-      this.formUserVisible = false;
-      this.clearFormData();
-    },
+
     /**
      * @description:数据新增编辑完成过后清空
      */
@@ -591,6 +678,7 @@ export default {
       this.form.role = [];
       this.form.status = '1';
       this.form.department = undefined;
+      this.form.organizations = undefined;
     }
   }
 };
@@ -606,13 +694,13 @@ export default {
   border-radius: 5px;
   display: flex;
   justify-content: space-between;
-  .userList {
-    width: 20%;
+  .departmentList {
+    width: 330px;
     background: white;
     border-radius: 5px;
   }
   .userMain {
-    width: 79%;
+    width: calc(100% - 340px);
     height: 100%;
     position: relative;
     .position {
@@ -627,32 +715,9 @@ export default {
     }
     .userMainSearch {
       width: 100%;
-      padding: 10px;
+      padding: 20px;
       background: white;
       margin-bottom: 10px;
-      .userMainSearchInput {
-        flex: 1;
-        height: 64px;
-        display: flex;
-        align-items: center;
-        padding: 0 0 0 60px;
-      }
-      .userMainSearchSelect {
-        flex: 1;
-        height: 64px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 0px;
-      }
-      .userMainSearchButton {
-        flex: 1;
-        height: 64px;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        padding: 0 30px 0 0;
-      }
     }
     .userMainTable {
       background: white;
@@ -667,6 +732,10 @@ export default {
         font-size: 18px;
         justify-content: space-between;
         padding: 0 20px;
+        font-weight: 600;
+        .buttonMargin {
+          margin-right: 10px;
+        }
       }
       .userMainTableContent {
         height: calc(100vh - 380px);

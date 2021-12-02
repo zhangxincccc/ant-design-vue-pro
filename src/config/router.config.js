@@ -7,8 +7,7 @@ import {
 } from '@hangar/pro-layout';
 import {
   workplace,
-  system,
-  organization
+  system
 } from '@/core/icons';
 import {
   demosRouter
@@ -47,19 +46,19 @@ export const asyncRouterMap = [{
           icon: system,
           permission: ['system']
         },
-
-        children: [{
-            path: '/system/organizations',
-            name: 'organizations',
-            hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
-            component: () => import('@/views/system/organizations/index'),
-            meta: {
-              title: 'menu.system.organizations',
-              icon: organization,
-              keepAlive: true
-              //  permission: ['system:organizations']
-            }
-          },
+        children: [
+          // {
+          //   path: '/system/organizations',
+          //   name: 'organizations',
+          //   hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
+          //   component: () => import('@/views/system/organizations/index'),
+          //   meta: {
+          //     title: 'menu.system.organizations',
+          //     icon: organization,
+          //     keepAlive: true,
+          //      permission: ['system:organizations']
+          //   }
+          // },
           {
             path: '/system/user',
             name: 'user',
