@@ -1,23 +1,14 @@
-import {
-  BasicLayout,
-  UserLayout
-} from '@/layouts';
-import {
-  RouteView
-} from '@hangar/pro-layout';
-import {
-  workplace,
-  system
-} from '@/core/icons';
-import {
-  demosRouter
-} from '@/config/demos-router.config';
+import { BasicLayout, UserLayout } from '@/layouts';
+import { RouteView } from '@hangar/pro-layout';
+import { workplace, system } from '@/core/icons';
+import { demosRouter } from '@/config/demos-router.config';
 /*
 注意：
 多标签页请尽量避免使用三级路由，多标签页存在问题
 */
 export const defaultPage = '/workplace';
-export const asyncRouterMap = [{
+export const asyncRouterMap = [
+  {
     path: '/',
     name: 'index',
     component: BasicLayout,
@@ -25,7 +16,8 @@ export const asyncRouterMap = [{
       title: 'menu.home'
     },
     redirect: defaultPage, // 首页跳转地址
-    children: [{
+    children: [
+      {
         path: '/workplace',
         name: 'Workplace',
         component: () => import('@/views/workplace/Workplace'),
@@ -85,12 +77,14 @@ export const asyncRouterMap = [{
  * 基础路由
  * @type { *[] }
  */
-export const constantRouterMap = [{
+export const constantRouterMap = [
+  {
     path: '/user',
     component: UserLayout,
     redirect: '/user/login',
     hidden: true,
-    children: [{
+    children: [
+      {
         path: 'login',
         name: 'login',
         component: () => import('@/views/user/Login')
