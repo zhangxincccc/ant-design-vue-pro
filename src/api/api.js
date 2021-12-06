@@ -30,6 +30,317 @@ export const request = (method, url, body, queryParameters, form, config) => {
  *                    系统接口文档，如果需要，可以覆盖Swagger配置进行自定义配置
  ==========================================================*/
 /**
+* 排序属性：
+成功：code=200，data对象为包含分页信息的列表，失败：code!=200
+* request: listApplications
+* url: listApplicationsURL
+* method: listApplications_TYPE
+* raw_url: listApplications_RAW_URL
+     * @param pageNumber - 分页号码,从0开始
+     * @param pageSize - 分页大小
+     * @param searchCode - 查询条件:应用代码，精准匹配
+     * @param searchName - 查询条件:应用名称，模糊匹配
+     * @param sort - 排序规则，格式: 字段名[,asc|desc]，默认升序，支持多字段排序
+*/
+export const listApplications = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/applications'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters['pageNumber'] !== undefined) {
+    queryParameters['pageNumber'] = parameters['pageNumber']
+  }
+  if (parameters['pageSize'] !== undefined) {
+    queryParameters['pageSize'] = parameters['pageSize']
+  }
+  if (parameters['searchCode'] !== undefined) {
+    queryParameters['search_code'] = parameters['searchCode']
+  }
+  if (parameters['searchName'] !== undefined) {
+    queryParameters['search_name'] = parameters['searchName']
+  }
+  if (parameters['sort'] !== undefined) {
+    queryParameters['sort'] = parameters['sort']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('get', domain + path, body, queryParameters, form, config)
+}
+export const listApplications_RAW_URL = function() {
+  return '/api/applications'
+}
+export const listApplications_TYPE = function() {
+  return 'get'
+}
+export const listApplicationsURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/applications'
+  if (parameters['pageNumber'] !== undefined) {
+    queryParameters['pageNumber'] = parameters['pageNumber']
+  }
+  if (parameters['pageSize'] !== undefined) {
+    queryParameters['pageSize'] = parameters['pageSize']
+  }
+  if (parameters['searchCode'] !== undefined) {
+    queryParameters['search_code'] = parameters['searchCode']
+  }
+  if (parameters['searchName'] !== undefined) {
+    queryParameters['search_name'] = parameters['searchName']
+  }
+  if (parameters['sort'] !== undefined) {
+    queryParameters['sort'] = parameters['sort']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=201，失败：code!=201
+ * request: createApplication
+ * url: createApplicationURL
+ * method: createApplication_TYPE
+ * raw_url: createApplication_RAW_URL
+ * @param body - 实体参数
+ */
+export const createApplication = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/applications'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters['body'] !== undefined) {
+    body = parameters['body']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('post', domain + path, body, queryParameters, form, config)
+}
+export const createApplication_RAW_URL = function() {
+  return '/api/applications'
+}
+export const createApplication_TYPE = function() {
+  return 'post'
+}
+export const createApplicationURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/applications'
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+* 排序属性：
+成功：code=200，data对象为列表，失败：code!=200
+* request: listAllApplications
+* url: listAllApplicationsURL
+* method: listAllApplications_TYPE
+* raw_url: listAllApplications_RAW_URL
+     * @param searchCode - 查询条件:应用代码，精准匹配
+     * @param searchName - 查询条件:应用名称，模糊匹配
+*/
+export const listAllApplications = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/applications/all'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters['searchCode'] !== undefined) {
+    queryParameters['search_code'] = parameters['searchCode']
+  }
+  if (parameters['searchName'] !== undefined) {
+    queryParameters['search_name'] = parameters['searchName']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('get', domain + path, body, queryParameters, form, config)
+}
+export const listAllApplications_RAW_URL = function() {
+  return '/api/applications/all'
+}
+export const listAllApplications_TYPE = function() {
+  return 'get'
+}
+export const listAllApplicationsURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/applications/all'
+  if (parameters['searchCode'] !== undefined) {
+    queryParameters['search_code'] = parameters['searchCode']
+  }
+  if (parameters['searchName'] !== undefined) {
+    queryParameters['search_name'] = parameters['searchName']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=0，data对象为信息，失败：code!=0
+ * request: loadApplicationById
+ * url: loadApplicationByIdURL
+ * method: loadApplicationById_TYPE
+ * raw_url: loadApplicationById_RAW_URL
+ * @param id - ID
+ */
+export const loadApplicationById = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/applications/{id}'
+  let body
+  let queryParameters = {}
+  let form = {}
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters['id'] === undefined) {
+    return Promise.reject(new Error('Missing required  parameter: id'))
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('get', domain + path, body, queryParameters, form, config)
+}
+export const loadApplicationById_RAW_URL = function() {
+  return '/api/applications/{id}'
+}
+export const loadApplicationById_TYPE = function() {
+  return 'get'
+}
+export const loadApplicationByIdURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/applications/{id}'
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=200，失败：code!=200
+ * request: updateApplication
+ * url: updateApplicationURL
+ * method: updateApplication_TYPE
+ * raw_url: updateApplication_RAW_URL
+ * @param body - 实体参数
+ * @param id - ID
+ */
+export const updateApplication = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/applications/{id}'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters['body'] !== undefined) {
+    body = parameters['body']
+  }
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters['id'] === undefined) {
+    return Promise.reject(new Error('Missing required  parameter: id'))
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('put', domain + path, body, queryParameters, form, config)
+}
+export const updateApplication_RAW_URL = function() {
+  return '/api/applications/{id}'
+}
+export const updateApplication_TYPE = function() {
+  return 'put'
+}
+export const updateApplicationURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/applications/{id}'
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=0，失败：code!=0
+ * request: deleteApplicationById
+ * url: deleteApplicationByIdURL
+ * method: deleteApplicationById_TYPE
+ * raw_url: deleteApplicationById_RAW_URL
+ * @param id - ID
+ */
+export const deleteApplicationById = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/applications/{id}'
+  let body
+  let queryParameters = {}
+  let form = {}
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters['id'] === undefined) {
+    return Promise.reject(new Error('Missing required  parameter: id'))
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('delete', domain + path, body, queryParameters, form, config)
+}
+export const deleteApplicationById_RAW_URL = function() {
+  return '/api/applications/{id}'
+}
+export const deleteApplicationById_TYPE = function() {
+  return 'delete'
+}
+export const deleteApplicationByIdURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/applications/{id}'
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
  * 成功：code=201，失败：code!=201
  * request: createAttachment
  * url: createAttachmentURL
@@ -408,7 +719,9 @@ export const createDepartmentURL = function(parameters = {}) {
  * url: departmentsTreeURL
  * method: departmentsTree_TYPE
  * raw_url: departmentsTree_RAW_URL
+ * @param searchIsEnable - 查询条件:是否启用，精确匹配
  * @param searchName - 查询条件:部门名称，精确匹配
+ * @param searchOrganizationId - 查询条件:组织机构id，精确匹配
  */
 export const departmentsTree = function(parameters = {}) {
   const domain = parameters.$domain ? parameters.$domain : getDomain()
@@ -417,8 +730,14 @@ export const departmentsTree = function(parameters = {}) {
   let body
   let queryParameters = {}
   let form = {}
+  if (parameters['searchIsEnable'] !== undefined) {
+    queryParameters['search_isEnable'] = parameters['searchIsEnable']
+  }
   if (parameters['searchName'] !== undefined) {
     queryParameters['search_name'] = parameters['searchName']
+  }
+  if (parameters['searchOrganizationId'] !== undefined) {
+    queryParameters['search_organizationId'] = parameters['searchOrganizationId']
   }
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
@@ -437,8 +756,14 @@ export const departmentsTreeURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   let path = '/api/departments/tree'
+  if (parameters['searchIsEnable'] !== undefined) {
+    queryParameters['search_isEnable'] = parameters['searchIsEnable']
+  }
   if (parameters['searchName'] !== undefined) {
     queryParameters['search_name'] = parameters['searchName']
+  }
+  if (parameters['searchOrganizationId'] !== undefined) {
+    queryParameters['search_organizationId'] = parameters['searchOrganizationId']
   }
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
@@ -627,6 +952,96 @@ export const updateDepartmentPatchURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   let path = '/api/departments/{id}'
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=200，失败：code!=200
+ * request: disableDepartmentById
+ * url: disableDepartmentByIdURL
+ * method: disableDepartmentById_TYPE
+ * raw_url: disableDepartmentById_RAW_URL
+ * @param id - 部门id
+ */
+export const disableDepartmentById = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/departments/{id}/disable'
+  let body
+  let queryParameters = {}
+  let form = {}
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters['id'] === undefined) {
+    return Promise.reject(new Error('Missing required  parameter: id'))
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('put', domain + path, body, queryParameters, form, config)
+}
+export const disableDepartmentById_RAW_URL = function() {
+  return '/api/departments/{id}/disable'
+}
+export const disableDepartmentById_TYPE = function() {
+  return 'put'
+}
+export const disableDepartmentByIdURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/departments/{id}/disable'
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=200，失败：code!=200
+ * request: enableDepartmentById
+ * url: enableDepartmentByIdURL
+ * method: enableDepartmentById_TYPE
+ * raw_url: enableDepartmentById_RAW_URL
+ * @param id - 部门id
+ */
+export const enableDepartmentById = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/departments/{id}/enable'
+  let body
+  let queryParameters = {}
+  let form = {}
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters['id'] === undefined) {
+    return Promise.reject(new Error('Missing required  parameter: id'))
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('put', domain + path, body, queryParameters, form, config)
+}
+export const enableDepartmentById_RAW_URL = function() {
+  return '/api/departments/{id}/enable'
+}
+export const enableDepartmentById_TYPE = function() {
+  return 'put'
+}
+export const enableDepartmentByIdURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/departments/{id}/enable'
   path = path.replace('{id}', `${parameters['id']}`)
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
@@ -2903,6 +3318,7 @@ export const createOrganizationURL = function(parameters = {}) {
  * url: organizationsTreeURL
  * method: organizationsTree_TYPE
  * raw_url: organizationsTree_RAW_URL
+ * @param searchIsEnable - 查询条件:是否启用，精确匹配
  * @param searchName - 查询条件:组织机构或部门名称，精确匹配
  */
 export const organizationsTree = function(parameters = {}) {
@@ -2912,6 +3328,9 @@ export const organizationsTree = function(parameters = {}) {
   let body
   let queryParameters = {}
   let form = {}
+  if (parameters['searchIsEnable'] !== undefined) {
+    queryParameters['search_isEnable'] = parameters['searchIsEnable']
+  }
   if (parameters['searchName'] !== undefined) {
     queryParameters['search_name'] = parameters['searchName']
   }
@@ -2932,6 +3351,9 @@ export const organizationsTreeURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   let path = '/api/organizations/tree'
+  if (parameters['searchIsEnable'] !== undefined) {
+    queryParameters['search_isEnable'] = parameters['searchIsEnable']
+  }
   if (parameters['searchName'] !== undefined) {
     queryParameters['search_name'] = parameters['searchName']
   }
@@ -3132,6 +3554,96 @@ export const updateOrganizationPatchURL = function(parameters = {}) {
   return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
 }
 /**
+ * 成功：code=200，失败：code!=200
+ * request: disableOrganizationById
+ * url: disableOrganizationByIdURL
+ * method: disableOrganizationById_TYPE
+ * raw_url: disableOrganizationById_RAW_URL
+ * @param id - 组织机构id
+ */
+export const disableOrganizationById = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/organizations/{id}/disable'
+  let body
+  let queryParameters = {}
+  let form = {}
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters['id'] === undefined) {
+    return Promise.reject(new Error('Missing required  parameter: id'))
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('put', domain + path, body, queryParameters, form, config)
+}
+export const disableOrganizationById_RAW_URL = function() {
+  return '/api/organizations/{id}/disable'
+}
+export const disableOrganizationById_TYPE = function() {
+  return 'put'
+}
+export const disableOrganizationByIdURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/organizations/{id}/disable'
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=200，失败：code!=200
+ * request: enableOrganizationById
+ * url: enableOrganizationByIdURL
+ * method: enableOrganizationById_TYPE
+ * raw_url: enableOrganizationById_RAW_URL
+ * @param id - 组织机构id
+ */
+export const enableOrganizationById = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/organizations/{id}/enable'
+  let body
+  let queryParameters = {}
+  let form = {}
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters['id'] === undefined) {
+    return Promise.reject(new Error('Missing required  parameter: id'))
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('put', domain + path, body, queryParameters, form, config)
+}
+export const enableOrganizationById_RAW_URL = function() {
+  return '/api/organizations/{id}/enable'
+}
+export const enableOrganizationById_TYPE = function() {
+  return 'put'
+}
+export const enableOrganizationByIdURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/organizations/{id}/enable'
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
 * 排序属性：type,code,name,url,icon,description,parent.id,parent.code,
 parent.name,sortIndex,isEnable,createTime
 成功：code=200，data对象为包含分页信息的权限列表，失败：code!=200
@@ -3141,6 +3653,7 @@ parent.name,sortIndex,isEnable,createTime
 * raw_url: listPermissions_RAW_URL
      * @param pageNumber - 分页号码,从0开始
      * @param pageSize - 分页大小
+     * @param searchApplicationId - 查询条件:应用id，精确匹配
      * @param searchCode - 查询条件:权限代码，模糊匹配
      * @param searchCreateDateBegin - 查询条件:创建日期起，格式yyyy-mm-dd
      * @param searchCreateDateEnd - 查询条件:创建日期止，格式yyyy-mm-dd
@@ -3167,6 +3680,9 @@ export const listPermissions = function(parameters = {}) {
   }
   if (parameters['pageSize'] !== undefined) {
     queryParameters['pageSize'] = parameters['pageSize']
+  }
+  if (parameters['searchApplicationId'] !== undefined) {
+    queryParameters['search_applicationId'] = parameters['searchApplicationId']
   }
   if (parameters['searchCode'] !== undefined) {
     queryParameters['search_code'] = parameters['searchCode']
@@ -3229,6 +3745,9 @@ export const listPermissionsURL = function(parameters = {}) {
   }
   if (parameters['pageSize'] !== undefined) {
     queryParameters['pageSize'] = parameters['pageSize']
+  }
+  if (parameters['searchApplicationId'] !== undefined) {
+    queryParameters['search_applicationId'] = parameters['searchApplicationId']
   }
   if (parameters['searchCode'] !== undefined) {
     queryParameters['search_code'] = parameters['searchCode']
@@ -4058,6 +4577,7 @@ export const updateReservableConfigPatchURL = function(parameters = {}) {
 * raw_url: listRoles_RAW_URL
      * @param pageNumber - 分页号码,从0开始
      * @param pageSize - 分页大小
+     * @param searchApplicationId - 查询条件:应用id，精准匹配
      * @param searchCode - 查询条件:角色代码，模糊匹配
      * @param searchCreateDateBegin - 查询条件:创建日期起，格式yyyy-mm-dd
      * @param searchCreateDateEnd - 查询条件:创建日期止，格式yyyy-mm-dd
@@ -4081,6 +4601,9 @@ export const listRoles = function(parameters = {}) {
   }
   if (parameters['pageSize'] !== undefined) {
     queryParameters['pageSize'] = parameters['pageSize']
+  }
+  if (parameters['searchApplicationId'] !== undefined) {
+    queryParameters['search_applicationId'] = parameters['searchApplicationId']
   }
   if (parameters['searchCode'] !== undefined) {
     queryParameters['search_code'] = parameters['searchCode']
@@ -4134,6 +4657,9 @@ export const listRolesURL = function(parameters = {}) {
   }
   if (parameters['pageSize'] !== undefined) {
     queryParameters['pageSize'] = parameters['pageSize']
+  }
+  if (parameters['searchApplicationId'] !== undefined) {
+    queryParameters['search_applicationId'] = parameters['searchApplicationId']
   }
   if (parameters['searchCode'] !== undefined) {
     queryParameters['search_code'] = parameters['searchCode']
@@ -4208,6 +4734,116 @@ export const createRoleURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   let path = '/api/roles'
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+* 排序属性：code,name,description,level.code,level.name,isSystem,isEnable,createTime
+成功：code=200，data对象为角色列表，失败：code!=200
+* request: listAllRoles
+* url: listAllRolesURL
+* method: listAllRoles_TYPE
+* raw_url: listAllRoles_RAW_URL
+     * @param searchApplicationId - 查询条件:应用id，精准匹配
+     * @param searchCode - 查询条件:角色代码，模糊匹配
+     * @param searchCreateDateBegin - 查询条件:创建日期起，格式yyyy-mm-dd
+     * @param searchCreateDateEnd - 查询条件:创建日期止，格式yyyy-mm-dd
+     * @param searchDescription - 查询条件:角色描述，模糊匹配
+     * @param searchIsEnable - 查询条件:是否可用，，1：是，0：否，精确匹配
+     * @param searchIsSystem - 查询条件:是否系统角色，1：是，0：否，精确匹配
+     * @param searchLevel - 查询条件:角色级别，对应角色字典，精确匹配
+     * @param searchLevelName - 查询条件:角色级别名称，模糊匹配
+     * @param searchName - 查询条件:角色名称，模糊匹配
+*/
+export const listAllRoles = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/roles/all'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters['searchApplicationId'] !== undefined) {
+    queryParameters['search_applicationId'] = parameters['searchApplicationId']
+  }
+  if (parameters['searchCode'] !== undefined) {
+    queryParameters['search_code'] = parameters['searchCode']
+  }
+  if (parameters['searchCreateDateBegin'] !== undefined) {
+    queryParameters['search_createDateBegin'] = parameters['searchCreateDateBegin']
+  }
+  if (parameters['searchCreateDateEnd'] !== undefined) {
+    queryParameters['search_createDateEnd'] = parameters['searchCreateDateEnd']
+  }
+  if (parameters['searchDescription'] !== undefined) {
+    queryParameters['search_description'] = parameters['searchDescription']
+  }
+  if (parameters['searchIsEnable'] !== undefined) {
+    queryParameters['search_isEnable'] = parameters['searchIsEnable']
+  }
+  if (parameters['searchIsSystem'] !== undefined) {
+    queryParameters['search_isSystem'] = parameters['searchIsSystem']
+  }
+  if (parameters['searchLevel'] !== undefined) {
+    queryParameters['search_level'] = parameters['searchLevel']
+  }
+  if (parameters['searchLevelName'] !== undefined) {
+    queryParameters['search_levelName'] = parameters['searchLevelName']
+  }
+  if (parameters['searchName'] !== undefined) {
+    queryParameters['search_name'] = parameters['searchName']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('get', domain + path, body, queryParameters, form, config)
+}
+export const listAllRoles_RAW_URL = function() {
+  return '/api/roles/all'
+}
+export const listAllRoles_TYPE = function() {
+  return 'get'
+}
+export const listAllRolesURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/roles/all'
+  if (parameters['searchApplicationId'] !== undefined) {
+    queryParameters['search_applicationId'] = parameters['searchApplicationId']
+  }
+  if (parameters['searchCode'] !== undefined) {
+    queryParameters['search_code'] = parameters['searchCode']
+  }
+  if (parameters['searchCreateDateBegin'] !== undefined) {
+    queryParameters['search_createDateBegin'] = parameters['searchCreateDateBegin']
+  }
+  if (parameters['searchCreateDateEnd'] !== undefined) {
+    queryParameters['search_createDateEnd'] = parameters['searchCreateDateEnd']
+  }
+  if (parameters['searchDescription'] !== undefined) {
+    queryParameters['search_description'] = parameters['searchDescription']
+  }
+  if (parameters['searchIsEnable'] !== undefined) {
+    queryParameters['search_isEnable'] = parameters['searchIsEnable']
+  }
+  if (parameters['searchIsSystem'] !== undefined) {
+    queryParameters['search_isSystem'] = parameters['searchIsSystem']
+  }
+  if (parameters['searchLevel'] !== undefined) {
+    queryParameters['search_level'] = parameters['searchLevel']
+  }
+  if (parameters['searchLevelName'] !== undefined) {
+    queryParameters['search_levelName'] = parameters['searchLevelName']
+  }
+  if (parameters['searchName'] !== undefined) {
+    queryParameters['search_name'] = parameters['searchName']
+  }
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
       queryParameters[parameterName] = parameters.$queryParameters[parameterName]
@@ -4406,6 +5042,96 @@ export const updateRolePatchURL = function(parameters = {}) {
 }
 /**
  * 成功：code=200，失败：code!=200
+ * request: disableRoleById
+ * url: disableRoleByIdURL
+ * method: disableRoleById_TYPE
+ * raw_url: disableRoleById_RAW_URL
+ * @param id - 角色id
+ */
+export const disableRoleById = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/roles/{id}/disable'
+  let body
+  let queryParameters = {}
+  let form = {}
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters['id'] === undefined) {
+    return Promise.reject(new Error('Missing required  parameter: id'))
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('put', domain + path, body, queryParameters, form, config)
+}
+export const disableRoleById_RAW_URL = function() {
+  return '/api/roles/{id}/disable'
+}
+export const disableRoleById_TYPE = function() {
+  return 'put'
+}
+export const disableRoleByIdURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/roles/{id}/disable'
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=200，失败：code!=200
+ * request: enableRoleById
+ * url: enableRoleByIdURL
+ * method: enableRoleById_TYPE
+ * raw_url: enableRoleById_RAW_URL
+ * @param id - 角色id
+ */
+export const enableRoleById = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/roles/{id}/enable'
+  let body
+  let queryParameters = {}
+  let form = {}
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters['id'] === undefined) {
+    return Promise.reject(new Error('Missing required  parameter: id'))
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('put', domain + path, body, queryParameters, form, config)
+}
+export const enableRoleById_RAW_URL = function() {
+  return '/api/roles/{id}/enable'
+}
+export const enableRoleById_TYPE = function() {
+  return 'put'
+}
+export const enableRoleByIdURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/roles/{id}/enable'
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=200，失败：code!=200
  * request: setPermissions
  * url: setPermissionsURL
  * method: setPermissions_TYPE
@@ -4493,6 +5219,119 @@ export const userInfoURL = function(parameters = {}) {
   return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
 }
 /**
+ * 成功：code=200，data对象为部门树形结构，失败：code!=200
+ * request: userDepartmentTree
+ * url: userDepartmentTreeURL
+ * method: userDepartmentTree_TYPE
+ * raw_url: userDepartmentTree_RAW_URL
+ * @param searchIsEnable - 查询条件:是否启用，精确匹配
+ * @param searchName - 查询条件:部门名称，精确匹配
+ * @param searchOrganizationId - 查询条件:组织机构id，精确匹配
+ */
+export const userDepartmentTree = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/user/departments/tree'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters['searchIsEnable'] !== undefined) {
+    queryParameters['search_isEnable'] = parameters['searchIsEnable']
+  }
+  if (parameters['searchName'] !== undefined) {
+    queryParameters['search_name'] = parameters['searchName']
+  }
+  if (parameters['searchOrganizationId'] !== undefined) {
+    queryParameters['search_organizationId'] = parameters['searchOrganizationId']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('get', domain + path, body, queryParameters, form, config)
+}
+export const userDepartmentTree_RAW_URL = function() {
+  return '/api/user/departments/tree'
+}
+export const userDepartmentTree_TYPE = function() {
+  return 'get'
+}
+export const userDepartmentTreeURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/user/departments/tree'
+  if (parameters['searchIsEnable'] !== undefined) {
+    queryParameters['search_isEnable'] = parameters['searchIsEnable']
+  }
+  if (parameters['searchName'] !== undefined) {
+    queryParameters['search_name'] = parameters['searchName']
+  }
+  if (parameters['searchOrganizationId'] !== undefined) {
+    queryParameters['search_organizationId'] = parameters['searchOrganizationId']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=200，data对象为组织机构树形结构，失败：code!=200
+ * request: userOrganizationTree
+ * url: userOrganizationTreeURL
+ * method: userOrganizationTree_TYPE
+ * raw_url: userOrganizationTree_RAW_URL
+ * @param searchIsEnable - 查询条件:是否启用，精确匹配
+ * @param searchName - 查询条件:组织机构或部门名称，精确匹配
+ */
+export const userOrganizationTree = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/user/organizations/tree'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters['searchIsEnable'] !== undefined) {
+    queryParameters['search_isEnable'] = parameters['searchIsEnable']
+  }
+  if (parameters['searchName'] !== undefined) {
+    queryParameters['search_name'] = parameters['searchName']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('get', domain + path, body, queryParameters, form, config)
+}
+export const userOrganizationTree_RAW_URL = function() {
+  return '/api/user/organizations/tree'
+}
+export const userOrganizationTree_TYPE = function() {
+  return 'get'
+}
+export const userOrganizationTreeURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/user/organizations/tree'
+  if (parameters['searchIsEnable'] !== undefined) {
+    queryParameters['search_isEnable'] = parameters['searchIsEnable']
+  }
+  if (parameters['searchName'] !== undefined) {
+    queryParameters['search_name'] = parameters['searchName']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
 * 排序属性：username,name,gender.code,gender.name,email,mobile,title.code,
 title.name,organization.id,organization.name,department.id,
 department.name,isEnable,createTime
@@ -4514,6 +5353,7 @@ department.name,isEnable,createTime
      * @param searchName - 查询条件:姓名，模糊查询
      * @param searchOrganizationId - 查询条件:所属组织机构ID，精确匹配
      * @param searchOrganizationName - 查询条件:所属组织机构名称，模糊匹配
+     * @param searchRoleId - 查询条件:角色id，精确匹配
      * @param searchTitle - 查询条件:岗位代码，对应岗位字典，精确匹配
      * @param searchUsername - 查询条件:用户名称，模糊查询
      * @param sort - 排序规则，格式: 字段名[,asc|desc]，默认升序，支持多字段排序
@@ -4563,6 +5403,9 @@ export const listUsers = function(parameters = {}) {
   }
   if (parameters['searchOrganizationName'] !== undefined) {
     queryParameters['search_organizationName'] = parameters['searchOrganizationName']
+  }
+  if (parameters['searchRoleId'] !== undefined) {
+    queryParameters['search_roleId'] = parameters['searchRoleId']
   }
   if (parameters['searchTitle'] !== undefined) {
     queryParameters['search_title'] = parameters['searchTitle']
@@ -4629,6 +5472,9 @@ export const listUsersURL = function(parameters = {}) {
   if (parameters['searchOrganizationName'] !== undefined) {
     queryParameters['search_organizationName'] = parameters['searchOrganizationName']
   }
+  if (parameters['searchRoleId'] !== undefined) {
+    queryParameters['search_roleId'] = parameters['searchRoleId']
+  }
   if (parameters['searchTitle'] !== undefined) {
     queryParameters['search_title'] = parameters['searchTitle']
   }
@@ -4681,6 +5527,135 @@ export const createUserURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   let path = '/api/users'
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=0，data对象为结果数据，失败：code!=0
+ * request: batchDeleteUserByIds
+ * url: batchDeleteUserByIdsURL
+ * method: batchDeleteUserByIds_TYPE
+ * raw_url: batchDeleteUserByIds_RAW_URL
+ * @param body - 用户id数组
+ */
+export const batchDeleteUserByIds = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/users/batch'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters['body'] !== undefined) {
+    body = parameters['body']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('delete', domain + path, body, queryParameters, form, config)
+}
+export const batchDeleteUserByIds_RAW_URL = function() {
+  return '/api/users/batch'
+}
+export const batchDeleteUserByIds_TYPE = function() {
+  return 'delete'
+}
+export const batchDeleteUserByIdsURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/users/batch'
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=0，data对象为结果数据，失败：code!=0
+ * request: batchDisableUserByIds
+ * url: batchDisableUserByIdsURL
+ * method: batchDisableUserByIds_TYPE
+ * raw_url: batchDisableUserByIds_RAW_URL
+ * @param body - 用户id数组
+ */
+export const batchDisableUserByIds = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/users/disable/batch'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters['body'] !== undefined) {
+    body = parameters['body']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('put', domain + path, body, queryParameters, form, config)
+}
+export const batchDisableUserByIds_RAW_URL = function() {
+  return '/api/users/disable/batch'
+}
+export const batchDisableUserByIds_TYPE = function() {
+  return 'put'
+}
+export const batchDisableUserByIdsURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/users/disable/batch'
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=0，data对象为结果数据，失败：code!=0
+ * request: batchEnableUserByIds
+ * url: batchEnableUserByIdsURL
+ * method: batchEnableUserByIds_TYPE
+ * raw_url: batchEnableUserByIds_RAW_URL
+ * @param body - 用户id数组
+ */
+export const batchEnableUserByIds = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/users/enable/batch'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters['body'] !== undefined) {
+    body = parameters['body']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('put', domain + path, body, queryParameters, form, config)
+}
+export const batchEnableUserByIds_RAW_URL = function() {
+  return '/api/users/enable/batch'
+}
+export const batchEnableUserByIds_TYPE = function() {
+  return 'put'
+}
+export const batchEnableUserByIdsURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/users/enable/batch'
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
       queryParameters[parameterName] = parameters.$queryParameters[parameterName]

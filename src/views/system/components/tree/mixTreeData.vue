@@ -1,12 +1,12 @@
 <template>
   <div class="departmentListMain">
     <div class="departmentListSearch">
-      <span><a-input placeholder="搜索组织/部门" style="width: 275px" @change="handleSearch" v-model="departmentListSearch"/></span>
+      <span><a-input placeholder="搜索组织/部门" style="width: 275px" @change="handleSearch" v-model="mixTreeSearch"/></span>
       <span>
         <a-popover placement="bottomRight">
           <template slot="content">
-            <p style="cursor: pointer;" @click="openTree">展开全部</p>
-            <p style="cursor: pointer;" @click="endTree">折叠全部</p>
+            <p style="cursor: pointer;" @click="() => (this.expandedKeys = this.treeDataAllId)">展开全部</p>
+            <p style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</p>
           </template>
           <a-icon type="menu-unfold" /> </a-popover
         ></span>
@@ -27,8 +27,8 @@
           <span
             v-html="
               name.replace(
-                new RegExp(departmentListSearch, 'g'),
-                '<span style=color:#f50>' + departmentListSearch + '</span>'
+                new RegExp(mixTreeSearch, 'g'),
+                '<span style=color:#f50>' + mixTreeSearch + '</span>'
               )
             "
           ></span>
@@ -41,15 +41,15 @@
 <script>
 import * as api from '@/api/api';
 export default {
-  name: 'TreeListComponents',
+  name: 'MixTreeData',
   data() {
     return {
       expandedKeys: [], // 控制树结构展开折叠数据组
+      treeDataAllId: [], // 用来保存树形所有节点ID
       selectIdArray: [], // 搜索条件命中的节点ID
-      departmentTreeSelectData: [], // 树结构选中的数据
-      departmentListSearch: '', // 部门列表搜索
-      departmentTreeData: [], // 部门树形结构数据
-      isOrganizations: 2 // 判断treeSelect选中时的数据是否带有isOrganization字段属性(1代表是属于部门 0代表属于组织 2代表全部)
+      selectMixTreeArray: [], // 树结构选中的数据
+      mixTreeSearch: '', // 混合树搜索
+      departmentTreeData: [] // 部门树形结构数据
     };
   },
   created() {
@@ -61,50 +61,89 @@ export default {
      */
 
     getDepartmentsTree() {
-      api.organizationsTree().then(res => {
+      api.userOrganizationTree().then(res => {
         if (res.code === 200) {
           this.departmentTreeData = res.data;
-          this.openTree();
-          this.$emit('getDepartmentOrganizationTreeData', this.departmentTreeData);
+          this.setOrganizationType(this.departmentTreeData);
+          this.getMixTreeData(this.departmentTreeData);
+          this.getMixTreeAllid(this.departmentTreeData);
+        }
+      });
+    },
+
+    /**
+     * @description: 设置组织的type 为了区分组织和部门
+     * @param {array} departmentTreeData
+     */
+    setOrganizationType(departmentTreeData) {
+      departmentTreeData.forEach(item => {
+        item.type = 7;
+        if (item.children) {
+          this.setOrganizationType(item.children);
+        }
+      });
+    },
+
+    /**
+     * @description: 初始化获取所有节点的ID并备份 用来做树形结构的默认展开
+     * @param {array} departmentTreeData
+     */
+     getMixTreeAllid(departmentTreeData) {
+      departmentTreeData.forEach(item => {
+        this.expandedKeys.push(item.id);
+        if (item.children) {
+          this.getMixTreeAllid(item.children);
+        }
+      });
+      this.treeDataAllId = this.expandedKeys;
+    },
+
+    /**
+     * @description: 拼接部门组织的混合树 利用递归添加scopedSlots 用来搜索变色
+     * @param {array} departmentTreeData 部门列表数据
+     */
+    getMixTreeData(departmentTreeData) {
+      departmentTreeData.forEach(item => {
+        item.scopedSlots = { title: 'title' };
+        if (item.isEnable === 0) {
+          item.disabled = true;
+        }
+        if (!item.children) {
+          item.children = [];
+        }
+        if (item.departments) {
+          item.departments.forEach(value => {
+            this.setDepartmentType(item.departments);
+            item.children.push(value);
+          });
+        }
+        if (item.children) {
+          this.getMixTreeData(item.children);
         }
       });
     },
     /**
-     * @description: 利用递归获取到所有的节点code 并添加scopedSlots 用来搜索变色
-     * @param {array} departmentTreeData 部门列表数据
+     * @description: 利用递归将部门的数据添加上一个type的唯一字段
+     * @param {array} departmentsChildrenData 部门的子数据
      */
-
-    getTreeData(departmentTreeData) {
-      departmentTreeData.forEach(res => {
-        this.expandedKeys.push(res.id);
-        res.scopedSlots = { title: 'title' };
-        if (res.isEnable === 0) {
-          res.disabled = true;
-        }
-        if (res.children) {
-          if (res.departments) {
-            res.departments.forEach(item => {
-              res.children.push(item);
-            });
-            res.departments = undefined;
-            this.getTreeData(departmentTreeData);
-            return false;
-          }
-          this.getTreeData(res.children);
+    setDepartmentType(departmentsChildrenData) {
+      departmentsChildrenData.forEach(value => {
+        value.type = 6;
+        if (value.children) {
+          this.setDepartmentType(value.children);
         }
       });
     },
-
     /**
      * @description: 部门列表搜索
      */
 
     handleSearch() {
       // 获取符合条件的ID值
-      this.selectIdArray = this.getTreeIDList(this.departmentListSearch, this.departmentTreeData, []);
+      this.selectIdArray = this.getMixTreeId(this.mixTreeSearch, this.departmentTreeData, []);
       // 获取符合条件的ID值得父级ID
-      this.selectIdArray.forEach(res => {
-        this.getParentKey(res, this.departmentTreeData);
+      this.selectIdArray.forEach(item => {
+        this.getParentKey(item, this.departmentTreeData);
       });
       this.expandedKeys = this.selectIdArray;
     },
@@ -116,7 +155,7 @@ export default {
      * @return {array} idList 命中节点的ID数组
      */
 
-    getTreeIDList(searchValue, departmentTreeData, idList) {
+    getMixTreeId(searchValue, departmentTreeData, idList) {
       // 遍历所有同一级的树
       for (let i = 0; i < departmentTreeData.length; i++) {
         const node = departmentTreeData[i];
@@ -126,7 +165,7 @@ export default {
         }
         // 如果拥有孩子继续遍历
         if (node.children) {
-          this.getTreeIDList(searchValue, node.children, idList);
+          this.getMixTreeId(searchValue, node.children, idList);
         }
       }
       return idList;
@@ -145,7 +184,11 @@ export default {
         const node = departmentTreeData[i];
         if (node.id === id) {
           // 判断该节点是否有父级
-          if (node.parent) {
+          if (node.type === 7) {
+            // 一级的组织没有parent字段
+            if (!node.parent) {
+              return false;
+            }
             parentId = node.parent.id;
             // 数组去重添加
             if (this.selectIdArray.indexOf(parentId) === -1) {
@@ -154,7 +197,7 @@ export default {
               this.getParentKey(node.parent.id, this.departmentTreeData);
             }
             // 判断该节点是否为部门
-          } else if (node.organization) {
+          } else if (node.type === 6) {
             parentId = node.organization.id;
             // 数组去重添加
             if (this.selectIdArray.indexOf(parentId) === -1) {
@@ -175,49 +218,24 @@ export default {
       }
       return parentId;
     },
-
-    /**
-     * @description: 展开部门树形结构
-     */
-
-    openTree() {
-      this.expandedKeys = [];
-      this.getTreeData(this.departmentTreeData);
-    },
-    /**
-     * @description: 关闭部门树形结构
-     */
-
-    endTree() {
-      this.expandedKeys = [];
-    },
     /**
      * @description: 选择部门列表数据
      * @param {array} selectedKeys 选中的部门id数组
      */
 
     handleSelect(selectedKeys, rowData) {
-      this.departmentTreeSelectData = selectedKeys;
-      // 判断点击的是组织还是部门 如果有parent字段代表是组织 如果有organization字段代表有部门 最后else代表1级的组织既没有parent 也没有organization字
-
-      if (rowData.node.dataRef.parent) {
-        this.isOrganizations = 0;
-      } else if (rowData.node.dataRef.organization) {
-        this.isOrganizations = 1;
-      } else {
-        this.isOrganizations = 0;
+      this.selectMixTreeArray = selectedKeys;
+      if (rowData.node.dataRef.type === 7) {
+        this.$emit('selectOrganization', this.selectMixTreeArray, true);
+      } else if (rowData.node.dataRef.type === 6) {
+        const selectMixTreeOrganizationAnddepartmentId = [];
+        selectMixTreeOrganizationAnddepartmentId.push(rowData.node.dataRef.organization.id);
+        selectMixTreeOrganizationAnddepartmentId.push(this.selectMixTreeArray[0]);
+        this.$emit('selectDepartment', selectMixTreeOrganizationAnddepartmentId, false);
       }
-      if (this.departmentTreeSelectData.length === 0) {
-        this.isOrganizations = 2;
-      }
-      if (this.isOrganizations === 1) {
-        const departmentAndOrganizationsTreeSelectData = [];
-        departmentAndOrganizationsTreeSelectData.push(this.departmentTreeSelectData[0]);
-        departmentAndOrganizationsTreeSelectData.push(rowData.node.dataRef.organization.id);
-        this.$emit('getDepartmentData', departmentAndOrganizationsTreeSelectData, this.isOrganizations);
-      } else {
-        // organization
-        this.$emit('getDepartmentData', this.departmentTreeSelectData, this.isOrganizations);
+      // 取消选中
+      if (this.selectMixTreeArray.length === 0) {
+        this.$emit('cancelSelect');
       }
     }
   }
