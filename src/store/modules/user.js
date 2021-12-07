@@ -6,8 +6,10 @@ import { welcome } from '@/utils/util';
 
 const user = {
   state: {
-    token: '',
-    name: '',
+     // 统一配置分页的选择条数
+    defaultPaginationOptions: ['5', '7', '10'],
+     // 统一配置分页的默认一页条数
+    defaultPaginationPagesize: 10,
     welcome: '',
     avatar: '',
     roles: [],
