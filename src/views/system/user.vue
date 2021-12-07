@@ -147,20 +147,20 @@
           <a-form-model-item ref="email" label="邮箱" prop="email">
             <a-input v-model="form.email" placeholder="请输入邮箱" />
           </a-form-model-item>
-          <a-form-model-item label="角色" prop="roles">
-            <a-select v-model="form.roles" mode="multiple" size="default" placeholder="请选择角色">
+          <a-form-model-item label="角色" prop="roleIds">
+            <a-select v-model="form.roleIds" mode="multiple" size="default" placeholder="请选择角色">
               <a-select-option v-for="item in userRoleArray" :key="item.id">
                 {{ item.name }}
               </a-select-option>
             </a-select>
           </a-form-model-item>
-          <a-form-model-item label="所属组织" prop="organization">
+          <a-form-model-item label="所属组织" prop="organizationId">
             <a-tree-select
               :replaceFields="{
                 title: 'name',
                 value: 'id'
               }"
-              v-model="form.organization"
+              v-model="form.organizationId"
               style="width: 100%"
               @change="organizationId => this.getUserDepartmentTree({ searchOrganizationId: organizationId })"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
@@ -170,13 +170,13 @@
             >
             </a-tree-select>
           </a-form-model-item>
-          <a-form-model-item label="所属部门" prop="department">
+          <a-form-model-item label="所属部门" prop="departmentId">
             <a-tree-select
               :replaceFields="{
                 title: 'name',
                 value: 'id'
               }"
-              v-model="form.department"
+              v-model="form.departmentId"
               style="width: 100%"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
               :tree-data="formDepartmentTreeData"
@@ -287,8 +287,11 @@ export default {
         name: undefined, // 名字
         email: undefined, // 邮箱
         roles: [], // 角色
+        roleIds: [], // 角色ID
         isEnable: '1', // 状态
+        departmentId: undefined, // 所属部门ID
         department: undefined, // 所属部门
+        organizationId: undefined, // 所属组织ID
         organization: undefined // 所属组织
       },
       rules: {
@@ -309,7 +312,7 @@ export default {
           { required: true, message: '请输入用户名', trigger: 'blur' },
           { max: 200, message: '用户名长度不能大于200', trigger: 'blur' }
         ],
-        roles: [{ required: true, message: '请选择角色', trigger: 'change' }],
+        roleIds: [{ required: true, message: '请选择角色', trigger: 'change' }],
         organization: [{ required: true, message: '请选择组织', trigger: 'change' }]
       },
       formDepartmentTreeData: [], // 部门下拉选择树结构数据
@@ -463,23 +466,23 @@ export default {
       this.$refs.userRuleForm.validate(valid => {
         if (valid) {
           this.formButtonDisableFlag = true;
-          const formObj = JSON.parse(JSON.stringify(this.form));
           // 构建后端需要的参数形式[{id:1}]
-          formObj.roles = [];
-          this.form.roles.map(item => {
+          this.form.roles = [];
+          this.form.roleIds.map(item => {
             const obj = {
               id: item
             };
-            formObj.roles.push(obj);
+            return this.form.roles.push(obj);
           });
-          formObj.organization = { id: this.form.organization };
-          formObj.department = { id: this.form.department };
+          this.form.department = { id: this.form.departmentId };
+          this.form.organization = { id: this.form.organizationId };
+
           // 编辑
-          if (formObj.id) {
-            this.userUpdate(formObj);
+          if (this.form.id) {
+            this.userUpdate(this.form);
           } else {
             // 新增
-            this.userAdd(formObj);
+            this.userAdd(this.form);
           }
         } else {
           return false;
@@ -654,11 +657,11 @@ export default {
       this.form.id = undefined;
       this.modleVisible = true;
       if (this.isOrganization === true) {
-        this.form.organization = this.searchParameters.searchOrganizationId;
+        this.form.organizationId = this.searchParameters.searchOrganizationId;
       } else if (this.isOrganization === false) {
-        this.form.organization = this.selectMixTreeOrganizationId;
-        this.form.department = this.searchParameters.searchDepartmentId;
-        this.getUserDepartmentTree({ searchOrganizationId: this.form.organization });
+        this.form.organizationId = this.selectMixTreeOrganizationId;
+        this.form.departmentId = this.searchParameters.searchDepartmentId;
+        this.getUserDepartmentTree({ searchOrganizationId: this.form.organizationId });
       }
     },
 
@@ -685,18 +688,16 @@ export default {
       loadUserById({ id: userTableRowData.id }).then(res => {
         if (res.code === 200) {
           this.form = Object.assign({}, this.form, res.data);
-          const copyForm = JSON.parse(JSON.stringify(this.form));
-          this.form.roles = [];
-          copyForm.roles.forEach(item => {
-            this.form.roles.push(item.id);
+          this.form.roleIds = this.form.roles.map(item => {
+            return item.id;
           });
-          this.form.organization = copyForm.organization.id;
+          this.form.organizationId = this.form.organization.id;
           if (this.form.department) {
-            this.form.department = copyForm.department.id;
+            this.form.departmentId = this.form.department.id;
           } else {
             this.form.department = undefined;
           }
-          this.form.isEnable = String(copyForm.isEnable);
+          this.form.isEnable = String(this.form.isEnable);
           this.getUserDepartmentTree({ searchOrganizationId: this.form.organization });
           this.modleVisible = true;
         }

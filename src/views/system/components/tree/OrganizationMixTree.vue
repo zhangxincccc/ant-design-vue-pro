@@ -1,6 +1,6 @@
 <template>
-  <div class="departmentListMain">
-    <div class="departmentListSearch">
+  <div class="mixTreeMain">
+    <div class="mixTreeSearch">
       <span><a-input placeholder="搜索组织/部门" style="width: 275px" @change="handleSearch" v-model="mixTreeSearch"/></span>
       <span>
         <a-popover placement="bottomRight">
@@ -11,7 +11,7 @@
           <a-icon type="menu-unfold" /> </a-popover
         ></span>
     </div>
-    <div class="departmentListContent">
+    <div class="mixTreeContent">
       <a-tree
         ref="tree"
         :replaceFields="{
@@ -103,9 +103,7 @@ export default {
     initTreeData(organizationData) {
       organizationData.forEach(item => {
         item.scopedSlots = { title: 'title' };
-        if (item.isEnable === 0) {
-          item.disabled = true;
-        }
+        item.disabled = item.isEnable === 0;
         if (!item.children) {
           item.children = [];
         }
@@ -240,11 +238,11 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.departmentListMain {
+.mixTreeMain {
   width: 100%;
   display: flex;
   flex-direction: column;
-  .departmentListSearch {
+  .mixTreeSearch {
     width: 100%;
     height: 46px;
     border-bottom: 1px solid #ececec;
@@ -256,12 +254,12 @@ export default {
     cursor: pointer;
   }
 
-  .departmentListContent {
+  .mixTreeContent {
     flex: 1;
     overflow: scroll;
     padding: 10px;
   }
-  .departmentListContent::-webkit-scrollbar {
+  .mixTreeContent::-webkit-scrollbar {
     display: none;
   }
 }
