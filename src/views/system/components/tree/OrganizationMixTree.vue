@@ -1,6 +1,6 @@
 <template>
-  <div class="departmentListMain">
-    <div class="departmentListSearch">
+  <div class="organizationMixTree">
+    <div class="organizationMixTreeSearch">
       <span><a-input placeholder="搜索组织/部门" style="width: 275px" @change="handleSearch" v-model="mixTreeSearch"/></span>
       <span>
         <a-popover placement="bottomRight">
@@ -11,7 +11,7 @@
           <a-icon type="menu-unfold" /> </a-popover
         ></span>
     </div>
-    <div class="departmentListContent">
+    <div class="organizationMixTreeContent">
       <a-tree
         ref="tree"
         :replaceFields="{
@@ -243,11 +243,11 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.departmentListMain {
+.organizationMixTree {
   width: 100%;
   display: flex;
   flex-direction: column;
-  .departmentListSearch {
+  .organizationMixTreeSearch {
     width: 100%;
     height: 46px;
     border-bottom: 1px solid #ececec;
@@ -259,12 +259,12 @@ export default {
     cursor: pointer;
   }
 
-  .departmentListContent {
+  .organizationMixTreeContent {
     flex: 1;
     overflow: scroll;
     padding: 10px;
   }
-  .departmentListContent::-webkit-scrollbar {
+  .organizationMixTreeContent::-webkit-scrollbar {
     display: none;
   }
 }
