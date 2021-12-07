@@ -60,6 +60,15 @@ export const asyncRouterMap = [
               permission: ['system:users'],
               icon: workplace
             }
+          },
+          {
+            path: '/system/organization',
+            name: 'organization',
+            component: () => import('@/views/system/organization'),
+            meta: {
+              title: '组织机构',
+              icon: workplace
+            }
           }
         ]
       },
