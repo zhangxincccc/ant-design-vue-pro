@@ -1,11 +1,11 @@
 <template>
   <page-header-wrapper :title="false">
     <div class="user">
-      <div class="departmentList">
+      <div class="mixTree">
         <organization-mix-tree
           @selectOrganization="selectMixTreeOrganizationData"
           @selectDepartment="selectMixTreeDepartmentData"
-          @cancelSelect="cancelSelectMixTreeDepartmentData"
+          @cancelSelect="cancelSelectMixTreeData"
         ></organization-mix-tree>
       </div>
       <div class="userMain">
@@ -27,12 +27,7 @@
                 <template v-if="advanced">
                   <a-col :md="8" :sm="24">
                     <a-form-item label="角色">
-                      <a-select
-                        allowClear
-                        v-model="searchParameters.searchRoleId"
-                        size="default"
-                        placeholder="请选择"
-                      >
+                      <a-select allowClear v-model="searchParameters.searchRoleId" size="default" placeholder="请选择">
                         <a-select-option v-for="item in userRoleArray" :key="item.id">
                           {{ item.name }}
                         </a-select-option>
@@ -56,12 +51,7 @@
                 <a-col :md="8" :sm="24" style="display:flex;justify-content: flex-end">
                   <span>
                     <a-button style="margin-left: 30px" @click="() => (this.searchParameters = {})">重置</a-button>
-                    <a-button
-                      style="margin-left: 8px"
-                      type="primary"
-                      @click="() => this.searchUserTableComponentParams()"
-                      >查询</a-button
-                    >
+                    <a-button style="margin-left: 8px" type="primary" @click="() => this.searchUserTableData()">查询</a-button>
                     <a @click="() => (this.advanced = !this.advanced)" style="margin-left: 8px">
                       {{ advanced ? '收起' : '展开' }}
                       <a-icon :type="6 ? 'up' : 'down'" />
@@ -92,7 +82,7 @@
           </div>
           <div class="userMainTableContent">
             <a-table
-              :row-selection="{ selectedRowKeys: batchSelectIdArray, onChange: onSelectChange }"
+              :row-selection="{ selectedRowKeys: batchSelectIdArray, onChange: handleUserSelectChange }"
               :columns="columns"
               :data-source="tableData"
               :pagination="false"
@@ -134,7 +124,7 @@
             :total="userTableTotal"
             show-size-changer
             :page-size="pageObject.pageSize"
-            @change="getPageNumber"
+            @change="handlePageNumberChange"
             @showSizeChange="onPageSizeChange"
           >
           </a-pagination>
@@ -142,7 +132,7 @@
       </div>
       <a-modal
         v-model="modleVisible"
-        :title="addOrEdit == 1 ? '新增用户' : '编辑用户'"
+        :title="form.id ? '编辑用户' : '新增用户'"
         @cancel="() => ((this.modleVisible = false), this.clearFormData())"
         :confirm-loading="formButtonDisableFlag"
         @ok="onSubmit"
@@ -157,8 +147,8 @@
           <a-form-model-item ref="email" label="邮箱" prop="email">
             <a-input v-model="form.email" placeholder="请输入邮箱" />
           </a-form-model-item>
-          <a-form-model-item label="角色" prop="role">
-            <a-select v-model="form.role" mode="multiple" size="default" placeholder="请选择角色">
+          <a-form-model-item label="角色" prop="roles">
+            <a-select v-model="form.roles" mode="multiple" size="default" placeholder="请选择角色">
               <a-select-option v-for="item in userRoleArray" :key="item.id">
                 {{ item.name }}
               </a-select-option>
@@ -223,7 +213,8 @@ import {
   batchEnableUserByIds,
   batchDeleteUserByIds,
   userDepartmentTree,
-  listAllRoles
+  listAllRoles,
+  loadUserById
 } from '@/api/api';
 import moment from 'moment';
 import OrganizationMixTree from './components/tree/OrganizationMixTree';
@@ -276,12 +267,10 @@ export default {
       userLoading: false, // 页面加载数据loading
       searchParameters: {}, // 表格搜索条件Input绑定
       advanced: false, // 控制搜索条件的展开折叠
-      addOrEdit: 1, // 判断新增或编辑（1为新增2为编辑）
       modleVisible: false, // 控制表单弹框
       userRoleArray: [], // 角色下拉数组
       tableData, // 表格数据
       columns, // 表格头部
-      tableRowId: undefined, // 表格单条数据的ID
       currentPage: 1, // 默认分页当前页
       pageSizeOptions: this.$store.state.user.defaultPaginationOptions, // 分页下拉
       pageObject: {
@@ -297,7 +286,7 @@ export default {
         username: undefined,
         name: undefined, // 名字
         email: undefined, // 邮箱
-        role: [], // 角色
+        roles: [], // 角色
         isEnable: '1', // 状态
         department: undefined, // 所属部门
         organization: undefined // 所属组织
@@ -320,7 +309,7 @@ export default {
           { required: true, message: '请输入用户名', trigger: 'blur' },
           { max: 200, message: '用户名长度不能大于200', trigger: 'blur' }
         ],
-        role: [{ required: true, message: '请选择角色', trigger: 'change' }],
+        roles: [{ required: true, message: '请选择角色', trigger: 'change' }],
         organization: [{ required: true, message: '请选择组织', trigger: 'change' }]
       },
       formDepartmentTreeData: [], // 部门下拉选择树结构数据
@@ -354,7 +343,7 @@ export default {
   created() {
     this.userLoading = true;
     this.getUserTableData(this.pageObject, this.searchParameters); // 获取表格数据
-    this.getUserRoleData(); // 获取角色数据列表
+    this.getRoles(); // 获取角色数据列表
     this.getFormOrganizationsTree(); // 获取表单组织树结构数据
   },
   methods: {
@@ -363,7 +352,7 @@ export default {
      * @param {array} selectedRowKeys 下标回值
      * @param {array} selectedRows 数据回值
      */
-    onSelectChange(selectedRowKeys) {
+    handleUserSelectChange(selectedRowKeys) {
       this.batchSelectIdArray = selectedRowKeys;
     },
     /**
@@ -376,7 +365,7 @@ export default {
       this.searchParameters.searchOrganizationId = organizationId[0];
       this.searchParameters.searchDepartmentId = undefined;
       this.isOrganization = organizationType;
-      this.searchUserTableComponentParams();
+      this.searchUserTableData();
     },
     /**
      * @description: 选中混合树组织的数据
@@ -388,16 +377,16 @@ export default {
       this.searchParameters.searchDepartmentId = organizationAnddepartmentId.departmentId;
       this.searchParameters.searchOrganizationId = undefined;
       this.isOrganization = departmentType;
-      this.searchUserTableComponentParams();
+      this.searchUserTableData();
     },
     /**
      * @description: 取消选中混合树
      */
-    cancelSelectMixTreeDepartmentData() {
+    cancelSelectMixTreeData() {
       this.searchParameters.searchOrganizationId = undefined;
       this.searchParameters.searchDepartmentId = undefined;
       this.isOrganization = -1;
-      this.searchUserTableComponentParams();
+      this.searchUserTableData();
     },
     /**
      * @description: 获取表格数据
@@ -425,7 +414,7 @@ export default {
     /**
      * @description: 获取角色数据列表
      */
-    getUserRoleData() {
+    getRoles() {
       listAllRoles().then(res => {
         if (res.code === 200) {
           this.userRoleArray = res.data;
@@ -437,7 +426,7 @@ export default {
      * @description: 表格查询公共的代码
      */
 
-    searchUserTableComponentParams() {
+    searchUserTableData() {
       this.currentPage = 1;
       this.pageObject.pageNumber = 0;
       this.userLoading = true;
@@ -475,9 +464,9 @@ export default {
         if (valid) {
           this.formButtonDisableFlag = true;
           const formObj = JSON.parse(JSON.stringify(this.form));
-          formObj.roles = [];
           // 构建后端需要的参数形式[{id:1}]
-          formObj.role.map(item => {
+          formObj.roles = [];
+          this.form.roles.map(item => {
             const obj = {
               id: item
             };
@@ -485,12 +474,12 @@ export default {
           });
           formObj.organization = { id: this.form.organization };
           formObj.department = { id: this.form.department };
-          // 新增
-          if (this.addOrEdit === 1) {
-            this.userAdd(formObj);
-          } else {
-            // 编辑
+          // 编辑
+          if (formObj.id) {
             this.userUpdate(formObj);
+          } else {
+            // 新增
+            this.userAdd(formObj);
           }
         } else {
           return false;
@@ -519,7 +508,7 @@ export default {
      * @param {object} userAddParam 编辑的对象参数
      */
     userUpdate(userEditParam) {
-      updateUser({ body: userEditParam, id: this.tableRowId })
+      updateUser({ body: userEditParam, id: userEditParam.id })
         .then(res => {
           if (res.code === 200) {
             this.formSuccessOperation(res);
@@ -588,7 +577,7 @@ export default {
       this.userLoading = true;
       batchDisableUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
-          this.batchComponent(res);
+          this.afterBatchActions(res);
         }
       });
     },
@@ -599,7 +588,7 @@ export default {
       this.userLoading = true;
       batchEnableUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
-          this.batchComponent(res);
+          this.afterBatchActions(res);
         }
       });
     },
@@ -607,7 +596,7 @@ export default {
       this.userLoading = true;
       batchDeleteUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
-          this.batchComponent(res);
+          this.afterBatchActions(res);
         }
       });
     },
@@ -616,7 +605,7 @@ export default {
      * @param {object} batchSuccessData 接口返回数据
      */
 
-    batchComponent(batchSuccessData) {
+    afterBatchActions(batchSuccessData) {
       this.$message.success(batchSuccessData.message);
       this.batchSelectIdArray = [];
       this.getUserTableData(this.pageObject, this.searchParameters);
@@ -625,7 +614,7 @@ export default {
      * @description: 获取分页页数改变后的值
      * @param {string} pageNumber UI框架自带
      */
-    getPageNumber(pageNumber) {
+    handlePageNumberChange(pageNumber) {
       this.userLoading = true;
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
@@ -662,7 +651,6 @@ export default {
      * @description: 新增用户
      */
     handleAddUser() {
-      this.addOrEdit = 1;
       this.form.id = undefined;
       this.modleVisible = true;
       if (this.isOrganization === true) {
@@ -694,40 +682,32 @@ export default {
      * @param {object} userTableRowData 某一条表格数据对象
      */
     handleEditUser(userTableRowData) {
-      this.form.role = [];
-      if (userTableRowData.roles) {
-        userTableRowData.roles.forEach(res => {
-          this.form.role.push(res.id);
-        });
-      } else {
-        this.form.role = [];
-      }
-      this.tableRowId = userTableRowData.id;
-      this.form.id = userTableRowData.id;
-      this.form.username = userTableRowData.username;
-      this.form.name = userTableRowData.name;
-      this.form.email = userTableRowData.email ? userTableRowData.email : undefined;
-      this.form.isEnable = String(userTableRowData.isEnable);
-      this.form.department = userTableRowData.department ? userTableRowData.department.id : undefined;
-      this.form.organization = userTableRowData.organization ? userTableRowData.organization.id : undefined;
-      this.addOrEdit = 2;
-      this.getUserDepartmentTree({ searchOrganizationId: this.form.organization });
-      this.modleVisible = true;
+      loadUserById({ id: userTableRowData.id }).then(res => {
+        if (res.code === 200) {
+          this.form = Object.assign({}, this.form, res.data);
+          const copyForm = JSON.parse(JSON.stringify(this.form));
+          this.form.roles = [];
+          copyForm.roles.forEach(item => {
+            this.form.roles.push(item.id);
+          });
+          this.form.organization = copyForm.organization.id;
+          if (this.form.department) {
+            this.form.department = copyForm.department.id;
+          } else {
+            this.form.department = undefined;
+          }
+          this.form.isEnable = String(copyForm.isEnable);
+          this.getUserDepartmentTree({ searchOrganizationId: this.form.organization });
+          this.modleVisible = true;
+        }
+      });
     },
 
     /**
      * @description:数据新增编辑完成过后清空
      */
     clearFormData() {
-      this.$refs.userRuleForm.resetFields();
-      this.form.name = undefined;
-      this.form.email = undefined;
-      this.form.username = undefined;
-      this.tableRowId = undefined;
-      this.form.role = [];
-      this.form.isEnable = '1';
-      this.form.department = undefined;
-      this.form.organization = undefined;
+      this.form = this.$options.data.call(this).form;
     }
   }
 };
@@ -743,7 +723,7 @@ export default {
   border-radius: 5px;
   display: flex;
   justify-content: space-between;
-  .departmentList {
+  .mixTree {
     width: 330px;
     background: white;
     border-radius: 5px;

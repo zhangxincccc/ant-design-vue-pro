@@ -1,6 +1,6 @@
 <template>
-  <div class="organizationMixTree">
-    <div class="organizationMixTreeSearch">
+  <div class="departmentListMain">
+    <div class="departmentListSearch">
       <span><a-input placeholder="搜索组织/部门" style="width: 275px" @change="handleSearch" v-model="mixTreeSearch"/></span>
       <span>
         <a-popover placement="bottomRight">
@@ -11,7 +11,7 @@
           <a-icon type="menu-unfold" /> </a-popover
         ></span>
     </div>
-    <div class="organizationMixTreeContent">
+    <div class="departmentListContent">
       <a-tree
         ref="tree"
         :replaceFields="{
@@ -46,8 +46,6 @@ export default {
     return {
       expandedKeys: [], // 控制树结构展开折叠数据组
       allIds: [], // 用来保存树形所有节点ID
-      selectIdArray: [], // 搜索条件命中的节点ID
-      selectMixTreeArray: [], // 树结构选中的数据
       mixTreeSearch: '', // 混合树搜索
       treeData: [] // 混合树形结构数据
     };
@@ -223,9 +221,8 @@ export default {
      */
 
     handleSelect(selectedKeys, rowData) {
-      this.selectMixTreeArray = selectedKeys;
       if (rowData.node.dataRef.type === 7) {
-        this.$emit('selectOrganization', this.selectMixTreeArray, true);
+        this.$emit('selectOrganization', selectedKeys, true);
       } else if (rowData.node.dataRef.type === 6) {
         const selecOrganizationAnddepartmentId = {
           organizationId: rowData.node.dataRef.organization.id,
@@ -234,7 +231,7 @@ export default {
         this.$emit('selectDepartment', selecOrganizationAnddepartmentId, false);
       }
       // 取消选中
-      if (this.selectMixTreeArray.length === 0) {
+      if (selectedKeys.length === 0) {
         this.$emit('cancelSelect');
       }
     }
@@ -243,11 +240,11 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.organizationMixTree {
+.departmentListMain {
   width: 100%;
   display: flex;
   flex-direction: column;
-  .organizationMixTreeSearch {
+  .departmentListSearch {
     width: 100%;
     height: 46px;
     border-bottom: 1px solid #ececec;
@@ -259,12 +256,12 @@ export default {
     cursor: pointer;
   }
 
-  .organizationMixTreeContent {
+  .departmentListContent {
     flex: 1;
     overflow: scroll;
     padding: 10px;
   }
-  .organizationMixTreeContent::-webkit-scrollbar {
+  .departmentListContent::-webkit-scrollbar {
     display: none;
   }
 }
