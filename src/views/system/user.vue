@@ -51,7 +51,12 @@
                 <a-col :md="8" :sm="24" style="display:flex;justify-content: flex-end">
                   <span>
                     <a-button style="margin-left: 30px" @click="() => (this.searchParameters = {})">重置</a-button>
-                    <a-button style="margin-left: 8px" type="primary" @click="() => this.searchUserTableData()">查询</a-button>
+                    <a-button
+                      style="margin-left: 8px"
+                      type="primary"
+                      @click="() => this.searchUserTableData()"
+                    >查询</a-button
+                    >
                     <a @click="() => (this.advanced = !this.advanced)" style="margin-left: 8px">
                       {{ advanced ? '收起' : '展开' }}
                       <a-icon :type="6 ? 'up' : 'down'" />
@@ -467,12 +472,10 @@ export default {
         if (valid) {
           this.formButtonDisableFlag = true;
           // 构建后端需要的参数形式[{id:1}]
-          this.form.roles = [];
-          this.form.roleIds.map(item => {
-            const obj = {
+          this.form.roles = this.form.roleIds.map(item => {
+            return {
               id: item
             };
-            return this.form.roles.push(obj);
           });
           this.form.department = { id: this.form.departmentId };
           this.form.organization = { id: this.form.organizationId };
