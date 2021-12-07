@@ -59,7 +59,7 @@ export default {
      */
 
     getTreeData() {
-      api.userOrganizationTree().then(res => {
+      api.organizationsTree().then(res => {
         if (res.code === 200) {
           this.treeData = res.data;
           this.setOrganizationType(this.treeData);

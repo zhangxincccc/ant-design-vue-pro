@@ -204,7 +204,7 @@
 import {
   listUsers,
   deleteUserById,
-  userOrganizationTree,
+  organizationsTree,
   createUser,
   updateUser,
   disableUserById,
@@ -641,7 +641,7 @@ export default {
      * @description: 获取表单树结构数据
      */
     getFormOrganizationsTree() {
-      userOrganizationTree().then(res => {
+      organizationsTree().then(res => {
         if (res.code === 200) {
           this.formOrganizationTreeData = res.data;
           this.disabledFormTreeData(this.formOrganizationTreeData);
