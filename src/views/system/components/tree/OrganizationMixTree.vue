@@ -5,7 +5,7 @@
       <span>
         <a-popover placement="bottomRight">
           <template slot="content">
-            <p style="cursor: pointer;" @click="() => (this.expandedKeys = this.treeDataAllId)">展开全部</p>
+            <p style="cursor: pointer;" @click="() => (this.expandedKeys = this.allIds)">展开全部</p>
             <p style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</p>
           </template>
           <a-icon type="menu-unfold" /> </a-popover
@@ -19,7 +19,7 @@
           key: 'id'
         }"
         defaultExpandAll
-        :tree-data="departmentTreeData"
+        :tree-data="treeData"
         :expandedKeys.sync="expandedKeys"
         @select="handleSelect"
       >
@@ -41,42 +41,42 @@
 <script>
 import * as api from '@/api/api';
 export default {
-  name: 'MixTreeData',
+  name: 'OrganizationMixTree',
   data() {
     return {
       expandedKeys: [], // 控制树结构展开折叠数据组
-      treeDataAllId: [], // 用来保存树形所有节点ID
+      allIds: [], // 用来保存树形所有节点ID
       selectIdArray: [], // 搜索条件命中的节点ID
       selectMixTreeArray: [], // 树结构选中的数据
       mixTreeSearch: '', // 混合树搜索
-      departmentTreeData: [] // 部门树形结构数据
+      treeData: [] // 混合树形结构数据
     };
   },
   created() {
-    this.getDepartmentsTree();
+    this.getTreeData();
   },
   methods: {
     /**
-     * @description: 获取部门列表树形结构数据
+     * @description: 获取混合树形结构数据
      */
 
-    getDepartmentsTree() {
+    getTreeData() {
       api.userOrganizationTree().then(res => {
         if (res.code === 200) {
-          this.departmentTreeData = res.data;
-          this.setOrganizationType(this.departmentTreeData);
-          this.getMixTreeData(this.departmentTreeData);
-          this.getMixTreeAllid(this.departmentTreeData);
+          this.treeData = res.data;
+          this.setOrganizationType(this.treeData);
+          this.initTreeData(this.treeData);
+          this.getMixTreeAllId(this.treeData);
         }
       });
     },
 
     /**
      * @description: 设置组织的type 为了区分组织和部门
-     * @param {array} departmentTreeData
+     * @param {array} organizationData 组织数据
      */
-    setOrganizationType(departmentTreeData) {
-      departmentTreeData.forEach(item => {
+    setOrganizationType(organizationData) {
+      organizationData.forEach(item => {
         item.type = 7;
         if (item.children) {
           this.setOrganizationType(item.children);
@@ -86,24 +86,24 @@ export default {
 
     /**
      * @description: 初始化获取所有节点的ID并备份 用来做树形结构的默认展开
-     * @param {array} departmentTreeData
+     * @param {array} treeData 混合树
      */
-     getMixTreeAllid(departmentTreeData) {
-      departmentTreeData.forEach(item => {
+     getMixTreeAllId(treeData) {
+      treeData.forEach(item => {
         this.expandedKeys.push(item.id);
         if (item.children) {
-          this.getMixTreeAllid(item.children);
+          this.getMixTreeAllId(item.children);
         }
       });
-      this.treeDataAllId = this.expandedKeys;
+      this.allIds = this.expandedKeys;
     },
 
     /**
      * @description: 拼接部门组织的混合树 利用递归添加scopedSlots 用来搜索变色
-     * @param {array} departmentTreeData 部门列表数据
+     * @param {array} organizationData 组织列表数据
      */
-    getMixTreeData(departmentTreeData) {
-      departmentTreeData.forEach(item => {
+    initTreeData(organizationData) {
+      organizationData.forEach(item => {
         item.scopedSlots = { title: 'title' };
         if (item.isEnable === 0) {
           item.disabled = true;
@@ -118,7 +118,7 @@ export default {
           });
         }
         if (item.children) {
-          this.getMixTreeData(item.children);
+          this.initTreeData(item.children);
         }
       });
     },
@@ -135,30 +135,29 @@ export default {
       });
     },
     /**
-     * @description: 部门列表搜索
+     * @description: 混合树列表搜索
      */
 
     handleSearch() {
       // 获取符合条件的ID值
-      this.selectIdArray = this.getMixTreeId(this.mixTreeSearch, this.departmentTreeData, []);
+      this.expandedKeys = this.getMixTreeId(this.mixTreeSearch, this.treeData, []);
       // 获取符合条件的ID值得父级ID
-      this.selectIdArray.forEach(item => {
-        this.getParentKey(item, this.departmentTreeData);
+      this.expandedKeys.forEach(item => {
+        this.getParentKey(item, this.treeData);
       });
-      this.expandedKeys = this.selectIdArray;
     },
     /**
      * @description:  获取符合条件的ID值
      * @param {string} searchValue 搜索框的值
-     * @param {array} departmentTreeData 部门列表数据
+     * @param {array} treeData 混合树数据
      * @param {array} idList 空数组 用来做返回值
      * @return {array} idList 命中节点的ID数组
      */
 
-    getMixTreeId(searchValue, departmentTreeData, idList) {
+    getMixTreeId(searchValue, treeData, idList) {
       // 遍历所有同一级的树
-      for (let i = 0; i < departmentTreeData.length; i++) {
-        const node = departmentTreeData[i];
+      for (let i = 0; i < treeData.length; i++) {
+        const node = treeData[i];
         // 如果该节点存在value值则push
         if (node.name.indexOf(searchValue) !== -1) {
           idList.push(node.id);
@@ -174,14 +173,14 @@ export default {
     /**
      * @description:  获取符合条件的ID值得父级ID
      * @param {string} id 选中的id
-     * @param {array} departmentTreeData 部门列表数组
+     * @param {array} treeData 混合树数组
      * @return {parentId} 选中id的父级id
      */
 
-    getParentKey(id, departmentTreeData) {
+    getParentKey(id, treeData) {
       let parentId = null;
-      for (let i = 0; i < departmentTreeData.length; i++) {
-        const node = departmentTreeData[i];
+      for (let i = 0; i < treeData.length; i++) {
+        const node = treeData[i];
         if (node.id === id) {
           // 判断该节点是否有父级
           if (node.type === 7) {
@@ -191,22 +190,22 @@ export default {
             }
             parentId = node.parent.id;
             // 数组去重添加
-            if (this.selectIdArray.indexOf(parentId) === -1) {
-              this.selectIdArray.push(parentId);
+            if (this.expandedKeys.indexOf(parentId) === -1) {
+              this.expandedKeys.push(parentId);
               // 如果还有父级则拿父级ID重新遍历
-              this.getParentKey(node.parent.id, this.departmentTreeData);
+              this.getParentKey(node.parent.id, this.treeData);
             }
             // 判断该节点是否为部门
           } else if (node.type === 6) {
             parentId = node.organization.id;
             // 数组去重添加
-            if (this.selectIdArray.indexOf(parentId) === -1) {
-              this.selectIdArray.push(parentId);
+            if (this.expandedKeys.indexOf(parentId) === -1) {
+              this.expandedKeys.push(parentId);
               // 如果还有父级则拿父级ID重新遍历 如果没有父级说明已经在部门的一级列表 拿organization.id继续向上查找
               if (node.parent) {
-                this.getParentKey(node.parent.id, this.departmentTreeData);
+                this.getParentKey(node.parent.id, this.treeData);
               } else {
-                this.getParentKey(node.organization.id, this.departmentTreeData);
+                this.getParentKey(node.organization.id, this.treeData);
               }
             }
           }
@@ -219,8 +218,8 @@ export default {
       return parentId;
     },
     /**
-     * @description: 选择部门列表数据
-     * @param {array} selectedKeys 选中的部门id数组
+     * @description: 选择混合树列表数据
+     * @param {array} selectedKeys 选中的id数组
      */
 
     handleSelect(selectedKeys, rowData) {
@@ -228,10 +227,11 @@ export default {
       if (rowData.node.dataRef.type === 7) {
         this.$emit('selectOrganization', this.selectMixTreeArray, true);
       } else if (rowData.node.dataRef.type === 6) {
-        const selectMixTreeOrganizationAnddepartmentId = [];
-        selectMixTreeOrganizationAnddepartmentId.push(rowData.node.dataRef.organization.id);
-        selectMixTreeOrganizationAnddepartmentId.push(this.selectMixTreeArray[0]);
-        this.$emit('selectDepartment', selectMixTreeOrganizationAnddepartmentId, false);
+        const selecOrganizationAnddepartmentId = {
+          organizationId: rowData.node.dataRef.organization.id,
+          departmentId: rowData.node.dataRef.id
+        };
+        this.$emit('selectDepartment', selecOrganizationAnddepartmentId, false);
       }
       // 取消选中
       if (this.selectMixTreeArray.length === 0) {

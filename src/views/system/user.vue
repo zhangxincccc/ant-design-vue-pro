@@ -2,12 +2,11 @@
   <page-header-wrapper :title="false">
     <div class="user">
       <div class="departmentList">
-        <mix-Tree
-          ref="childComponent"
+        <organization-mix-tree
           @selectOrganization="selectMixTreeOrganizationData"
           @selectDepartment="selectMixTreeDepartmentData"
           @cancelSelect="cancelSelectMixTreeDepartmentData"
-        ></mix-Tree>
+        ></organization-mix-tree>
       </div>
       <div class="userMain">
         <a-spin tip="加载中..." class="position" v-if="userLoading"> </a-spin>
@@ -17,18 +16,23 @@
               <a-row :gutter="48">
                 <a-col :md="8" :sm="24">
                   <a-form-item label="用户名">
-                    <a-input v-model="userTableSearchParam.searchName" placeholder="请输入" allowClear />
+                    <a-input v-model="searchParameters.searchName" placeholder="请输入" allowClear />
                   </a-form-item>
                 </a-col>
                 <a-col :md="8" :sm="24">
                   <a-form-item label="创建日期">
-                    <a-range-picker @change="onChangeData" allowClear v-model="userTableSearchParam.userDate" />
+                    <a-range-picker @change="onChangeData" allowClear v-model="searchParameters.userDate" />
                   </a-form-item>
                 </a-col>
                 <template v-if="advanced">
                   <a-col :md="8" :sm="24">
                     <a-form-item label="角色">
-                      <a-select allowClear v-model="userTableSearchParam.searchRoleId" size="default" placeholder="请选择">
+                      <a-select
+                        allowClear
+                        v-model="searchParameters.searchRoleId"
+                        size="default"
+                        placeholder="请选择"
+                      >
                         <a-select-option v-for="item in userRoleArray" :key="item.id">
                           {{ item.name }}
                         </a-select-option>
@@ -37,12 +41,12 @@
                   </a-col>
                   <a-col :md="8" :sm="24">
                     <a-form-item label="登录名">
-                      <a-input v-model="userTableSearchParam.searchUsername" placeholder="请输入" allowClear />
+                      <a-input v-model="searchParameters.searchUsername" placeholder="请输入" allowClear />
                     </a-form-item>
                   </a-col>
                   <a-col :md="8" :sm="24">
                     <a-form-item label="状态">
-                      <a-select v-model="userTableSearchParam.searchIsEnable" placeholder="请选择" allowClear>
+                      <a-select v-model="searchParameters.searchIsEnable" placeholder="请选择" allowClear>
                         <a-select-option value="1">启用</a-select-option>
                         <a-select-option value="0">停用</a-select-option>
                       </a-select>
@@ -51,7 +55,7 @@
                 </template>
                 <a-col :md="8" :sm="24" style="display:flex;justify-content: flex-end">
                   <span>
-                    <a-button style="margin-left: 30px" @click="() => (this.userTableSearchParam = {})">重置</a-button>
+                    <a-button style="margin-left: 30px" @click="() => (this.searchParameters = {})">重置</a-button>
                     <a-button
                       style="margin-left: 8px"
                       type="primary"
@@ -222,7 +226,7 @@ import {
   listAllRoles
 } from '@/api/api';
 import moment from 'moment';
-import mixTree from './components/tree/mixTreeData';
+import OrganizationMixTree from './components/tree/OrganizationMixTree';
 // 表单正则验证统一写在这里
 import { validateEmail } from '../../utils/validator';
 const columns = [
@@ -270,7 +274,7 @@ export default {
       selectDepartmentFlagArray: [], // 接受部门列表子组件选中的ID数组 []为未选中状态 有值为选中状态
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
       userLoading: false, // 页面加载数据loading
-      userTableSearchParam: {}, // 表格搜索条件Input绑定
+      searchParameters: {}, // 表格搜索条件Input绑定
       advanced: false, // 控制搜索条件的展开折叠
       addOrEdit: 1, // 判断新增或编辑（1为新增2为编辑）
       modleVisible: false, // 控制表单弹框
@@ -322,11 +326,11 @@ export default {
       formDepartmentTreeData: [], // 部门下拉选择树结构数据
       formOrganizationTreeData: [], // 组织下拉选择树结构数据
       batchSelectIdArray: [], // 批量选中的数据ID
-      selectMixTreeOrganizationAndDepartmentIdArray: [] // 点击左侧部门树获取到部门ID和上级组织ID
+      selectMixTreeOrganizationId: undefined // 点击左侧混合树获取到部门上级组织ID
     };
   },
   components: {
-    mixTree
+    OrganizationMixTree
   },
   watch: {
     /**
@@ -338,7 +342,7 @@ export default {
     userTableTotal() {
       if (this.userTableTotal === this.getExceptCurrentPageTableTotalData && this.userTableTotal !== 0) {
         this.currentPage -= 1;
-        this.getUserTableData(this.pageObject, this.userTableSearchParam);
+        this.getUserTableData(this.pageObject, this.searchParameters);
       }
     }
   },
@@ -349,7 +353,7 @@ export default {
   },
   created() {
     this.userLoading = true;
-    this.getUserTableData(this.pageObject, this.userTableSearchParam); // 获取表格数据
+    this.getUserTableData(this.pageObject, this.searchParameters); // 获取表格数据
     this.getUserRoleData(); // 获取角色数据列表
     this.getFormOrganizationsTree(); // 获取表单组织树结构数据
   },
@@ -369,8 +373,8 @@ export default {
      */
 
     selectMixTreeOrganizationData(organizationId, organizationType) {
-      this.userTableSearchParam.searchOrganizationId = organizationId[0];
-      this.userTableSearchParam.searchDepartmentId = undefined;
+      this.searchParameters.searchOrganizationId = organizationId[0];
+      this.searchParameters.searchDepartmentId = undefined;
       this.isOrganization = organizationType;
       this.searchUserTableComponentParams();
     },
@@ -379,10 +383,10 @@ export default {
      * @param {array} departmentId 部门ID数组
      * @param {string} departmentType 选中的类型
      */
-    selectMixTreeDepartmentData(departmentId, departmentType) {
-      this.selectMixTreeOrganizationAndDepartmentIdArray = departmentId;
-      this.userTableSearchParam.searchDepartmentId = departmentId[1];
-      this.userTableSearchParam.searchOrganizationId = undefined;
+    selectMixTreeDepartmentData(organizationAnddepartmentId, departmentType) {
+      this.selectMixTreeOrganizationId = organizationAnddepartmentId.organizationId;
+      this.searchParameters.searchDepartmentId = organizationAnddepartmentId.departmentId;
+      this.searchParameters.searchOrganizationId = undefined;
       this.isOrganization = departmentType;
       this.searchUserTableComponentParams();
     },
@@ -390,8 +394,8 @@ export default {
      * @description: 取消选中混合树
      */
     cancelSelectMixTreeDepartmentData() {
-      this.userTableSearchParam.searchOrganizationId = undefined;
-      this.userTableSearchParam.searchDepartmentId = undefined;
+      this.searchParameters.searchOrganizationId = undefined;
+      this.searchParameters.searchDepartmentId = undefined;
       this.isOrganization = -1;
       this.searchUserTableComponentParams();
     },
@@ -437,7 +441,7 @@ export default {
       this.currentPage = 1;
       this.pageObject.pageNumber = 0;
       this.userLoading = true;
-      this.getUserTableData(this.pageObject, this.userTableSearchParam);
+      this.getUserTableData(this.pageObject, this.searchParameters);
     },
 
     /**
@@ -446,8 +450,8 @@ export default {
      * @param {array} dateString UI框架自带 时间区间
      */
     onChangeData(date, dateString) {
-      this.userTableSearchParam.searchCreateDateBegin = dateString[0];
-      this.userTableSearchParam.searchCreateDateEnd = dateString[1];
+      this.searchParameters.searchCreateDateBegin = dateString[0];
+      this.searchParameters.searchCreateDateEnd = dateString[1];
     },
 
     /**
@@ -455,8 +459,8 @@ export default {
      * @param {object} searchOrganizationId 组织ID
      * @return {*}
      */
-    getUserDepartmentTree(searchOrganizationId) {
-      userDepartmentTree(searchOrganizationId).then(res => {
+    getUserDepartmentTree(searchParameters) {
+      userDepartmentTree(searchParameters).then(res => {
         if (res.code === 200) {
           this.formDepartmentTreeData = res.data;
         }
@@ -535,7 +539,7 @@ export default {
       this.modleVisible = false;
       this.clearFormData();
       this.userLoading = true;
-      this.getUserTableData(this.pageObject, this.userTableSearchParam);
+      this.getUserTableData(this.pageObject, this.searchParameters);
     },
 
     /**
@@ -548,7 +552,7 @@ export default {
           this.$message.success(res.message);
           this.modleVisible = false;
           this.userLoading = true;
-          this.getUserTableData(this.pageObject, this.userTableSearchParam);
+          this.getUserTableData(this.pageObject, this.searchParameters);
         }
       });
     },
@@ -564,7 +568,7 @@ export default {
           if (res.code === 200) {
             this.$message.success(res.message);
             this.modleVisible = false;
-            this.getUserTableData(this.pageObject, this.userTableSearchParam);
+            this.getUserTableData(this.pageObject, this.searchParameters);
           }
         });
       } else {
@@ -572,7 +576,7 @@ export default {
           if (res.code === 200) {
             this.$message.success(res.message);
             this.modleVisible = false;
-            this.getUserTableData(this.pageObject, this.userTableSearchParam);
+            this.getUserTableData(this.pageObject, this.searchParameters);
           }
         });
       }
@@ -615,7 +619,7 @@ export default {
     batchComponent(batchSuccessData) {
       this.$message.success(batchSuccessData.message);
       this.batchSelectIdArray = [];
-      this.getUserTableData(this.pageObject, this.userTableSearchParam);
+      this.getUserTableData(this.pageObject, this.searchParameters);
     },
     /**
      * @description: 获取分页页数改变后的值
@@ -625,7 +629,7 @@ export default {
       this.userLoading = true;
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
-      this.getUserTableData(this.pageObject, this.userTableSearchParam);
+      this.getUserTableData(this.pageObject, this.searchParameters);
     },
 
     /**
@@ -638,7 +642,7 @@ export default {
       this.currentPage = currentPage;
       this.pageObject.pageSize = pageSize;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
-      this.getUserTableData(this.pageObject, this.userTableSearchParam);
+      this.getUserTableData(this.pageObject, this.searchParameters);
     },
 
     /**
@@ -662,10 +666,10 @@ export default {
       this.form.id = undefined;
       this.modleVisible = true;
       if (this.isOrganization === true) {
-        this.form.organization = this.userTableSearchParam.searchOrganizationId;
+        this.form.organization = this.searchParameters.searchOrganizationId;
       } else if (this.isOrganization === false) {
-        this.form.organization = this.selectMixTreeOrganizationAndDepartmentIdArray[0];
-        this.form.department = this.userTableSearchParam.searchDepartmentId;
+        this.form.organization = this.selectMixTreeOrganizationId;
+        this.form.department = this.searchParameters.searchDepartmentId;
         this.getUserDepartmentTree({ searchOrganizationId: this.form.organization });
       }
     },
