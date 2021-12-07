@@ -670,12 +670,10 @@ export default {
      * @param {array} formTreeData 组织树形结构数据
      */
     disabledFormTreeData(formTreeData) {
-      formTreeData.forEach(res => {
-        if (res.isEnable === 0) {
-          res.disabled = true;
-        }
-        if (res.children) {
-          this.disabledFormTreeData(res.children);
+      formTreeData.forEach(item => {
+        item.disabled = item.isEnable === 0;
+        if (item.children) {
+          this.disabledFormTreeData(item.children);
         }
       });
     },
