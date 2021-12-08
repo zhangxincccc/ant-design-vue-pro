@@ -1,14 +1,7 @@
-// eslint-disable-next-line
-import { BasicLayout,  UserLayout } from '@/layouts';
+import { BasicLayout, UserLayout } from '@/layouts';
 import { RouteView } from '@hangar/pro-layout';
-
-import { workplace, system, organization } from '@/core/icons';
+import { workplace, system } from '@/core/icons';
 import { demosRouter } from '@/config/demos-router.config';
-
-// const RouteView = {
-//   name: 'RouteView',
-//   render: h => h('router-view')
-// };
 /*
 注意：
 多标签页请尽量避免使用三级路由，多标签页存在问题
@@ -19,14 +12,19 @@ export const asyncRouterMap = [
     path: '/',
     name: 'index',
     component: BasicLayout,
-    meta: { title: 'menu.home' },
+    meta: {
+      title: 'menu.home'
+    },
     redirect: defaultPage, // 首页跳转地址
     children: [
       {
         path: '/workplace',
         name: 'Workplace',
         component: () => import('@/views/workplace/Workplace'),
-        meta: { title: 'menu.workplace', icon: workplace }
+        meta: {
+          title: 'menu.workplace',
+          icon: workplace
+        }
       },
       // 其他路由请在这里添加
       // ...
@@ -35,18 +33,31 @@ export const asyncRouterMap = [
         name: 'system',
         component: RouteView,
         redirect: '/system/organizations',
-        meta: { title: 'menu.system', icon: system, permission: ['system'] },
+        meta: {
+          title: 'menu.system',
+          icon: system,
+          permission: ['system']
+        },
         children: [
+          // {
+          //   path: '/system/organizations',
+          //   name: 'organizations',
+          //   hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
+          //   component: () => import('@/views/system/organizations/index'),
+          //   meta: {
+          //     title: 'menu.system.organizations',
+          //     icon: organization,
+          //     keepAlive: true,
+          //      permission: ['system:organizations']
+          //   }
+          // },
           {
-            path: '/system/organizations',
-            name: 'organizations',
-            hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
-            component: () => import('@/views/system/organizations/index'),
+            path: '/system/role',
+            name: 'role',
+            component: () => import('@/views/system/role'),
             meta: {
-              title: 'menu.system.organizations',
-              icon: organization,
-              keepAlive: true,
-              permission: ['system:organizations']
+              title: '角色管理',
+              icon: workplace
             }
           }
         ]
@@ -75,17 +86,17 @@ export const constantRouterMap = [
       {
         path: 'login',
         name: 'login',
-        component: () => import(/* webpackChunkName: "user" */ '@/views/user/Login')
+        component: () => import('@/views/user/Login')
       },
       {
         path: 'register',
         name: 'register',
-        component: () => import(/* webpackChunkName: "user" */ '@/views/user/Register')
+        component: () => import('@/views/user/Register')
       },
       {
         path: 'register-result',
         name: 'registerResult',
-        component: () => import(/* webpackChunkName: "user" */ '@/views/user/RegisterResult')
+        component: () => import('@/views/user/RegisterResult')
       },
       {
         path: 'recover',
@@ -97,14 +108,14 @@ export const constantRouterMap = [
 
   {
     path: '/403',
-    component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/403')
+    component: () => import('@/views/exception/403')
   },
   {
     path: '/404',
-    component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/404')
+    component: () => import('@/views/exception/404')
   },
   {
     path: '/500',
-    component: () => import(/* webpackChunkName: "fail" */ '@/views/exception/500')
+    component: () => import('@/views/exception/500')
   }
 ];

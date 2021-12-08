@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2021-08-24 11:28:34
+ * @LastEditTime: 2021-12-08 17:15:40
+ * @LastEditors: your name
+ * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ * @FilePath: \ant-design-vue-pro\src\main.js
+ */
 // with polyfills
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
@@ -14,7 +22,7 @@ import '@/layouts/scrollbar.less'; // progress bar custom style
 
 // mock
 // WARNING: `mockjs` NOT SUPPORT `IE` PLEASE DO NOT USE IN `production` ENV.
-import './mock';
+// import './mock';
 
 import bootstrap from './core/bootstrap';
 import './core/lazy_use'; // use lazy load components
