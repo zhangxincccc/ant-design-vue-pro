@@ -301,12 +301,12 @@ export default {
             item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
           });
           this.roleTableTotal = res.data.totalElements;
-          this.roleLoading = false;
         } else {
           this.roleTableTotal = res.data.totalElements;
           this.roleTableData = [];
-          this.roleLoading = false;
         }
+      }).finally(() => {
+        this.roleLoading = false;
       });
     },
 
