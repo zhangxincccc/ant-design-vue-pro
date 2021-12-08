@@ -6,7 +6,7 @@
         <a-popover placement="bottomRight">
           <template slot="content">
             <p style="cursor: pointer;" @click="() => (this.expandedKeys = this.allIds)">展开全部</p>
-            <p style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</p>
+            <span style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</span>
           </template>
           <a-icon type="menu-unfold" /> </a-popover
         ></span>
