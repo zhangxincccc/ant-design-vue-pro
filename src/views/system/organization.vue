@@ -131,10 +131,10 @@
             :wrapper-col="wrapperCol"
           >
             <a-form-model-item ref="name" label="组织名称" prop="name">
-              <a-input v-model="form.name" placeholder="请输入角色名称" />
+              <a-input v-model="form.name" placeholder="请输入组织名称" />
             </a-form-model-item>
             <a-form-model-item ref="code" label="组织代码" prop="code">
-              <a-input v-model="form.code" placeholder="请输入角色代码" />
+              <a-input v-model="form.code" placeholder="请输入组织代码" />
             </a-form-model-item>
             <a-form-model-item label="上级组织" prop="parentId">
               <a-tree-select
@@ -146,7 +146,7 @@
                 style="width: 100%"
                 :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
                 :tree-data="formOrganizationTreeData"
-                placeholder="请选择上级权限"
+                placeholder="请选择上级组织"
                 tree-default-expand-all
               >
               </a-tree-select>
