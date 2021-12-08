@@ -64,9 +64,6 @@
             bordered
           >
             <template slot="action" slot-scope="text, record">
-              <a slot="action" href="javascript:;" @click="handleIsEnable(record)" :class="{deactivate:record.isEnable == 1,enable:record.isEnable == 0}">{{
-                record.isEnable == 1 ? '停用' : '启用'
-              }}</a>
               <a slot="action" href="javascript:;" style="margin-left:5px" @click="handleEdit(record)">编辑</a>
               <a-popconfirm
                 slot="action"
@@ -119,7 +116,7 @@
                 <a-form-model-item ref="name" label="角色名称" prop="name">
                   <a-input v-model="form.name" placeholder="请输入角色名称" />
                 </a-form-model-item>
-                <a-form-model-item ref="code" label="角色值" prop="code">
+                <a-form-model-item ref="code" label="角色代码" prop="code">
                   <a-input v-model="form.code" placeholder="请输入角色值" />
                 </a-form-model-item>
                 <a-form-model-item label="状态" prop="isEnable">
@@ -513,12 +510,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.deactivate {
-  color: red;
-}
-.enable {
-  color: green;
-}
 .table-page-search-wrapper /deep/ .ant-form-inline .ant-form-item > .ant-form-item-label {
   line-height: 32px;
   padding-right: 8px;
