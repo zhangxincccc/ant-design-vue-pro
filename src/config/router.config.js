@@ -39,18 +39,26 @@ export const asyncRouterMap = [
           permission: ['system']
         },
         children: [
-          // {
-          //   path: '/system/organizations',
-          //   name: 'organizations',
-          //   hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
-          //   component: () => import('@/views/system/organizations/index'),
-          //   meta: {
-          //     title: 'menu.system.organizations',
-          //     icon: organization,
-          //     keepAlive: true,
-          //      permission: ['system:organizations']
-          //   }
-          // },
+          {
+            path: '/system/organization',
+            name: 'organization',
+            component: () => import('@/views/system/organization'),
+            meta: {
+              title: '组织机构管理',
+              permission: ['system:organizations'],
+              icon: workplace
+            }
+          },
+          {
+            path: '/system/department',
+            name: 'department',
+            component: () => import('@/views/system/department'),
+            meta: {
+              title: '部门管理',
+              permission: ['system:departments'],
+              icon: workplace
+            }
+          },
           {
             path: '/system/role',
             name: 'role',

@@ -51,15 +51,10 @@
                 <a-col :md="8" :sm="24" style="display:flex;justify-content: flex-end">
                   <span>
                     <a-button style="margin-left: 30px" @click="() => (this.searchParameters = {})">重置</a-button>
-                    <a-button
-                      style="margin-left: 8px"
-                      type="primary"
-                      @click="() => this.searchUserTableData()"
-                    >查询</a-button
-                    >
+                    <a-button style="margin-left: 8px" type="primary" @click="() => this.searchUserTableData()">查询</a-button>
                     <a @click="() => (this.advanced = !this.advanced)" style="margin-left: 8px">
                       {{ advanced ? '收起' : '展开' }}
-                      <a-icon :type="6 ? 'up' : 'down'" />
+                      <a-icon :type="advanced ? 'up' : 'down'" />
                     </a>
                   </span>
                 </a-col>
@@ -71,13 +66,28 @@
           <div class="userMainTableAdd">
             <div>用户列表</div>
             <div>
-              <a-button type="primary" class="buttonMargin" @click="handleBatchEnable">
+              <a-button
+                type="primary"
+                class="buttonMargin"
+                @click="handleBatchEnable"
+                :disabled="batchSelectIdArray.length === 0"
+              >
                 批量启用
               </a-button>
-              <a-button type="primary" class="buttonMargin" @click="handleBatchDisable">
+              <a-button
+                type="primary"
+                class="buttonMargin"
+                @click="handleBatchDisable"
+                :disabled="batchSelectIdArray.length === 0"
+              >
                 批量停用
               </a-button>
-              <a-button type="primary" class="buttonMargin" @click="handleBatchDelete">
+              <a-button
+                type="primary"
+                class="buttonMargin"
+                @click="handleBatchDelete"
+                :disabled="batchSelectIdArray.length === 0"
+              >
                 批量删除
               </a-button>
               <a-button type="primary" @click="handleAddUser()">
@@ -101,10 +111,10 @@
             >
               <span slot="name" slot-scope="text">{{ text }}</span>
               <template slot="roles" slot-scope="roles">
-                <span v-for="item in roles" :key="item.id"> {{ item.name }} <span style="padding:0 5px;"></span> </span>
+                <span v-for="(item,index) in roles" :key="item.id"> {{ item.name }}  <span v-if="index!=roles.length-1">/</span></span>
               </template>
               <template slot="action" slot-scope="text, record">
-                <a slot="action" href="javascript:;" @click="handleIsEnable(record)">{{
+                <a slot="action" href="javascript:;" @click="handleIsEnable(record)" :class="{deactivate:record.isEnable == 1,enable:record.isEnable == 0}">{{
                   record.isEnable == 1 ? '停用' : '启用'
                 }}</a>
                 <a slot="action" href="javascript:;" @click="handleEditUser(record)" style="margin-left:5px">编辑</a>
@@ -217,7 +227,7 @@ import {
   batchDisableUserByIds,
   batchEnableUserByIds,
   batchDeleteUserByIds,
-  userDepartmentTree,
+  departmentsTree,
   listAllRoles,
   loadUserById
 } from '@/api/api';
@@ -246,16 +256,12 @@ const columns = [
     dataIndex: 'username'
   },
   {
-    title: '邮箱',
-    dataIndex: 'email'
+    title: '所属组织',
+    dataIndex: 'organization.name'
   },
   {
     title: '所属部门',
     dataIndex: 'department.name'
-  },
-  {
-    title: '所属组织',
-    dataIndex: 'organization.name'
   },
   {
     title: '操作',
@@ -267,6 +273,7 @@ export default {
   name: 'User',
   data() {
     return {
+      isBatchButtonDisabled: true, // 判断批量按钮的禁用状态
       selectDepartmentFlagArray: [], // 接受部门列表子组件选中的ID数组 []为未选中状态 有值为选中状态
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
       userLoading: false, // 页面加载数据loading
@@ -457,7 +464,7 @@ export default {
      * @return {*}
      */
     getUserDepartmentTree(searchParameters) {
-      userDepartmentTree(searchParameters).then(res => {
+      departmentsTree(searchParameters).then(res => {
         if (res.code === 200) {
           this.formDepartmentTreeData = res.data;
         }
@@ -720,6 +727,12 @@ export default {
   padding-right: 8px;
   width: 77px;
 }
+.deactivate {
+  color: red;
+}
+.enable {
+  color: green;
+}
 .user {
   width: 100%;
   border-radius: 5px;
@@ -772,6 +785,7 @@ export default {
         height: calc(100vh - 380px);
         padding: 10px;
         overflow: scroll;
+
       }
       .userMainTableContent /deep/ .ant-table-tbody .ant-table-row:nth-child(2n) {
         background: #fafafa;
