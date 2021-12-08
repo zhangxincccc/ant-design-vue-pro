@@ -70,7 +70,7 @@
                 type="primary"
                 class="buttonMargin"
                 @click="handleBatchEnable"
-                :disabled="isBatchButtonDisabled"
+                :disabled="batchSelectIdArray.length === 0"
               >
                 批量启用
               </a-button>
@@ -78,7 +78,7 @@
                 type="primary"
                 class="buttonMargin"
                 @click="handleBatchDisable"
-                :disabled="isBatchButtonDisabled"
+                :disabled="batchSelectIdArray.length === 0"
               >
                 批量停用
               </a-button>
@@ -86,7 +86,7 @@
                 type="primary"
                 class="buttonMargin"
                 @click="handleBatchDelete"
-                :disabled="isBatchButtonDisabled"
+                :disabled="batchSelectIdArray.length === 0"
               >
                 批量删除
               </a-button>

@@ -48,12 +48,7 @@
                 <a-col :md="8" :sm="24" style="display:flex;justify-content: flex-end">
                   <span>
                     <a-button style="margin-left: 30px" @click="() => (this.searchParameters = {})">重置</a-button>
-                    <a-button
-                      style="margin-left: 8px"
-                      type="primary"
-                      @click="() => this.searchOrganizationTableData()"
-                    >查询</a-button
-                    >
+                    <a-button style="margin-left: 8px" type="primary" @click="() => this.searchOrganizationTableData()">查询</a-button>
                     <a @click="() => (this.advanced = !this.advanced)" style="margin-left: 8px">
                       {{ advanced ? '收起' : '展开' }}
                       <a-icon :type="advanced ? 'up' : 'down'" />
@@ -76,7 +71,7 @@
           <div class="organizationTableContent">
             <a-table
               :columns="columns"
-              :data-source="roleTableData"
+              :data-source="organizationTableData"
               :pagination="false"
               size="middle"
               :rowKey="
@@ -87,9 +82,13 @@
               bordered
             >
               <template slot="action" slot-scope="text, record">
-                <a slot="action" href="javascript:;" @click="handleIsEnable(record)" :class="{deactivate:record.isEnable == 1,enable:record.isEnable == 0}">{{
-                  record.isEnable == 1 ? '停用' : '启用'
-                }}</a>
+                <a
+                  slot="action"
+                  href="javascript:;"
+                  @click="handleIsEnable(record)"
+                  :class="{ deactivate: record.isEnable == 1, enable: record.isEnable == 0 }"
+                  >{{ record.isEnable == 1 ? '停用' : '启用' }}</a
+                >
                 <a slot="action" href="javascript:;" style="margin-left:5px" @click="handleEdit(record)">编辑</a>
                 <a-popconfirm
                   slot="action"
@@ -200,7 +199,7 @@ const columns = [
   }
 ];
 export default {
-  name: 'Role',
+  name: 'Organization',
   data() {
     return {
       advanced: false, // 控制搜索条件的展开折叠
@@ -209,7 +208,7 @@ export default {
       searchParameters: {}, // 表格搜索条件值
       modleVisible: false, // 控制弹框
       columns, // 表格头部
-      roleTableData: [], // 表格数据
+      organizationTableData: [], // 表格数据
       pageSizeOptions: this.$store.state.user.defaultPaginationOptions, // 分页下拉
       currentPage: 1, // 默认分页当前页
       pageObject: {
@@ -221,10 +220,10 @@ export default {
       wrapperCol: { span: 14 },
       form: {
         // 表单数据
-        name: undefined,
-        parent: undefined,
-        parentId: undefined,
-        code: undefined,
+        name: undefined, // 组织名称
+        parent: undefined, // 配合后台接口的字段
+        parentId: undefined, // 上级组织ID
+        code: undefined, // 组织代码
         isEnable: '1' // 状态
       },
       rules: {
@@ -300,20 +299,22 @@ export default {
      * @param {object} params 搜索参数
      */
     getOrganizationTableData(page, params) {
-      listOrganizations(Object.assign({}, page, params)).then(res => {
-        if (res.code === 200 && res.data.content) {
-          this.roleTableData = res.data.content;
-          this.roleTableData.forEach(item => {
-            item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
-          });
-          this.organizationTableTotal = res.data.totalElements;
+      listOrganizations(Object.assign({}, page, params))
+        .then(res => {
+          if (res.code === 200 && res.data.content) {
+            this.organizationTableData = res.data.content;
+            this.organizationTableData.forEach(item => {
+              item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
+            });
+            this.organizationTableTotal = res.data.totalElements;
+          } else {
+            this.organizationTableTotal = res.data.totalElements;
+            this.organizationTableData = [];
+          }
+        })
+        .finally(() => {
           this.organizationloading = false;
-        } else {
-          this.organizationTableTotal = res.data.totalElements;
-          this.roleTableData = [];
-          this.organizationloading = false;
-        }
-      });
+        });
     },
 
     /**
@@ -404,15 +405,10 @@ export default {
      * @param {object} organizationTableRowData 表格某一行的数据对象
      */
     handleEdit(organizationTableRowData) {
-      console.log(organizationTableRowData);
       loadOrganizationById({ id: organizationTableRowData.id }).then(res => {
         if (res.code === 200) {
           this.form = Object.assign({}, this.form, res.data);
-          if (this.form.parent) {
-            this.form.parentId = this.form.parent.id;
-          } else {
-            this.form.parentId = undefined;
-          }
+          this.form.parentId = this.form.parent ? this.form.parent.id : undefined;
           this.form.isEnable = String(this.form.isEnable);
           this.modleVisible = true;
         }
