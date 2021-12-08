@@ -348,9 +348,6 @@ export default {
         this.currentPage -= 1;
         this.getUserTableData(this.pageObject, this.searchParameters);
       }
-    },
-    batchSelectIdArray() {
-      this.isBatchButtonDisabled = this.batchSelectIdArray.length === 0;
     }
   },
   computed: {

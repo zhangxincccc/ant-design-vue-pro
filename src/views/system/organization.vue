@@ -161,6 +161,9 @@
                 </a-radio-button>
               </a-radio-group>
             </a-form-model-item>
+            <a-form-model-item label="组织描述">
+              <a-input v-model="form.description" type="textarea" placeholder="请输入描述" />
+            </a-form-model-item>
           </a-form-model>
         </a-modal>
       </div>
@@ -191,6 +194,10 @@ const columns = [
   {
     title: '代码',
     dataIndex: 'code'
+  },
+  {
+    title: '组织描述',
+    dataIndex: 'description'
   },
   {
     title: '操作',
@@ -224,7 +231,8 @@ export default {
         parent: undefined, // 配合后台接口的字段
         parentId: undefined, // 上级组织ID
         code: undefined, // 组织代码
-        isEnable: '1' // 状态
+        isEnable: '1', // 状态
+        description: undefined // 组织描述
       },
       rules: {
         // 规则验证
