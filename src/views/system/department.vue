@@ -276,7 +276,6 @@ export default {
         code: [{ required: true, message: '请输入部门编码', trigger: 'blur' }],
         organizationId: [{ required: true, message: '请选择所属组织', trigger: 'change' }]
       },
-      selectDepartmentParentId: undefined, // 选中部门的父级ID
       selectOrganizationId: undefined, // 选中部门的组织ID
       departmentFormTreeData: [], // 部门下拉选择树结构数据
       organizationTreeData: [] // 组织下拉选择树结构数据
@@ -344,7 +343,6 @@ export default {
      */
     selectDepartment(organizationAnddepartmentId) {
       this.selectOrganizationId = organizationAnddepartmentId.organizationId;
-      this.selectDepartmentParentId = organizationAnddepartmentId.departmentParentId;
       this.searchParameters.searchParentId = organizationAnddepartmentId.departmentId;
       this.searchDepartmentTableData();
     },
@@ -354,7 +352,6 @@ export default {
     cancelSelect() {
       this.searchParameters.searchParentId = undefined;
       this.selectOrganizationId = undefined;
-      this.selectDepartmentParentId = undefined;
       this.searchDepartmentTableData();
     },
 
@@ -477,7 +474,7 @@ export default {
       this.form.id = undefined;
       this.modleVisible = true;
       this.form.organizationId = this.selectOrganizationId;
-      this.form.parentId = this.selectDepartmentParentId;
+      this.form.parentId = this.searchParameters.searchParentId;
       this.getDepartmentTree({ searchOrganizationId: this.form.organizationId });
     },
 

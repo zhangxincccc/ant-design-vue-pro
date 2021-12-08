@@ -159,8 +159,7 @@ export default {
     handleSelect(selectedKeys, rowData) {
       const selecOrganizationAnddepartmentId = {
         organizationId: rowData.node.dataRef.organization.id,
-        departmentId: rowData.node.dataRef.id,
-        departmentParentId: rowData.node.dataRef.parent ? rowData.node.dataRef.parent.id : undefined
+        departmentId: rowData.node.dataRef.id
       };
       this.$emit('selectDepartment', selecOrganizationAnddepartmentId, false);
       // 取消选中
