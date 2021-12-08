@@ -265,9 +265,9 @@ export default {
         code: undefined, // 编码
         isEnable: '1', // 状态
         parentId: undefined, // 上级部门
-        parent: undefined,
+        parent: undefined, // 传给后台接口的上级部门字段
         organizationId: undefined, // 所属组织
-        organization: undefined,
+        organization: undefined, // 传给后台接口的所属组织字段
         description: undefined // 备注
       },
       rules: {
@@ -369,12 +369,12 @@ export default {
             item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
           });
           this.departmentTableTotal = res.data.totalElements;
-          this.departmentLoading = false;
         } else {
           this.departmentTableTotal = res.data.totalElements;
           this.departmentTableData = [];
-          this.departmentLoading = false;
         }
+      }).finally(() => {
+         this.departmentLoading = false;
       });
     },
 
@@ -490,11 +490,7 @@ export default {
         if (res.code === 200) {
           this.form = Object.assign({}, this.form, res.data);
           this.form.organizationId = this.form.organization.id;
-          if (this.form.parent) {
-            this.form.parentId = this.form.parent.id;
-          } else {
-            this.form.parentId = undefined;
-          }
+          this.form.parentId = this.form.parent ? this.form.parent.id : undefined;
           this.form.isEnable = String(this.form.isEnable);
           this.getDepartmentTree({ searchOrganizationId: this.form.organizationId });
           this.modleVisible = true;
