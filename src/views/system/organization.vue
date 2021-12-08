@@ -56,7 +56,7 @@
                     >
                     <a @click="() => (this.advanced = !this.advanced)" style="margin-left: 8px">
                       {{ advanced ? '收起' : '展开' }}
-                      <a-icon :type="6 ? 'up' : 'down'" />
+                      <a-icon :type="advanced ? 'up' : 'down'" />
                     </a>
                   </span>
                 </a-col>
@@ -87,7 +87,7 @@
               bordered
             >
               <template slot="action" slot-scope="text, record">
-                <a slot="action" href="javascript:;" @click="handleIsEnable(record)">{{
+                <a slot="action" href="javascript:;" @click="handleIsEnable(record)" :class="{deactivate:record.isEnable == 1,enable:record.isEnable == 0}">{{
                   record.isEnable == 1 ? '停用' : '启用'
                 }}</a>
                 <a slot="action" href="javascript:;" style="margin-left:5px" @click="handleEdit(record)">编辑</a>
@@ -507,6 +507,12 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.deactivate {
+  color: red;
+}
+.enable {
+  color: green;
+}
 .table-page-search-wrapper /deep/ .ant-form-inline .ant-form-item > .ant-form-item-label {
   line-height: 32px;
   padding-right: 8px;
