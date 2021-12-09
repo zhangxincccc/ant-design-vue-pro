@@ -177,7 +177,7 @@
               }"
               v-model="form.organizationId"
               style="width: 100%"
-              @change="organizationId => this.getUserDepartmentTree({ searchOrganizationId: organizationId })"
+              @change="organizationId => (this.getUserDepartmentTree({ searchOrganizationId: organizationId }),this.form.departmentId = undefined)"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
               :tree-data="formOrganizationTreeData"
               placeholder="请选择所属组织"
@@ -325,7 +325,7 @@ export default {
           { max: 200, message: '用户名长度不能大于200', trigger: 'blur' }
         ],
         roleIds: [{ required: true, message: '请选择角色', trigger: 'change' }],
-        organization: [{ required: true, message: '请选择组织', trigger: 'change' }]
+        organizationId: [{ required: true, message: '请选择组织', trigger: 'change' }]
       },
       formDepartmentTreeData: [], // 部门下拉选择树结构数据
       formOrganizationTreeData: [], // 组织下拉选择树结构数据
@@ -345,8 +345,9 @@ export default {
      */
     userTableTotal() {
       if (this.userTableTotal === this.getExceptCurrentPageTableTotalData && this.userTableTotal !== 0) {
-        this.currentPage -= 1;
-        this.getUserTableData(this.pageObject, this.searchParameters);
+       this.pageObject.pageNumber = Number(this.currentPage) - 1;
+       this.currentPage -= 1;
+       this.getUserTableData(this.pageObject, this.searchParameters);
       }
     }
   },
@@ -356,7 +357,6 @@ export default {
     }
   },
   created() {
-    this.userLoading = true;
     this.getUserTableData(this.pageObject, this.searchParameters); // 获取表格数据
     this.getRoles(); // 获取角色数据列表
     this.getFormOrganizationsTree(); // 获取表单组织树结构数据
@@ -410,6 +410,7 @@ export default {
      */
 
     getUserTableData(page, params) {
+      this.userLoading = true;
       listUsers(Object.assign({}, page, params)).then(resp => {
         if (resp.code === 200 && resp.data.content) {
           this.tableData = resp.data.content;
@@ -417,12 +418,12 @@ export default {
             item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
           });
           this.userTableTotal = resp.data.totalElements;
-          this.userLoading = false;
         } else {
           this.userTableTotal = resp.data.totalElements;
           this.tableData = [];
-          this.userLoading = false;
         }
+      }).finally(() => {
+        this.userLoading = false;
       });
     },
 
@@ -444,7 +445,6 @@ export default {
     searchUserTableData() {
       this.currentPage = 1;
       this.pageObject.pageNumber = 0;
-      this.userLoading = true;
       this.getUserTableData(this.pageObject, this.searchParameters);
     },
 
@@ -540,7 +540,6 @@ export default {
       this.$message.success(formSuccessData.message);
       this.modleVisible = false;
       this.clearFormData();
-      this.userLoading = true;
       this.getUserTableData(this.pageObject, this.searchParameters);
     },
 
@@ -553,7 +552,6 @@ export default {
         if (res.code === 200) {
           this.$message.success(res.message);
           this.modleVisible = false;
-          this.userLoading = true;
           this.getUserTableData(this.pageObject, this.searchParameters);
         }
       });
@@ -564,7 +562,6 @@ export default {
      * @param {object} userTableRowData 某一条表格数据对象
      */
     handleIsEnable(userTableRowData) {
-      this.userLoading = true;
       if (userTableRowData.isEnable === 1) {
         disableUserById({ id: userTableRowData.id }).then(res => {
           if (res.code === 200) {
@@ -628,7 +625,6 @@ export default {
      * @param {string} pageNumber UI框架自带
      */
     handlePageNumberChange(pageNumber) {
-      this.userLoading = true;
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getUserTableData(this.pageObject, this.searchParameters);
@@ -640,7 +636,6 @@ export default {
      * @param {string} pageSize UI框架自带
      */
     onPageSizeChange(currentPage, pageSize) {
-      this.userLoading = true;
       this.currentPage = currentPage;
       this.pageObject.pageSize = pageSize;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
@@ -716,6 +711,7 @@ export default {
      * @description:数据新增编辑完成过后清空
      */
     clearFormData() {
+      this.$refs.userRuleForm.resetFields();
       this.form = this.$options.data.call(this).form;
     }
   }

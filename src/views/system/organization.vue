@@ -161,8 +161,8 @@
                 </a-radio-button>
               </a-radio-group>
             </a-form-model-item>
-            <a-form-model-item label="组织描述">
-              <a-input v-model="form.description" type="textarea" placeholder="请输入描述" />
+            <a-form-model-item label="备注">
+              <a-input v-model="form.description" type="textarea" placeholder="请输入备注" />
             </a-form-model-item>
           </a-form-model>
         </a-modal>
@@ -257,6 +257,7 @@ export default {
         this.organizationTableTotal === this.getExceptCurrentPageTableTotalData &&
         this.organizationTableTotal !== 0
       ) {
+        this.pageObject.pageNumber = Number(this.currentPage) - 1;
         this.currentPage -= 1;
         this.getOrganizationTableData(this.pageObject, this.searchParameters);
       }
@@ -271,7 +272,6 @@ export default {
     }
   },
   created() {
-    this.organizationloading = true;
     this.getOrganizationTableData(this.pageObject, this.searchParameters); // 获取表格数据
   },
   methods: {
@@ -307,6 +307,7 @@ export default {
      * @param {object} params 搜索参数
      */
     getOrganizationTableData(page, params) {
+      this.organizationloading = true;
       listOrganizations(Object.assign({}, page, params))
         .then(res => {
           if (res.code === 200 && res.data.content) {
@@ -331,7 +332,6 @@ export default {
     searchOrganizationTableData() {
       this.currentPage = 1;
       this.pageObject.pageNumber = 0;
-      this.organizationloading = true;
       this.getOrganizationTableData(this.pageObject, this.searchParameters);
     },
 
@@ -395,7 +395,6 @@ export default {
       this.modleVisible = false;
       this.formButtonDisableFlag = false;
       this.clearFormData();
-      this.organizationloading = true;
       this.getOrganizationTableData(this.pageObject, this.searchParameters);
       this.$refs.organizationTree.getTreeData();
     },
@@ -431,7 +430,6 @@ export default {
       deleteOrganizationById({ id: organizationTableRowData.id }).then(res => {
         if (res.code === 200) {
           this.$message.success(res.message);
-          this.organizationloading = true;
           this.getOrganizationTableData(this.pageObject, this.searchParameters);
           this.$refs.organizationTree.getTreeData();
         }
@@ -444,7 +442,6 @@ export default {
      * @param {string} pageSize 当前页展示几条
      */
     onPageSizeChange(current, pageSize) {
-      this.organizationloading = true;
       this.currentPage = current;
       this.pageObject.pageSize = pageSize;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
@@ -456,7 +453,6 @@ export default {
      * @param {string} pageNumber UI框架自带
      */
     handlePageNumberChange(pageNumber) {
-      this.organizationloading = true;
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getOrganizationTableData(this.pageObject, this.searchParameters);

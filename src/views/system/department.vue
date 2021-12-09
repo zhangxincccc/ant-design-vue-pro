@@ -156,7 +156,7 @@
                 value: 'id'
               }"
               v-model="form.organizationId"
-              @change="organizationId => this.getDepartmentTree({ searchOrganizationId: organizationId })"
+              @change="organizationId => (this.getDepartmentTree({ searchOrganizationId: organizationId }),form.parentId = undefined)"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
               :tree-data="organizationTreeData"
               placeholder="请选择所属组织"
@@ -174,7 +174,7 @@
               style="width: 100%"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
               :tree-data="departmentFormTreeData"
-              placeholder="请选择所属部门"
+              placeholder="请选择上级部门"
               tree-default-expand-all
             >
             </a-tree-select>
@@ -293,6 +293,7 @@ export default {
      */
     departmentTableTotal() {
       if (this.departmentTableTotal === this.getExceptCurrentPageTableTotalData && this.departmentTableTotal !== 0) {
+        this.pageObject.pageNumber = Number(this.currentPage) - 1;
         this.currentPage -= 1;
         this.getDepartentTableData(this.pageObject, this.searchParameters);
       }

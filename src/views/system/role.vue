@@ -9,12 +9,12 @@
               <a-row :gutter="64">
                 <a-col :md="6" :sm="32">
                   <a-form-item label="角色名称">
-                    <a-input allowClear v-model="searchParameters.searchName" placeholder="请输入" />
+                    <a-input allowClear v-model="searchParameters.searchName" placeholder="请输入角色名称" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="32">
                   <a-form-item label="角色值">
-                    <a-input allowClear v-model="searchParameters.searchCode" placeholder="请输入" />
+                    <a-input allowClear v-model="searchParameters.searchCode" placeholder="请输入角色值" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="32">
@@ -117,7 +117,7 @@
                   <a-input v-model="form.name" placeholder="请输入角色名称" />
                 </a-form-model-item>
                 <a-form-model-item ref="code" label="角色代码" prop="code">
-                  <a-input v-model="form.code" placeholder="请输入角色值" />
+                  <a-input v-model="form.code" placeholder="请输入角色代码" />
                 </a-form-model-item>
                 <a-form-model-item label="状态" prop="isEnable">
                   <a-radio-group v-model="form.isEnable" button-style="solid">
@@ -254,6 +254,7 @@ export default {
 
     roleTableTotal() {
       if (this.roleTableTotal === this.getExceptCurrentPageTableTotalData && this.roleTableTotal !== 0) {
+        this.pageObject.pageNumber = Number(this.currentPage) - 1;
         this.currentPage -= 1;
         this.getRoleTableData();
       }
