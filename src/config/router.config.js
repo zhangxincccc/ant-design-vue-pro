@@ -78,6 +78,15 @@ export const asyncRouterMap = [
               permission: ['system:roles'],
               icon: workplace
             }
+          },
+          {
+            path: '/system/permissions',
+            name: 'permissions',
+            component: () => import('@/views/system/permissions'),
+            meta: {
+              title: '权限管理',
+              icon: workplace
+            }
           }
         ]
       },

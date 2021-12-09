@@ -1,59 +1,60 @@
 <template>
   <page-header-wrapper :title="false">
-    <div class="Role">
-      <a-spin tip="加载中..." class="position" v-if="roleLoading"> </a-spin>
-      <div class="roleSearch">
-        <div class="roleSearchInput">
+    <div class="permissions">
+      <a-spin tip="加载中..." class="position" v-if="permissionsLoading"> </a-spin>
+      <div class="permissionsSearch">
+        <div class="permissionsSearchInput">
           <div class="table-page-search-wrapper">
             <a-form layout="inline">
               <a-row :gutter="64">
                 <a-col :md="6" :sm="32">
-                  <a-form-item label="角色名称">
-                    <a-input allowClear v-model="searchParameters.searchName" placeholder="请输入角色名称" />
+                  <a-form-item label="权限名称">
+                    <a-input allowClear v-model="searchParameters.searchName" placeholder="请输入" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="32">
-                  <a-form-item label="角色值">
-                    <a-input allowClear v-model="searchParameters.searchCode" placeholder="请输入角色值" />
+                  <a-form-item label="权限代码">
+                    <a-input allowClear v-model="searchParameters.searchCode" placeholder="请输入" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="32">
-                  <a-form-item label="创建日期">
-                    <a-range-picker @change="onChangeData" allowClear v-model="searchParameters.roleDate" />
-                  </a-form-item>
-                </a-col>
-                <a-col :md="6" :sm="32">
-                  <a-form-item label="状态">
-                    <a-select allowClear v-model="searchParameters.searchIsEnable" placeholder="请选择">
-                      <a-select-option value="0">停用</a-select-option>
-                      <a-select-option value="1">启用</a-select-option>
+                  <a-form-item label="权限类型">
+                    <a-select allowClear v-model="searchParameters.searchType" placeholder="请选择">
+                      <a-select-option v-for="(item, index) in permissionsTypeArray" :key="index" :value="item.value">
+                        {{ item.name }}
+                      </a-select-option>
                     </a-select>
+                  </a-form-item>
+                </a-col>
+                <a-col :md="6" :sm="32">
+                  <a-form-item label="创建时间">
+                    <a-range-picker allowClear v-model="searchParameters.interfaceCreatetime" />
                   </a-form-item>
                 </a-col>
               </a-row>
             </a-form>
           </div>
         </div>
-        <div class="roleSearchButton">
+        <div class="permissionSearchButton">
           <a-button style="margin-right:20px" @click="() => (this.searchParameters = {})">重置</a-button>
-          <a-button type="primary" @click="() => this.searchRoleTableData()">
+          <a-button type="primary" @click="() => this.searchPermissionTableData()">
             查询
           </a-button>
         </div>
       </div>
-      <div class="roleTable">
-        <div class="roleTableAdd">
-          <div class="roleTableAddTitle">角色列表</div>
-          <div class="roleTableAddButton">
+      <div class="permissionsTable">
+        <div class="permissionsTableAdd">
+          <div class="permissionsTableAddTitle">权限列表</div>
+          <div class="permissionsTableAddButton">
             <a-button type="primary" @click="() => (this.modleVisible = true)">
-              新增角色
+              新增权限
             </a-button>
           </div>
         </div>
-        <div class="roleTableContent">
+        <div class="permissionsTableContent">
           <a-table
             :columns="columns"
-            :data-source="roleTableData"
+            :data-source="permissionsTableData"
             :pagination="false"
             size="middle"
             :rowKey="
@@ -78,12 +79,12 @@
           </a-table>
         </div>
       </div>
-      <div class="rolePagination">
+      <div class="permissionsPagination">
         <a-pagination
           v-model="currentPage"
           show-quick-jumper
           :page-size-options="pageSizeOptions"
-          :total="roleTableTotal"
+          :total="permissionsTableTotal"
           show-size-changer
           :page-size="pageObject.pageSize"
           @change="handlePageNumberChange"
@@ -92,9 +93,9 @@
         </a-pagination>
       </div>
       <a-modal
-        width="45%"
+        width="50%"
         v-model="modleVisible"
-        :title="form.id ? '编辑角色' : '新增角色'"
+        :title="form.id ? '编辑权限' : '新增权限'"
         @cancel="() => (this.clearFormData(), (this.modleVisible = false))"
         :confirm-loading="formButtonDisableFlag"
         @ok="onSubmit"
@@ -107,44 +108,60 @@
             <div class="modalContentFormTitle">基础信息</div>
             <div class="modalContentFormContent">
               <a-form-model
-                ref="roleRuleForm"
+                ref="permissionsRuleForm"
                 :model="form"
                 :rules="rules"
                 :label-col="labelCol"
                 :wrapper-col="wrapperCol"
               >
-                <a-form-model-item ref="name" label="角色名称" prop="name">
-                  <a-input v-model="form.name" placeholder="请输入角色名称" />
+                <a-form-model-item ref="type" label="权限类型" prop="type">
+                  <a-select v-model="form.type" placeholder="请选择权限类型">
+                    <a-select-option v-for="(item, index) in permissionsTypeArray" :key="index" :value="item.value">
+                      {{ item.name }}
+                    </a-select-option>
+                  </a-select>
                 </a-form-model-item>
-                <a-form-model-item ref="code" label="角色代码" prop="code">
-                  <a-input v-model="form.code" placeholder="请输入角色代码" />
+                <a-form-model-item ref="code" label="权限代码" prop="code">
+                  <a-input v-model="form.code" placeholder="请输入权限代码" />
                 </a-form-model-item>
-                <a-form-model-item label="状态" prop="isEnable">
-                  <a-radio-group v-model="form.isEnable" button-style="solid">
-                    <a-radio-button value="1">
-                      启用
-                    </a-radio-button>
-                    <a-radio-button value="0">
-                      停用
-                    </a-radio-button>
-                  </a-radio-group>
+                <a-form-model-item ref="name" label="权限名称" prop="name">
+                  <a-input v-model="form.name" placeholder="请输入权限名称" />
                 </a-form-model-item>
-                <a-form-model-item label="备注">
-                  <a-input v-model="form.description" type="textarea" placeholder="请输入备注" />
+                <a-form-model-item label="上级权限" prop="parentId">
+                  <a-tree-select
+                    :replaceFields="{
+                      title: 'name',
+                      value: 'id'
+                    }"
+                    v-model="form.parentId"
+                    style="width: 100%"
+                    :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                    :tree-data="permissionsTreeArray"
+                    placeholder="请选择上级权限"
+                    tree-default-expand-all
+                  >
+                  </a-tree-select>
+                </a-form-model-item>
+                <a-form-model-item ref="component" label="组件地址" prop="component">
+                  <a-input v-model="form.component" placeholder="请输入组件地址" />
                 </a-form-model-item>
               </a-form-model>
             </div>
           </div>
           <div class="modalContentTree">
             <div class="modalContentTreeTitle">
-              <div class="title">菜单分配</div>
+              <div class="title">接口分配</div>
               <div class="icon">
                 <span>
                   <a-popover placement="bottomRight">
                     <template slot="content">
-                      <p style="cursor: pointer;" @click="() => (this.checkedKeys = this.permissionsAllids)">选择全部</p>
+                      <p style="cursor: pointer;" @click="() => (this.checkedKeys = this.interfacesAllids)">
+                        选择全部
+                      </p>
                       <p style="cursor: pointer;" @click="() => (this.checkedKeys = [])">取消选择</p>
-                      <p style="cursor: pointer;" @click="() => (this.expandedKeys = this.permissionsAllids)">展开全部</p>
+                      <p style="cursor: pointer;" @click="() => (this.expandedKeys = this.interfacesAllids)">
+                        展开全部
+                      </p>
                       <span style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</span>
                     </template>
                     <a-icon type="menu-unfold" /> </a-popover
@@ -160,7 +177,7 @@
                 v-model="checkedKeys"
                 checkable
                 :expanded-keys.sync="expandedKeys"
-                :tree-data="permissionsTreeArray"
+                :tree-data="interfacesTreeArray"
               />
             </div>
           </div>
@@ -172,31 +189,34 @@
 <script>
 import {
   listPermissionsTree,
-  listRoles,
-  createRole,
-  updateRole,
-  loadRoleById,
-  deleteRoleById,
-  disableRoleById,
-  enableRoleById
+  listPermissions,
+  createPermission,
+  updatePermission,
+  deletePermissionById,
+  apiTree,
+  loadPermissionById
 } from '@/api/api';
 import moment from 'moment';
 const columns = [
   {
-    title: '角色名称',
+    title: '权限名称',
     dataIndex: 'name'
   },
   {
-    title: '角色值',
+    title: '权限代码',
     dataIndex: 'code'
+  },
+  {
+    title: '权限类型',
+    dataIndex: 'typeName'
+  },
+  {
+    title: '组件地址',
+    dataIndex: 'component'
   },
   {
     title: '创建时间',
     dataIndex: 'createTime'
-  },
-  {
-    title: '备注',
-    dataIndex: 'description'
   },
   {
     title: '操作',
@@ -208,55 +228,65 @@ export default {
   name: 'Role',
   data() {
     return {
-      formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
+      advanced: false, // 控制搜索条件的展开折叠
       editWaitForLoading: false, // 加载编辑回显数据等待Loading
-      roleLoading: false, // 加载表格的loading
+      formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
+      permissionsLoading: false, // 加载表格的loading
       searchParameters: {}, // 表格搜索条件值
       modleVisible: false, // 控制弹框
       columns, // 表格头部
-      roleTableData: [], // 表格数据
+      permissionsTableData: [], // 表格数据
       pageSizeOptions: this.$store.state.user.defaultPaginationOptions, // 分页下拉
       currentPage: 1, // 默认分页当前页
       pageObject: {
         pageNumber: 0,
         pageSize: this.$store.state.user.defaultPaginationPagesize // 一页展示多少条数据
       },
-      roleTableTotal: 0, // 表格数据总数
+      permissionsTableTotal: 0, // 表格数据总数
       labelCol: { span: 4 },
       wrapperCol: { span: 14 },
       form: {
         // 表单数据
-        name: undefined, // 名字
-        code: undefined, // 角色
-        isEnable: '1', // 状态
-        isSystem: '0',
-        description: undefined,
-        permissions: []
+        type: undefined,
+        code: undefined,
+        name: undefined,
+        parent: undefined,
+        parentId: undefined,
+        component: undefined,
+        apis: [],
+        isSystem: '1',
+        sortIndex: 9010,
+        isEnable: '1'
       },
       rules: {
         // 规则验证
-        name: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
-        code: [{ required: true, message: '请输入角色值', trigger: 'change' }]
+        type: [{ required: true, message: '请输入权限类型', trigger: 'change' }],
+        code: [{ required: true, message: '请输入权限代码', trigger: 'blur' }],
+        name: [{ required: true, message: '请输入权限名称', trigger: 'blur' }],
+        parentId: [{ required: true, message: '请选择上级权限', trigger: 'change' }],
+        component: [{ required: true, message: '请输入组件地址', trigger: 'blur' }]
       },
-      permissionsTreeArray: [], // 表单的树形下拉数据
+      permissionsTreeArray: [], // 表单的权限树形下拉数据
+      permissionsTypeArray: [], // 权限类型数组数据
+      interfacesTreeArray: [], // 表单接口的树形下拉数据
       expandedKeys: [], // 控制树形下拉 展开收起全选取消全选 功能
       checkedKeys: [], // 树形下拉选中的数据
-      permissionsAllids: [] // 获取所有的权限ID
+      interfacesAllids: [] // 获取所有的接口ID
     };
   },
   watch: {
     /**
      * @description: 解决删除分页最后一条没数据的BUG
-     * 思路：先获取当前的表格数据总数this.roleTableTotal
+     * 思路：先获取当前的表格数据总数this.permissionsTableTotal
      * 在获取除了当前页数据外的表格总数this.getExceptCurrentPageTableTotalData
      * 如果这两个数相等 说明删除的是当前页最后一条数据 然后使当前页-1 请求数据就可以了
      */
 
-    roleTableTotal() {
-      if (this.roleTableTotal === this.getExceptCurrentPageTableTotalData && this.roleTableTotal !== 0) {
+    permissionsTableTotal() {
+      if (this.permissionsTableTotal === this.getExceptCurrentPageTableTotalData && this.permissionsTableTotal !== 0) {
         this.pageObject.pageNumber = Number(this.currentPage) - 1;
         this.currentPage -= 1;
-        this.getRoleTableData(this.pageObject, this.searchParameters);
+        this.getPermissionsTableData(this.pageObject, this.searchParameters);
       }
     }
   },
@@ -269,76 +299,106 @@ export default {
     }
   },
   created() {
-    this.roleLoading = true;
-    this.getRoleTableData(this.pageObject, this.searchParameters); // 获取表格数据
-    this.getRolePermissions(); // 获取角色权限
+    this.permissionsTypeArray = this.$store.state.enums.map.PermissionType; // 获取权限类型
+    this.getPermissionsTableData(this.pageObject, this.searchParameters); // 获取表格数据
+    this.formPermissionsTree(); // 表单的权限树
+    this.getInterfacesTree(); // 表单的接口权限树
   },
   methods: {
     /**
-     * @description: 获取角色权限
+     * @description: 获取接口树
      */
-    getRolePermissions() {
-      listPermissionsTree({ searchUserId: this.$store.getters.userInfo.roles[0].id }).then(res => {
+    getInterfacesTree() {
+      apiTree().then(res => {
         if (res.code === 200) {
-          this.permissionsTreeArray = res.data;
-          this.getTreeData(this.permissionsTreeArray);
+          this.interfacesTreeArray = res.data;
+          this.getTreeData(this.interfacesTreeArray);
         }
       });
     },
-
+    /**
+     * @description: 利用递归获取到所有的节点id
+     * @param {array} interfacesTreeArray 树形下拉的数据
+     */
+    getTreeData(interfacesTreeArray) {
+      interfacesTreeArray.forEach(item => {
+        this.interfacesAllids.push(item.id);
+        if (item.children) {
+          this.getTreeData(item.children);
+        }
+      });
+    },
+    /**
+     * @description:表单的权限树
+     */
+    formPermissionsTree() {
+      listPermissionsTree().then(res => {
+        if (res.code === 200) {
+          this.permissionsTreeArray = res.data;
+        }
+      });
+    },
     /**
      * @description: 获取表格数据
      * @param {object} page 分页参数
      * @param {object} params 搜索参数
      */
-    getRoleTableData(page, params) {
-      listRoles(Object.assign({}, page, params)).then(res => {
-        if (res.code === 200 && res.data.content) {
-          this.roleTableData = res.data.content;
-          this.roleTableData.forEach(item => {
-            item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
-          });
-          this.roleTableTotal = res.data.totalElements;
-        } else {
-          this.roleTableTotal = res.data.totalElements;
-          this.roleTableData = [];
-        }
-      }).finally(() => {
-        this.roleLoading = false;
-      });
+    getPermissionsTableData(page, params) {
+      this.permissionsLoading = true;
+      listPermissions(Object.assign({}, page, params))
+        .then(res => {
+          if (res.code === 200 && res.data.content) {
+            this.permissionsTableData = res.data.content;
+            this.permissionsTableData.forEach(res => {
+              res.createTime = moment(res.createTime).format('YYYY-MM-DD HH:mm');
+              this.permissionsTypeArray.forEach(item => {
+                if (item.value === res.type) {
+                  res.typeName = item.name;
+                }
+              });
+            });
+            this.permissionsTableTotal = res.data.totalElements;
+          } else {
+            this.permissionsTableTotal = res.data.totalElements;
+            this.permissionsTableData = [];
+          }
+        })
+        .finally(() => {
+          this.permissionsLoading = false;
+        });
     },
 
     /**
      * @description: 点击表格搜索条件的查询
      */
-    searchRoleTableData() {
+    searchPermissionTableData() {
       this.currentPage = 1;
       this.pageObject.pageNumber = 0;
-      this.roleLoading = true;
-      this.getRoleTableData(this.pageObject, this.searchParameters);
+      this.getPermissionsTableData(this.pageObject, this.searchParameters);
     },
 
     /**
      * @description: 新增编辑角色表单提交
      */
     onSubmit() {
-      this.$refs.roleRuleForm.validate(valid => {
+      this.$refs.permissionsRuleForm.validate(valid => {
         if (valid) {
-          this.form.permissions = this.checkedKeys.map(item => {
+          this.form.apis = this.checkedKeys.map(item => {
             return {
               id: item
             };
           });
-          // 判断是否至少选择了一个权限
-          if (this.form.permissions.length === 0) {
-            this.$message.error('请选择权限列表');
+          // 判断是否至少选择了一个接口
+          if (this.form.apis.length === 0) {
+            this.$message.error('请选择接口列表');
             return false;
           }
+          this.form.parent = { id: this.form.parentId };
           this.formButtonDisableFlag = true;
           if (this.form.id) {
-            this.editRole(this.form);
+            this.editPermissions(this.form);
           } else {
-            this.roleAdd(this.form);
+            this.addPermissions(this.form);
           }
         } else {
           return false;
@@ -348,12 +408,12 @@ export default {
 
     /**
      * @description: 新增角色权限
-     * @param {object} addRoleParam 表单参数
+     * @param {object} addPermission 表单参数
      */
-    roleAdd(addRoleParam) {
-      createRole({ body: addRoleParam })
+    addPermissions(addPermission) {
+      createPermission({ body: addPermission })
         .then(res => {
-          if (res.code === 200) {
+          if (res.code === 201) {
             this.formSuccessOperation(res);
           }
         })
@@ -364,10 +424,10 @@ export default {
 
     /**
      * @description: 编辑角色权限
-     * @param {object} editRoleParam 表单参数
+     * @param {object} editPermission 表单参数
      */
-    editRole(editRoleParam) {
-      updateRole({ body: editRoleParam, id: editRoleParam.id })
+    editPermissions(editPermission) {
+      updatePermission({ body: editPermission, id: editPermission.id })
         .then(res => {
           if (res.code === 200) {
             this.formSuccessOperation(res);
@@ -386,33 +446,33 @@ export default {
       this.$message.success(successFormData.message);
       this.modleVisible = false;
       this.clearFormData();
-      this.roleLoading = true;
-      this.getRoleTableData(this.pageObject, this.searchParameters);
+      this.getPermissionsTableData(this.pageObject, this.searchParameters);
     },
 
     /**
      * @description: 重置表单
      */
     clearFormData() {
-      this.$refs.roleRuleForm.resetFields();
+      this.$refs.permissionsRuleForm.resetFields();
       this.form = this.$options.data.call(this).form;
       this.checkedKeys = [];
     },
 
     /**
-     * @description: 编辑角色
-     * @param {object} roleTableRowData 表格某一行的数据对象
+     * @description: 编辑权限
+     * @param {object} permissionTableRowData 表格某一行的数据对象
      */
-    handleEdit(roleTableRowData) {
+    handleEdit(permissionTableRowData) {
       this.editWaitForLoading = true;
       this.modleVisible = true;
-      // 根据ID请求相应角色的权限 进行回显
-      loadRoleById({ id: roleTableRowData.id })
+
+      loadPermissionById({ id: permissionTableRowData.id })
         .then(res => {
           if (res.code === 200) {
             this.form = Object.assign({}, this.form, res.data);
             this.form.isEnable = String(this.form.isEnable);
-            this.checkedKeys = res.data.permissions.map(item => {
+            this.form.parentId = this.form.parent ? this.form.parent.id : undefined;
+            this.checkedKeys = res.data.apis.map(item => {
               return item.id;
             });
           }
@@ -427,39 +487,24 @@ export default {
      * @param {object} roleTableRowData 格某一行的数据对象
      */
     handleDelete(roleTableRowData) {
-      deleteRoleById({ id: roleTableRowData.id }).then(res => {
+      deletePermissionById({ id: roleTableRowData.id }).then(res => {
         if (res.code === 200) {
           this.$message.success(res.message);
-          this.roleLoading = true;
-          this.getRoleTableData(this.pageObject, this.searchParameters);
-        }
-      });
-    },
-
-    /**
-     * @description: 利用递归获取到所有的节点id
-     * @param {array} permissionsTreeArray 树形下拉的数据
-     */
-    getTreeData(permissionsTreeArray) {
-      permissionsTreeArray.forEach(item => {
-        this.permissionsAllids.push(item.id);
-        if (item.children) {
-          this.getTreeData(item.children);
+          this.getPermissionsTableData(this.pageObject, this.searchParameters);
         }
       });
     },
 
     /**
      * @description:  获取分页下拉第几页展示几个
-     * @param {string} currentPage 当前页
+     * @param {string} current 当前页
      * @param {string} pageSize 当前页展示几条
      */
-    onPageSizeChange(currentPage, pageSize) {
-      this.roleLoading = true;
-      this.currentPage = currentPage;
+    onPageSizeChange(current, pageSize) {
+      this.currentPage = current;
       this.pageObject.pageSize = pageSize;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
-      this.getRoleTableData(this.pageObject, this.searchParameters);
+      this.getPermissionsTableData(this.pageObject, this.searchParameters);
     },
 
     /**
@@ -467,44 +512,9 @@ export default {
      * @param {string} pageNumber UI框架自带
      */
     handlePageNumberChange(pageNumber) {
-      this.roleLoading = true;
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
-      this.getRoleTableData(this.pageObject, this.searchParameters);
-    },
-
-    /**
-     * @description: 日期选择器改变
-     * @param {array} date UI框架自带
-     * @param {array} dateString UI框架自带 时间区间
-     */
-    onChangeData(date, dateString) {
-      this.searchParameters.searchCreateDateBegin = dateString[0];
-      this.searchParameters.searchCreateDateEnd = dateString[1];
-    },
-    /**
-     * @description: 停用/启用表格数据的某一条
-     * @param {object} roleTableRowData 某一条表格数据对象
-     */
-    handleIsEnable(roleTableRowData) {
-      this.roleLoading = true;
-      if (roleTableRowData.isEnable === 1) {
-        disableRoleById({ id: roleTableRowData.id }).then(res => {
-          if (res.code === 200) {
-            this.$message.success(res.message);
-            this.modleVisible = false;
-            this.getRoleTableData(this.pageObject, this.searchParameters);
-          }
-        });
-      } else {
-        enableRoleById({ id: roleTableRowData.id }).then(res => {
-          if (res.code === 200) {
-            this.$message.success(res.message);
-            this.modleVisible = false;
-            this.getRoleTableData(this.pageObject, this.searchParameters);
-          }
-        });
-      }
+      this.getPermissionsTableData(this.pageObject, this.searchParameters);
     }
   }
 };
@@ -516,7 +526,7 @@ export default {
   padding-right: 8px;
   width: 77px;
 }
-.Role {
+.permissions {
   width: 100%;
   height: calc(100vh - 150px);
   border-radius: 5px;
@@ -533,39 +543,39 @@ export default {
     justify-content: center;
     z-index: 999;
   }
-  .roleSearch {
+  .permissionsSearch {
     width: 100%;
     height: 64px;
     background: white;
     border-radius: 5px;
     margin-bottom: 10px;
-    display: flex;
     padding: 15px 20px;
-    .roleSearchInput {
+    display: flex;
+    .permissionsSearchInput {
       width: 85%;
       height: 100%;
     }
-    .roleSearchButton {
+    .permissionSearchButton {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: flex-end;
     }
   }
-  .roleTable {
+  .permissionsTable {
     flex: 1;
     background: white;
     border-radius: 5px;
     display: flex;
     flex-direction: column;
-    .roleTableAdd {
+    .permissionsTableAdd {
       width: 100%;
       height: 64px;
       display: flex;
       align-items: center;
       border-bottom: 1px solid #ececec;
       padding: 0 20px;
-      .roleTableAddTitle {
+      .permissionsTableAddTitle {
         width: 80%;
         height: 100%;
         display: flex;
@@ -573,14 +583,14 @@ export default {
         font-size: 18px;
         font-weight: 550;
       }
-      .roleTableAddButton {
+      .permissionsTableAddButton {
         flex: 1;
         display: flex;
         align-items: center;
         justify-content: flex-end;
       }
     }
-    .roleTableContent {
+    .permissionsTableContent {
       max-height: calc(100vh - 380px);
       padding: 10px;
       overflow: scroll;
@@ -595,14 +605,14 @@ export default {
         z-index: 999;
       }
     }
-    .roleTableContent /deep/ .ant-table-tbody .ant-table-row:nth-child(2n) {
+    .permissionsTableContent /deep/ .ant-table-tbody .ant-table-row:nth-child(2n) {
       background: #fafafa;
     }
-    .roleTableContent::-webkit-scrollbar {
+    .permissionsTableContent::-webkit-scrollbar {
       display: none;
     }
   }
-  .rolePagination {
+  .permissionsPagination {
     width: 100%;
     height: 47px;
     border-radius: 5px;
