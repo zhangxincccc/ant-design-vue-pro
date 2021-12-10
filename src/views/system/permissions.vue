@@ -262,9 +262,7 @@ export default {
         // 规则验证
         type: [{ required: true, message: '请输入权限类型', trigger: 'change' }],
         code: [{ required: true, message: '请输入权限代码', trigger: 'blur' }],
-        name: [{ required: true, message: '请输入权限名称', trigger: 'blur' }],
-        parentId: [{ required: true, message: '请选择上级权限', trigger: 'change' }],
-        component: [{ required: true, message: '请输入组件地址', trigger: 'blur' }]
+        name: [{ required: true, message: '请输入权限名称', trigger: 'blur' }]
       },
       permissionsTreeArray: [], // 表单的权限树形下拉数据
       permissionsTypeArray: [], // 权限类型数组数据
@@ -378,7 +376,7 @@ export default {
     },
 
     /**
-     * @description: 新增编辑角色表单提交
+     * @description: 新增编辑权限表单提交
      */
     onSubmit() {
       this.$refs.permissionsRuleForm.validate(valid => {
@@ -407,7 +405,7 @@ export default {
     },
 
     /**
-     * @description: 新增角色权限
+     * @description: 新增权限
      * @param {object} addPermission 表单参数
      */
     addPermissions(addPermission) {
@@ -423,7 +421,7 @@ export default {
     },
 
     /**
-     * @description: 编辑角色权限
+     * @description: 编辑权限
      * @param {object} editPermission 表单参数
      */
     editPermissions(editPermission) {
