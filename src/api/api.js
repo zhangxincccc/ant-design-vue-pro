@@ -11,9 +11,12 @@ export const setDomain = ($domain) => {
 export const request = (method, url, body, queryParameters, form, config) => {
   method = method.toLowerCase()
   let keys = Object.keys(queryParameters)
+  config = Object.assign({
+    arrayFormat: 'repeat'
+  }, config);
   let queryUrl = url
   if (keys.length > 0) {
-    queryUrl = url + '?' + qs.stringify(queryParameters)
+    queryUrl = url + '?' + qs.stringify(queryParameters, config)
   }
   // let queryUrl = url+(keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
   if (body) {
@@ -557,6 +560,7 @@ organization.name,sortIndex,isEnable,createTime,
      * @param searchOrganizationId - 查询条件:所属组织机构ID，精确匹配
      * @param searchOrganizationName - 查询条件:所属组织机构名称，模糊匹配
      * @param searchParentId - 查询条件:上级部门ID，精确匹配
+     * @param searchParentIds - 查询条件:上级部门ID数组，精确匹配
      * @param searchParentName - 查询条件:上级部门名称，模糊匹配
      * @param sort - 排序规则，格式: 字段名[,asc|desc]，默认升序，支持多字段排序
 */
@@ -599,6 +603,9 @@ export const listDepartments = function(parameters = {}) {
   }
   if (parameters['searchParentId'] !== undefined) {
     queryParameters['search_parentId'] = parameters['searchParentId']
+  }
+  if (parameters['searchParentIds'] !== undefined) {
+    queryParameters['search_parentIds'] = parameters['searchParentIds']
   }
   if (parameters['searchParentName'] !== undefined) {
     queryParameters['search_parentName'] = parameters['searchParentName']
@@ -655,6 +662,9 @@ export const listDepartmentsURL = function(parameters = {}) {
   }
   if (parameters['searchParentId'] !== undefined) {
     queryParameters['search_parentId'] = parameters['searchParentId']
+  }
+  if (parameters['searchParentIds'] !== undefined) {
+    queryParameters['search_parentIds'] = parameters['searchParentIds']
   }
   if (parameters['searchParentName'] !== undefined) {
     queryParameters['search_parentName'] = parameters['searchParentName']
@@ -719,7 +729,6 @@ export const createDepartmentURL = function(parameters = {}) {
  * url: departmentsTreeURL
  * method: departmentsTree_TYPE
  * raw_url: departmentsTree_RAW_URL
- * @param searchIsEnable - 查询条件:是否启用，精确匹配
  * @param searchName - 查询条件:部门名称，精确匹配
  * @param searchOrganizationId - 查询条件:组织机构id，精确匹配
  */
@@ -730,9 +739,6 @@ export const departmentsTree = function(parameters = {}) {
   let body
   let queryParameters = {}
   let form = {}
-  if (parameters['searchIsEnable'] !== undefined) {
-    queryParameters['search_isEnable'] = parameters['searchIsEnable']
-  }
   if (parameters['searchName'] !== undefined) {
     queryParameters['search_name'] = parameters['searchName']
   }
@@ -756,9 +762,6 @@ export const departmentsTreeURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   let path = '/api/departments/tree'
-  if (parameters['searchIsEnable'] !== undefined) {
-    queryParameters['search_isEnable'] = parameters['searchIsEnable']
-  }
   if (parameters['searchName'] !== undefined) {
     queryParameters['search_name'] = parameters['searchName']
   }
@@ -3283,7 +3286,8 @@ export const updateApiPatchURL = function(parameters = {}) {
      * @param searchDescription - 查询条件:组织机构描述，模糊匹配
      * @param searchIsEnable - 查询条件:是否可用，，1：是，0：否，精确匹配
      * @param searchName - 查询条件:组织机构名称，模糊匹配
-     * @param searchParentId - 查询条件:级组织机构ID，精确匹配
+     * @param searchParentId - 查询条件:上级组织机构ID，精确匹配
+     * @param searchParentIds - 查询条件:上级组织机构ID数组，精确匹配
      * @param searchParentName - 查询条件:上级组织机构名称，模糊匹配
      * @param sort - 排序规则，格式: 字段名[,asc|desc]，默认升序，支持多字段排序
 */
@@ -3320,6 +3324,9 @@ export const listOrganizations = function(parameters = {}) {
   }
   if (parameters['searchParentId'] !== undefined) {
     queryParameters['search_parentId'] = parameters['searchParentId']
+  }
+  if (parameters['searchParentIds'] !== undefined) {
+    queryParameters['search_parentIds'] = parameters['searchParentIds']
   }
   if (parameters['searchParentName'] !== undefined) {
     queryParameters['search_parentName'] = parameters['searchParentName']
@@ -3370,6 +3377,9 @@ export const listOrganizationsURL = function(parameters = {}) {
   }
   if (parameters['searchParentId'] !== undefined) {
     queryParameters['search_parentId'] = parameters['searchParentId']
+  }
+  if (parameters['searchParentIds'] !== undefined) {
+    queryParameters['search_parentIds'] = parameters['searchParentIds']
   }
   if (parameters['searchParentName'] !== undefined) {
     queryParameters['search_parentName'] = parameters['searchParentName']
@@ -3434,8 +3444,6 @@ export const createOrganizationURL = function(parameters = {}) {
  * url: organizationsTreeURL
  * method: organizationsTree_TYPE
  * raw_url: organizationsTree_RAW_URL
- * @param searchIsEnable - 查询条件:是否启用，精确匹配
- * @param searchName - 查询条件:组织机构或部门名称，精确匹配
  */
 export const organizationsTree = function(parameters = {}) {
   const domain = parameters.$domain ? parameters.$domain : getDomain()
@@ -3444,12 +3452,6 @@ export const organizationsTree = function(parameters = {}) {
   let body
   let queryParameters = {}
   let form = {}
-  if (parameters['searchIsEnable'] !== undefined) {
-    queryParameters['search_isEnable'] = parameters['searchIsEnable']
-  }
-  if (parameters['searchName'] !== undefined) {
-    queryParameters['search_name'] = parameters['searchName']
-  }
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
       queryParameters[parameterName] = parameters.$queryParameters[parameterName]
@@ -3467,12 +3469,6 @@ export const organizationsTreeURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   let path = '/api/organizations/tree'
-  if (parameters['searchIsEnable'] !== undefined) {
-    queryParameters['search_isEnable'] = parameters['searchIsEnable']
-  }
-  if (parameters['searchName'] !== undefined) {
-    queryParameters['search_name'] = parameters['searchName']
-  }
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
       queryParameters[parameterName] = parameters.$queryParameters[parameterName]
@@ -5722,119 +5718,6 @@ export const userInfoURL = function(parameters = {}) {
   return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
 }
 /**
- * 成功：code=200，data对象为部门树形结构，失败：code!=200
- * request: userDepartmentTree
- * url: userDepartmentTreeURL
- * method: userDepartmentTree_TYPE
- * raw_url: userDepartmentTree_RAW_URL
- * @param searchIsEnable - 查询条件:是否启用，精确匹配
- * @param searchName - 查询条件:部门名称，精确匹配
- * @param searchOrganizationId - 查询条件:组织机构id，精确匹配
- */
-export const userDepartmentTree = function(parameters = {}) {
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  const config = parameters.$config
-  let path = '/api/user/departments/tree'
-  let body
-  let queryParameters = {}
-  let form = {}
-  if (parameters['searchIsEnable'] !== undefined) {
-    queryParameters['search_isEnable'] = parameters['searchIsEnable']
-  }
-  if (parameters['searchName'] !== undefined) {
-    queryParameters['search_name'] = parameters['searchName']
-  }
-  if (parameters['searchOrganizationId'] !== undefined) {
-    queryParameters['search_organizationId'] = parameters['searchOrganizationId']
-  }
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    });
-  }
-  return request('get', domain + path, body, queryParameters, form, config)
-}
-export const userDepartmentTree_RAW_URL = function() {
-  return '/api/user/departments/tree'
-}
-export const userDepartmentTree_TYPE = function() {
-  return 'get'
-}
-export const userDepartmentTreeURL = function(parameters = {}) {
-  let queryParameters = {}
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  let path = '/api/user/departments/tree'
-  if (parameters['searchIsEnable'] !== undefined) {
-    queryParameters['search_isEnable'] = parameters['searchIsEnable']
-  }
-  if (parameters['searchName'] !== undefined) {
-    queryParameters['search_name'] = parameters['searchName']
-  }
-  if (parameters['searchOrganizationId'] !== undefined) {
-    queryParameters['search_organizationId'] = parameters['searchOrganizationId']
-  }
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    })
-  }
-  let keys = Object.keys(queryParameters)
-  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
-}
-/**
- * 成功：code=200，data对象为组织机构树形结构，失败：code!=200
- * request: userOrganizationTree
- * url: userOrganizationTreeURL
- * method: userOrganizationTree_TYPE
- * raw_url: userOrganizationTree_RAW_URL
- * @param searchIsEnable - 查询条件:是否启用，精确匹配
- * @param searchName - 查询条件:组织机构或部门名称，精确匹配
- */
-export const userOrganizationTree = function(parameters = {}) {
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  const config = parameters.$config
-  let path = '/api/user/organizations/tree'
-  let body
-  let queryParameters = {}
-  let form = {}
-  if (parameters['searchIsEnable'] !== undefined) {
-    queryParameters['search_isEnable'] = parameters['searchIsEnable']
-  }
-  if (parameters['searchName'] !== undefined) {
-    queryParameters['search_name'] = parameters['searchName']
-  }
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    });
-  }
-  return request('get', domain + path, body, queryParameters, form, config)
-}
-export const userOrganizationTree_RAW_URL = function() {
-  return '/api/user/organizations/tree'
-}
-export const userOrganizationTree_TYPE = function() {
-  return 'get'
-}
-export const userOrganizationTreeURL = function(parameters = {}) {
-  let queryParameters = {}
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  let path = '/api/user/organizations/tree'
-  if (parameters['searchIsEnable'] !== undefined) {
-    queryParameters['search_isEnable'] = parameters['searchIsEnable']
-  }
-  if (parameters['searchName'] !== undefined) {
-    queryParameters['search_name'] = parameters['searchName']
-  }
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    })
-  }
-  let keys = Object.keys(queryParameters)
-  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
-}
-/**
 * 排序属性：username,name,gender.code,gender.name,email,mobile,title.code,
 title.name,organization.id,organization.name,department.id,
 department.name,isEnable,createTime
@@ -5849,6 +5732,7 @@ department.name,isEnable,createTime
      * @param searchCreateDateBegin - 查询条件:创建日期起，格式yyyy-mm-dd
      * @param searchCreateDateEnd - 查询条件:创建日期止，格式yyyy-mm-dd
      * @param searchDepartmentId - 查询条件:所属部门ID，精确匹配
+     * @param searchDepartmentIds - 查询条件:所属部门ID数组，精确匹配
      * @param searchDepartmentName - 查询条件:所属部门名称，模糊匹配
      * @param searchEmail - 查询条件:邮箱，模糊匹配
      * @param searchGender - 查询条件:性别代码，对应性别字典，精确匹配
@@ -5856,6 +5740,7 @@ department.name,isEnable,createTime
      * @param searchMobile - 查询条件:手机号码，模糊匹配
      * @param searchName - 查询条件:姓名，模糊查询
      * @param searchOrganizationId - 查询条件:所属组织机构ID，精确匹配
+     * @param searchOrganizationIds - 查询条件:所属组织机构ID数组，精确匹配
      * @param searchOrganizationName - 查询条件:所属组织机构名称，模糊匹配
      * @param searchRoleId - 查询条件:角色id，精确匹配
      * @param searchTitle - 查询条件:岗位代码，对应岗位字典，精确匹配
@@ -5887,6 +5772,9 @@ export const listUsers = function(parameters = {}) {
   if (parameters['searchDepartmentId'] !== undefined) {
     queryParameters['search_departmentId'] = parameters['searchDepartmentId']
   }
+  if (parameters['searchDepartmentIds'] !== undefined) {
+    queryParameters['search_departmentIds'] = parameters['searchDepartmentIds']
+  }
   if (parameters['searchDepartmentName'] !== undefined) {
     queryParameters['search_departmentName'] = parameters['searchDepartmentName']
   }
@@ -5907,6 +5795,9 @@ export const listUsers = function(parameters = {}) {
   }
   if (parameters['searchOrganizationId'] !== undefined) {
     queryParameters['search_organizationId'] = parameters['searchOrganizationId']
+  }
+  if (parameters['searchOrganizationIds'] !== undefined) {
+    queryParameters['search_organizationIds'] = parameters['searchOrganizationIds']
   }
   if (parameters['searchOrganizationName'] !== undefined) {
     queryParameters['search_organizationName'] = parameters['searchOrganizationName']
@@ -5958,6 +5849,9 @@ export const listUsersURL = function(parameters = {}) {
   if (parameters['searchDepartmentId'] !== undefined) {
     queryParameters['search_departmentId'] = parameters['searchDepartmentId']
   }
+  if (parameters['searchDepartmentIds'] !== undefined) {
+    queryParameters['search_departmentIds'] = parameters['searchDepartmentIds']
+  }
   if (parameters['searchDepartmentName'] !== undefined) {
     queryParameters['search_departmentName'] = parameters['searchDepartmentName']
   }
@@ -5978,6 +5872,9 @@ export const listUsersURL = function(parameters = {}) {
   }
   if (parameters['searchOrganizationId'] !== undefined) {
     queryParameters['search_organizationId'] = parameters['searchOrganizationId']
+  }
+  if (parameters['searchOrganizationIds'] !== undefined) {
+    queryParameters['search_organizationIds'] = parameters['searchOrganizationIds']
   }
   if (parameters['searchOrganizationName'] !== undefined) {
     queryParameters['search_organizationName'] = parameters['searchOrganizationName']
@@ -6056,7 +5953,7 @@ export const createUserURL = function(parameters = {}) {
 export const batchDeleteUserByIds = function(parameters = {}) {
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   const config = parameters.$config
-  let path = '/api/users/batch/delete'
+  let path = '/api/users/batch-delete'
   let body
   let queryParameters = {}
   let form = {}
@@ -6071,7 +5968,7 @@ export const batchDeleteUserByIds = function(parameters = {}) {
   return request('post', domain + path, body, queryParameters, form, config)
 }
 export const batchDeleteUserByIds_RAW_URL = function() {
-  return '/api/users/batch/delete'
+  return '/api/users/batch-delete'
 }
 export const batchDeleteUserByIds_TYPE = function() {
   return 'post'
@@ -6079,7 +5976,7 @@ export const batchDeleteUserByIds_TYPE = function() {
 export const batchDeleteUserByIdsURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
-  let path = '/api/users/batch/delete'
+  let path = '/api/users/batch-delete'
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
       queryParameters[parameterName] = parameters.$queryParameters[parameterName]
@@ -6099,7 +5996,7 @@ export const batchDeleteUserByIdsURL = function(parameters = {}) {
 export const batchDisableUserByIds = function(parameters = {}) {
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   const config = parameters.$config
-  let path = '/api/users/disable/batch'
+  let path = '/api/users/batch-disable'
   let body
   let queryParameters = {}
   let form = {}
@@ -6114,7 +6011,7 @@ export const batchDisableUserByIds = function(parameters = {}) {
   return request('put', domain + path, body, queryParameters, form, config)
 }
 export const batchDisableUserByIds_RAW_URL = function() {
-  return '/api/users/disable/batch'
+  return '/api/users/batch-disable'
 }
 export const batchDisableUserByIds_TYPE = function() {
   return 'put'
@@ -6122,7 +6019,7 @@ export const batchDisableUserByIds_TYPE = function() {
 export const batchDisableUserByIdsURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
-  let path = '/api/users/disable/batch'
+  let path = '/api/users/batch-disable'
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
       queryParameters[parameterName] = parameters.$queryParameters[parameterName]
@@ -6142,7 +6039,7 @@ export const batchDisableUserByIdsURL = function(parameters = {}) {
 export const batchEnableUserByIds = function(parameters = {}) {
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   const config = parameters.$config
-  let path = '/api/users/enable/batch'
+  let path = '/api/users/batch-enable'
   let body
   let queryParameters = {}
   let form = {}
@@ -6157,7 +6054,7 @@ export const batchEnableUserByIds = function(parameters = {}) {
   return request('put', domain + path, body, queryParameters, form, config)
 }
 export const batchEnableUserByIds_RAW_URL = function() {
-  return '/api/users/enable/batch'
+  return '/api/users/batch-enable'
 }
 export const batchEnableUserByIds_TYPE = function() {
   return 'put'
@@ -6165,7 +6062,7 @@ export const batchEnableUserByIds_TYPE = function() {
 export const batchEnableUserByIdsURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
-  let path = '/api/users/enable/batch'
+  let path = '/api/users/batch-enable'
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
       queryParameters[parameterName] = parameters.$queryParameters[parameterName]

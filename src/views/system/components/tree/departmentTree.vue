@@ -9,10 +9,11 @@
             <span style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</span>
           </template>
           <a-icon type="menu-unfold" /> </a-popover
-        ></span>
+      ></span>
     </div>
     <div class="departmentTreeContent">
       <a-tree
+        v-if="isDepartmentTreeShow"
         ref="tree"
         :replaceFields="{
           title: 'name',
@@ -21,15 +22,13 @@
         defaultExpandAll
         :tree-data="treeData"
         :expandedKeys.sync="expandedKeys"
+        :defaultSelectedKeys.sync="defaultSelectedId"
         @select="handleSelect"
       >
         <template slot="title" slot-scope="{ name }">
           <span
             v-html="
-              name.replace(
-                new RegExp(departmentSearch, 'g'),
-                '<span style=color:#f50>' + departmentSearch + '</span>'
-              )
+              name.replace(new RegExp(departmentSearch, 'g'), '<span style=color:#f50>' + departmentSearch + '</span>')
             "
           ></span>
         </template>
@@ -44,10 +43,13 @@ export default {
   name: 'DepartmentTree',
   data() {
     return {
+      isDepartmentTreeShow: true, // 用作取消选中重新加载组件 要不然默认效果不生效
+      defaultSelectedId: [], // 默认选中第一条的ID
       expandedKeys: [], // 控制树结构展开折叠数据组
       allIds: [], // 用来保存树形所有节点ID
       departmentSearch: '', // 部门列表搜索
-      treeData: [] // 部门树形结构数据
+      treeData: [], // 部门树形结构数据
+      selectTreeDataAllIds: [] // 获取选中的组织机构ID包含的所有ID
     };
   },
   created() {
@@ -61,6 +63,9 @@ export default {
       api.departmentsTree().then(res => {
         if (res.code === 200) {
           this.treeData = res.data;
+          if (this.$store.getters.userInfo.department) {
+            this.$set(this.defaultSelectedId, 0, this.treeData[0].id);
+          }
           this.initTreeData(this.treeData);
         }
       });
@@ -157,15 +162,41 @@ export default {
      */
 
     handleSelect(selectedKeys, rowData) {
-      const selecOrganizationAnddepartmentId = {
-        organizationId: rowData.node.dataRef.organization.id,
-        departmentId: rowData.node.dataRef.id
-      };
-      this.$emit('selectDepartment', selecOrganizationAnddepartmentId, false);
+      this.selectTreeDataAllIds = [];
       // 取消选中
       if (selectedKeys.length === 0) {
+        if (this.$store.getters.userInfo.department) {
+          this.isDepartmentTreeShow = false;
+            this.$nextTick(() => {
+              this.$set(this.defaultSelectedId, 0, this.treeData[0].id);
+              this.isDepartmentTreeShow = true;
+            });
+        }
         this.$emit('cancelSelect');
+        return false;
       }
+      if (rowData.node.dataRef.children && rowData.node.dataRef.children.length !== 0) {
+        this.getSelectDeparmentTreeAllIds(rowData.node.dataRef.children);
+      }
+      this.selectTreeDataAllIds.unshift(selectedKeys[0]);
+      const selecOrganizationAnddepartmentId = {
+        organizationId: rowData.node.dataRef.organization.id,
+        departmentId: this.selectTreeDataAllIds
+      };
+      this.$emit('selectDepartment', selecOrganizationAnddepartmentId, false);
+    },
+    /**
+     * @description: 获取选中的组织ID以及下属所有ID
+     * @param {array} treeData 当前组织树
+     */
+
+    getSelectDeparmentTreeAllIds(treeData) {
+      treeData.forEach(item => {
+        this.selectTreeDataAllIds.push(item.id);
+        if (item.children) {
+          this.getSelectDeparmentTreeAllIds(item.children);
+        }
+      });
     }
   }
 };

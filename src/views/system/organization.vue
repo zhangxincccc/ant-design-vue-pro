@@ -289,7 +289,13 @@ export default {
      * @param {object} selectOrganizationData 部门列表选中对象
      */
     selectOrganization(selectOrganizationData) {
-      this.searchParameters.searchParentId = selectOrganizationData.organizationId;
+      if (selectOrganizationData.length > 1) {
+         this.searchParameters.searchParentIds = selectOrganizationData;
+         this.searchParameters.searchParentId = undefined;
+      } else {
+         this.searchParameters.searchParentIds = undefined;
+         this.searchParameters.searchParentId = selectOrganizationData[0];
+      }
       this.searchOrganizationTableData();
     },
 
@@ -297,6 +303,7 @@ export default {
      * @description: 取消选中组织树
      */
     cancelSelectOrganizationTreeData() {
+      this.searchParameters.searchParentIds = undefined;
       this.searchParameters.searchParentId = undefined;
       this.searchOrganizationTableData();
     },
@@ -498,9 +505,7 @@ export default {
     handleAddOrganization() {
       this.form.id = undefined;
       this.modleVisible = true;
-      if (this.searchParameters.searchParentId) {
-        this.form.parentId = this.searchParameters.searchParentId;
-      }
+      this.form.parentId = this.searchParameters.searchParentIds ? this.searchParameters.searchParentIds[0] : this.searchParameters.searchParentId ? this.searchParameters.searchParentId : undefined;
     }
   }
 };
