@@ -344,13 +344,20 @@ export default {
      */
     selectDepartment(organizationAnddepartmentId) {
       this.selectOrganizationId = organizationAnddepartmentId.organizationId;
-      this.searchParameters.searchParentId = organizationAnddepartmentId.departmentId;
+      if (organizationAnddepartmentId.departmentId.length > 1) {
+        this.searchParameters.searchParentId = undefined;
+        this.searchParameters.searchParentIds = organizationAnddepartmentId.departmentId;
+      } else {
+        this.searchParameters.searchParentIds = undefined;
+        this.searchParameters.searchParentId = organizationAnddepartmentId.departmentId[0];
+      }
       this.searchDepartmentTableData();
     },
     /**
      * @description: 取消选中部门树
      */
     cancelSelect() {
+      this.searchParameters.searchParentIds = undefined;
       this.searchParameters.searchParentId = undefined;
       this.selectOrganizationId = undefined;
       this.searchDepartmentTableData();
@@ -360,6 +367,7 @@ export default {
      * @description:  获取部门表格数据
      */
     getDepartentTableData(page, params) {
+      this.departmentLoading = true;
       listDepartments(Object.assign({}, page, params)).then(res => {
         if (res.code === 200 && res.data.content) {
           this.departmentTableData = res.data.content;
@@ -475,7 +483,7 @@ export default {
       this.form.id = undefined;
       this.modleVisible = true;
       this.form.organizationId = this.selectOrganizationId;
-      this.form.parentId = this.searchParameters.searchParentId;
+      this.form.parentId = this.searchParameters.searchParentIds ? this.searchParameters.searchParentIds[0] : this.searchParameters.searchParentId ? this.searchParameters.searchParentId : undefined;
       this.getDepartmentTree({ searchOrganizationId: this.form.organizationId });
     },
 

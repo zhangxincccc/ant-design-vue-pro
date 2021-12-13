@@ -377,7 +377,14 @@ export default {
      */
 
     selectMixTreeOrganizationData(organizationId, organizationType) {
-      this.searchParameters.searchOrganizationId = organizationId[0];
+      if (organizationId.length > 1) {
+         this.searchParameters.searchOrganizationIds = organizationId;
+         this.searchParameters.searchOrganizationId = undefined;
+      } else {
+         this.searchParameters.searchOrganizationIds = undefined;
+         this.searchParameters.searchOrganizationId = organizationId[0];
+      }
+      this.searchParameters.searchDepartmentIds = undefined;
       this.searchParameters.searchDepartmentId = undefined;
       this.isOrganization = organizationType;
       this.searchUserTableData();
@@ -389,7 +396,14 @@ export default {
      */
     selectMixTreeDepartmentData(organizationAnddepartmentId, departmentType) {
       this.selectMixTreeOrganizationId = organizationAnddepartmentId.organizationId;
-      this.searchParameters.searchDepartmentId = organizationAnddepartmentId.departmentId;
+      if (organizationAnddepartmentId.departmentId.length > 1) {
+        this.searchParameters.searchDepartmentIds = organizationAnddepartmentId.departmentId;
+        this.searchParameters.searchDepartmentId = undefined;
+      } else {
+        this.searchParameters.searchDepartmentIds = undefined;
+        this.searchParameters.searchDepartmentId = organizationAnddepartmentId.departmentId[0];
+      }
+      this.searchParameters.searchOrganizationIds = undefined;
       this.searchParameters.searchOrganizationId = undefined;
       this.isOrganization = departmentType;
       this.searchUserTableData();
@@ -398,6 +412,8 @@ export default {
      * @description: 取消选中混合树
      */
     cancelSelectMixTreeData() {
+      this.searchParameters.searchOrganizationIds = undefined;
+      this.searchParameters.searchDepartmentIds = undefined;
       this.searchParameters.searchOrganizationId = undefined;
       this.searchParameters.searchDepartmentId = undefined;
       this.isOrganization = -1;
@@ -460,7 +476,7 @@ export default {
 
     /**
      * @description: 根据组织ID获取对应的部门树
-     * @param {object} searchOrganizationId 组织ID
+     * @param {object} searchParameters 组织ID
      * @return {*}
      */
     getUserDepartmentTree(searchParameters) {
@@ -662,10 +678,10 @@ export default {
       this.form.id = undefined;
       this.modleVisible = true;
       if (this.isOrganization === true) {
-        this.form.organizationId = this.searchParameters.searchOrganizationId;
+        this.form.organizationId = this.searchParameters.searchOrganizationIds ? this.searchParameters.searchOrganizationIds[0] : this.searchParameters.searchOrganizationId ? this.searchParameters.searchOrganizationId : undefined;
       } else if (this.isOrganization === false) {
         this.form.organizationId = this.selectMixTreeOrganizationId;
-        this.form.departmentId = this.searchParameters.searchDepartmentId;
+        this.form.departmentId = this.searchParameters.searchDepartmentIds ? this.searchParameters.searchDepartmentIds[0] : this.searchParameters.searchDepartmentId ? this.searchParameters.searchDepartmentId : undefined;
         this.getUserDepartmentTree({ searchOrganizationId: this.form.organizationId });
       }
     },

@@ -13,6 +13,7 @@
     </div>
     <div class="mixTreeContent">
       <a-tree
+        v-if="isMixTreeShow"
         ref="tree"
         :replaceFields="{
           title: 'name',
@@ -21,6 +22,7 @@
         defaultExpandAll
         :tree-data="treeData"
         :expandedKeys.sync="expandedKeys"
+        :defaultSelectedKeys.sync="defaultSelectedId"
         @select="handleSelect"
       >
         <template slot="title" slot-scope="{ name }">
@@ -44,10 +46,13 @@ export default {
   name: 'OrganizationMixTree',
   data() {
     return {
+      isMixTreeShow: true, // 用作取消选中重新加载组件 要不然默认效果不生效
+      defaultSelectedId: [], // 默认选中第一条的ID
       expandedKeys: [], // 控制树结构展开折叠数据组
       allIds: [], // 用来保存树形所有节点ID
       mixTreeSearch: '', // 混合树搜索
-      treeData: [] // 混合树形结构数据
+      treeData: [], // 混合树形结构数据
+      selectMixTreeAllIds: [] // 选中组织或部门后下面包含的所有组织ID
     };
   },
   created() {
@@ -62,6 +67,7 @@ export default {
       api.organizationsTree().then(res => {
         if (res.code === 200) {
           this.treeData = res.data;
+          this.$set(this.defaultSelectedId, 0, this.treeData[0].id);
           this.setOrganizationType(this.treeData);
           this.initTreeData(this.treeData);
           this.getMixTreeAllId(this.treeData);
@@ -219,19 +225,44 @@ export default {
      */
 
     handleSelect(selectedKeys, rowData) {
+      this.selectMixTreeAllIds = [];
+      // 取消选中
+      if (selectedKeys.length === 0) {
+        this.isMixTreeShow = false;
+        this.$nextTick(() => {
+          this.$set(this.defaultSelectedId, 0, this.treeData[0].id);
+          this.isMixTreeShow = true;
+        });
+        this.$emit('cancelSelect');
+        return false;
+      }
       if (rowData.node.dataRef.type === 7) {
-        this.$emit('selectOrganization', selectedKeys, true);
+        if (rowData.node.dataRef.children && rowData.node.dataRef.children.length !== 0) {
+          this.getSelectMixTreeAllIds(rowData.node.dataRef.children, 7);
+        }
+        this.selectMixTreeAllIds.unshift(selectedKeys[0]);
+        this.$emit('selectOrganization', this.selectMixTreeAllIds, true);
       } else if (rowData.node.dataRef.type === 6) {
+        if (rowData.node.dataRef.children && rowData.node.dataRef.children.length !== 0) {
+          this.getSelectMixTreeAllIds(rowData.node.dataRef.children, 6);
+        }
+        this.selectMixTreeAllIds.unshift(selectedKeys[0]);
         const selecOrganizationAnddepartmentId = {
           organizationId: rowData.node.dataRef.organization.id,
-          departmentId: rowData.node.dataRef.id
+          departmentId: this.selectMixTreeAllIds
         };
         this.$emit('selectDepartment', selecOrganizationAnddepartmentId, false);
       }
-      // 取消选中
-      if (selectedKeys.length === 0) {
-        this.$emit('cancelSelect');
-      }
+    },
+    getSelectMixTreeAllIds(treeData, type) {
+      treeData.forEach(item => {
+        if (item.type === type) {
+          this.selectMixTreeAllIds.push(item.id);
+        }
+        if (item.children) {
+          this.getSelectMixTreeAllIds(item.children, type);
+        }
+      });
     }
   }
 };
