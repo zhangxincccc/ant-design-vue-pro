@@ -28,7 +28,7 @@
                   <a-col :md="8" :sm="24">
                     <a-form-item label="角色">
                       <a-select allowClear v-model="searchParameters.searchRoleId" size="default" placeholder="请选择">
-                        <a-select-option v-for="item in userRoleArray" :key="item.id">
+                        <a-select-option :title="item.name" v-for="item in userRoleArray" :key="item.id">
                           {{ item.name }}
                         </a-select-option>
                       </a-select>
@@ -50,8 +50,8 @@
                 </template>
                 <a-col :md="8" :sm="24" style="display:flex;justify-content: flex-end">
                   <span>
-                    <a-button style="margin-left: 30px" @click="() => (this.searchParameters = {})">重置</a-button>
-                    <a-button style="margin-left: 8px" type="primary" @click="() => this.searchUserTableData()">查询</a-button>
+                    <a-button type="primary" @click="() => this.searchUserTableData()">查询</a-button>
+                    <a-button style="margin-left: 8px" @click="handleReset">重置</a-button>
                     <a @click="() => (this.advanced = !this.advanced)" style="margin-left: 8px">
                       {{ advanced ? '收起' : '展开' }}
                       <a-icon :type="advanced ? 'up' : 'down'" />
@@ -66,30 +66,41 @@
           <div class="userMainTableAdd">
             <div>用户列表</div>
             <div>
-              <a-button
-                type="primary"
-                class="buttonMargin"
-                @click="handleBatchEnable"
-                :disabled="batchSelectIdArray.length === 0"
+              <a-popconfirm
+              :disabled="batchSelectIdArray.length === 0"
+                title="此操作将批量启用数据，是否继续?"
+                ok-text="是"
+                cancel-text="否"
+                @confirm="handleBatchEnable"
               >
-                批量启用
-              </a-button>
-              <a-button
-                type="primary"
-                class="buttonMargin"
-                @click="handleBatchDisable"
-                :disabled="batchSelectIdArray.length === 0"
+                <a-button type="primary" class="buttonMargin" :disabled="batchSelectIdArray.length === 0">
+                  批量启用
+                </a-button>
+              </a-popconfirm>
+              <a-popconfirm
+               :disabled="batchSelectIdArray.length === 0"
+                title="此操作将批量停用数据，是否继续?"
+                ok-text="是"
+                cancel-text="否"
+                @confirm="handleBatchDisable"
               >
-                批量停用
-              </a-button>
-              <a-button
-                type="primary"
-                class="buttonMargin"
-                @click="handleBatchDelete"
+                <a-button type="primary" class="buttonMargin" :disabled="batchSelectIdArray.length === 0">
+                  批量停用
+                </a-button>
+              </a-popconfirm>
+
+              <a-popconfirm
                 :disabled="batchSelectIdArray.length === 0"
+                title="此操作将批量删除数据，是否继续?"
+                ok-text="是"
+                cancel-text="否"
+                @confirm="handleBatchDelete"
               >
-                批量删除
-              </a-button>
+                <a-button type="primary" class="buttonMargin" :disabled="batchSelectIdArray.length === 0">
+                  批量删除
+                </a-button>
+              </a-popconfirm>
+
               <a-button type="primary" @click="handleAddUser()">
                 新增用户
               </a-button>
@@ -101,22 +112,46 @@
               :columns="columns"
               :data-source="tableData"
               :pagination="false"
-              size="middle"
               :rowKey="
                 (record, index) => {
                   return record.id;
                 }
               "
+              :rowClassName="rowClassName"
               bordered
             >
-              <span slot="name" slot-scope="text">{{ text }}</span>
               <template slot="roles" slot-scope="roles">
-                <span v-for="(item,index) in roles" :key="item.id"> {{ item.name }}  <span v-if="index!=roles.length-1">/</span></span>
+                <span v-for="(item, index) in roles" :key="item.id">
+                  {{ item.name }} <span v-if="index != roles.length - 1">/</span></span
+                >
               </template>
               <template slot="action" slot-scope="text, record">
-                <a slot="action" href="javascript:;" @click="handleIsEnable(record)" :class="{deactivate:record.isEnable == 1,enable:record.isEnable == 0}">{{
-                  record.isEnable == 1 ? '停用' : '启用'
-                }}</a>
+                <a-popconfirm
+                  slot="action"
+                  title="此操作将停用该条数据，是否继续?"
+                  ok-text="是"
+                  cancel-text="否"
+                  @confirm="handleIsEnable(record)"
+                >
+                  <a href="javascript:;" v-if="record.isEnable == 1" :class="{ deactivate: record.isEnable == 1 }">停用</a>
+                </a-popconfirm>
+                <a
+                  slot="action"
+                  href="javascript:;"
+                  @click="handleIsEnable(record)"
+                  v-if="record.isEnable == 0"
+                  :class="{ enable: record.isEnable == 0 }"
+                  >启用</a
+                >
+                <a-popconfirm
+                  slot="action"
+                  title="此操作将重置密码，是否继续?"
+                  ok-text="是"
+                  cancel-text="否"
+                  @confirm="resetPassword(record)"
+                >
+                  <a href="javascript:;" style="margin-left:5px">重置密码</a>
+                </a-popconfirm>
                 <a slot="action" href="javascript:;" @click="handleEditUser(record)" style="margin-left:5px">编辑</a>
                 <a-popconfirm
                   slot="action"
@@ -137,6 +172,7 @@
             show-quick-jumper
             :page-size-options="pageSizeOptions"
             :total="userTableTotal"
+            :show-total="total => `共 ${userTableTotal} 条`"
             show-size-changer
             :page-size="pageObject.pageSize"
             @change="handlePageNumberChange"
@@ -177,7 +213,12 @@
               }"
               v-model="form.organizationId"
               style="width: 100%"
-              @change="organizationId => (this.getUserDepartmentTree({ searchOrganizationId: organizationId }),this.form.departmentId = undefined)"
+              @change="
+                organizationId => (
+                  this.getUserDepartmentTree({ searchOrganizationId: organizationId }),
+                  (this.form.departmentId = undefined)
+                )
+              "
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
               :tree-data="formOrganizationTreeData"
               placeholder="请选择所属组织"
@@ -229,7 +270,8 @@ import {
   batchDeleteUserByIds,
   departmentsTree,
   listAllRoles,
-  loadUserById
+  loadUserById,
+  resetUserPasswordById
 } from '@/api/api';
 import moment from 'moment';
 import OrganizationMixTree from './components/tree/OrganizationMixTree';
@@ -239,29 +281,38 @@ const columns = [
   {
     title: '用户名',
     dataIndex: 'name',
-    scopedSlots: { customRender: 'name' }
+    width: '10%',
+    ellipsis: true
   },
   {
     title: '创建时间',
-    dataIndex: 'createTime'
+    dataIndex: 'createTime',
+    width: '15%',
+    ellipsis: true
   },
   {
     title: '角色',
     dataIndex: 'roles',
-    width: '20%',
+    width: '15%',
     scopedSlots: { customRender: 'roles' }
   },
   {
     title: '登录名',
-    dataIndex: 'username'
+    dataIndex: 'username',
+    width: '10%',
+    ellipsis: true
   },
   {
     title: '所属组织',
-    dataIndex: 'organization.name'
+    dataIndex: 'organization.name',
+    width: '15%',
+    ellipsis: true
   },
   {
     title: '所属部门',
-    dataIndex: 'department.name'
+    dataIndex: 'department.name',
+    width: '15%',
+    ellipsis: true
   },
   {
     title: '操作',
@@ -345,9 +396,9 @@ export default {
      */
     userTableTotal() {
       if (this.userTableTotal === this.getExceptCurrentPageTableTotalData && this.userTableTotal !== 0) {
-       this.pageObject.pageNumber = Number(this.currentPage) - 1;
-       this.currentPage -= 1;
-       this.getUserTableData(this.pageObject, this.searchParameters);
+        this.currentPage -= 1;
+        this.pageObject.pageNumber = Number(this.currentPage) - 1;
+        this.getUserTableData(this.pageObject, this.searchParameters);
       }
     }
   },
@@ -378,11 +429,11 @@ export default {
 
     selectMixTreeOrganizationData(organizationId, organizationType) {
       if (organizationId.length > 1) {
-         this.searchParameters.searchOrganizationIds = organizationId;
-         this.searchParameters.searchOrganizationId = undefined;
+        this.searchParameters.searchOrganizationIds = organizationId;
+        this.searchParameters.searchOrganizationId = undefined;
       } else {
-         this.searchParameters.searchOrganizationIds = undefined;
-         this.searchParameters.searchOrganizationId = organizationId[0];
+        this.searchParameters.searchOrganizationIds = undefined;
+        this.searchParameters.searchOrganizationId = organizationId[0];
       }
       this.searchParameters.searchDepartmentIds = undefined;
       this.searchParameters.searchDepartmentId = undefined;
@@ -427,20 +478,22 @@ export default {
 
     getUserTableData(page, params) {
       this.userLoading = true;
-      listUsers(Object.assign({}, page, params)).then(resp => {
-        if (resp.code === 200 && resp.data.content) {
-          this.tableData = resp.data.content;
-          this.tableData.forEach(item => {
-            item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
-          });
-          this.userTableTotal = resp.data.totalElements;
-        } else {
-          this.userTableTotal = resp.data.totalElements;
-          this.tableData = [];
-        }
-      }).finally(() => {
-        this.userLoading = false;
-      });
+      listUsers(Object.assign({}, page, params))
+        .then(resp => {
+          if (resp.code === 200 && resp.data.content) {
+            this.tableData = resp.data.content;
+            this.tableData.forEach(item => {
+              item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
+            });
+            this.userTableTotal = resp.data.totalElements;
+          } else {
+            this.userTableTotal = resp.data.totalElements;
+            this.tableData = [];
+          }
+        })
+        .finally(() => {
+          this.userLoading = false;
+        });
     },
 
     /**
@@ -450,6 +503,12 @@ export default {
       listAllRoles().then(res => {
         if (res.code === 200) {
           this.userRoleArray = res.data;
+          this.userRoleArray = this.userRoleArray.filter(item => {
+            if (item.isEnable === 1) {
+              return item;
+            }
+          });
+          console.log(this.userRoleArray);
         }
       });
     },
@@ -581,7 +640,7 @@ export default {
       if (userTableRowData.isEnable === 1) {
         disableUserById({ id: userTableRowData.id }).then(res => {
           if (res.code === 200) {
-            this.$message.success(res.message);
+            this.$message.success('停用成功');
             this.modleVisible = false;
             this.getUserTableData(this.pageObject, this.searchParameters);
           }
@@ -589,7 +648,7 @@ export default {
       } else {
         enableUserById({ id: userTableRowData.id }).then(res => {
           if (res.code === 200) {
-            this.$message.success(res.message);
+            this.$message.success('启用成功');
             this.modleVisible = false;
             this.getUserTableData(this.pageObject, this.searchParameters);
           }
@@ -603,7 +662,7 @@ export default {
       this.userLoading = true;
       batchDisableUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
-          this.afterBatchActions(res);
+          this.afterBatchActions(res, 1);
         }
       });
     },
@@ -614,24 +673,42 @@ export default {
       this.userLoading = true;
       batchEnableUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
-          this.afterBatchActions(res);
+          this.afterBatchActions(res, 2);
         }
       });
     },
+      /**
+     * @description: 点击批量删除
+     */
     handleBatchDelete() {
       this.userLoading = true;
       batchDeleteUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
-          this.afterBatchActions(res);
+          this.afterBatchActions(res, 3);
         }
       });
     },
     /**
      * @description: 批量停用 启用 删除 公共返回数据
      * @param {object} batchSuccessData 接口返回数据
+     * @param {number} type 判断点击的类型
      */
 
-    afterBatchActions(batchSuccessData) {
+    afterBatchActions(batchSuccessData, type) {
+      if (type === 1) {
+        this.$message.success('停用成功');
+      } else if (type === 2) {
+        this.$message.success('启用成功');
+      } else {
+        this.$message.success('删除成功');
+      }
+      // switch (type) {
+      //   case 1: this.$message.success('停用成功');
+      //   break;
+      //   case 2: this.$message.success('启用成功');
+      //   break;
+      //   case 3: this.$message.success('删除成功');
+      // }
       this.$message.success(batchSuccessData.message);
       this.batchSelectIdArray = [];
       this.getUserTableData(this.pageObject, this.searchParameters);
@@ -678,11 +755,20 @@ export default {
       this.form.id = undefined;
       this.modleVisible = true;
       if (this.isOrganization === true) {
-        this.form.organizationId = this.searchParameters.searchOrganizationIds ? this.searchParameters.searchOrganizationIds[0] : this.searchParameters.searchOrganizationId ? this.searchParameters.searchOrganizationId : undefined;
+        this.form.organizationId = this.searchParameters.searchOrganizationIds
+          ? this.searchParameters.searchOrganizationIds[0]
+          : this.searchParameters.searchOrganizationId
+          ? this.searchParameters.searchOrganizationId
+          : undefined;
+          this.getUserDepartmentTree({ searchOrganizationId: this.form.organizationId });
       } else if (this.isOrganization === false) {
         this.form.organizationId = this.selectMixTreeOrganizationId;
-        this.form.departmentId = this.searchParameters.searchDepartmentIds ? this.searchParameters.searchDepartmentIds[0] : this.searchParameters.searchDepartmentId ? this.searchParameters.searchDepartmentId : undefined;
-        this.getUserDepartmentTree({ searchOrganizationId: this.form.organizationId });
+        this.form.departmentId = this.searchParameters.searchDepartmentIds
+          ? this.searchParameters.searchDepartmentIds[0]
+          : this.searchParameters.searchDepartmentId
+          ? this.searchParameters.searchDepartmentId
+          : undefined;
+          this.getUserDepartmentTree({ searchOrganizationId: this.form.organizationId });
       }
     },
 
@@ -729,10 +815,49 @@ export default {
     clearFormData() {
       this.$refs.userRuleForm.resetFields();
       this.form = this.$options.data.call(this).form;
+    },
+    /**
+     * @description: 重置搜索条件
+     */
+    handleReset() {
+      const copySearchParameters = JSON.parse(JSON.stringify(this.searchParameters));
+      this.searchParameters = {};
+      this.searchParameters.searchDepartmentIds = copySearchParameters.searchDepartmentIds;
+      this.searchParameters.searchDepartmentId = copySearchParameters.searchDepartmentId;
+      this.searchParameters.searchOrganizationIds = copySearchParameters.searchOrganizationIds;
+      this.searchParameters.searchOrganizationId = copySearchParameters.searchOrganizationId;
+      this.searchUserTableData();
+    },
+    /**
+     * @description: 根据isEnable判断表格背景颜色
+     * @param {*} record 当前行数据
+     */
+    rowClassName(record) {
+      let className = 'enableBackground';
+      if (record.isEnable === 1) className = 'deactivateBakcground';
+      console.log(className);
+      return className;
+    },
+    resetPassword(userTableRowData) {
+       console.log(userTableRowData.id);
+      resetUserPasswordById({ id: userTableRowData.id }).then(res => {
+          if (res.code === 200) {
+            this.$message.success(res.message);
+            this.getUserTableData(this.pageObject, this.searchParameters);
+          }
+      });
     }
   }
 };
 </script>
+<style>
+.deactivateBakcground {
+  background: white !important;
+}
+.enableBackground{
+  background: #FAFAFA !important;
+}
+</style>
 <style lang="less" scoped>
 .table-page-search-wrapper /deep/ .ant-form-inline .ant-form-item > .ant-form-item-label {
   line-height: 32px;
@@ -797,7 +922,6 @@ export default {
         height: calc(100vh - 380px);
         padding: 10px;
         overflow: scroll;
-
       }
       .userMainTableContent /deep/ .ant-table-tbody .ant-table-row:nth-child(2n) {
         background: #fafafa;
@@ -817,5 +941,16 @@ export default {
       padding: 0 10px 0 0;
     }
   }
+  .userMain /deep/.table-page-search-wrapper .ant-form-inline .ant-form-item .ant-form-item-control-wrapper {
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1;
+    flex: 1 1;
+    display: inline-block;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
 }
 </style>

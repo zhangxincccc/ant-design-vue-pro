@@ -5718,6 +5718,49 @@ export const userInfoURL = function(parameters = {}) {
   return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
 }
 /**
+ * 成功：code=200，失败：code!=200
+ * request: userChangePassword
+ * url: userChangePasswordURL
+ * method: userChangePassword_TYPE
+ * raw_url: userChangePassword_RAW_URL
+ * @param body - 用户修改密码视图实体
+ */
+export const userChangePassword = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/user/change-password'
+  let body
+  let queryParameters = {}
+  let form = {}
+  if (parameters['body'] !== undefined) {
+    body = parameters['body']
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('put', domain + path, body, queryParameters, form, config)
+}
+export const userChangePassword_RAW_URL = function() {
+  return '/api/user/change-password'
+}
+export const userChangePassword_TYPE = function() {
+  return 'put'
+}
+export const userChangePasswordURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/user/change-password'
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
 * 排序属性：username,name,gender.code,gender.name,email,mobile,title.code,
 title.name,organization.id,organization.name,department.id,
 department.name,isEnable,createTime
@@ -6340,6 +6383,51 @@ export const enableUserByIdURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   let path = '/api/users/{id}/enable'
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
+ * 成功：code=200，data对象为结果数据，失败：code!=0
+ * request: resetUserPasswordById
+ * url: resetUserPasswordByIdURL
+ * method: resetUserPasswordById_TYPE
+ * raw_url: resetUserPasswordById_RAW_URL
+ * @param id - 用户ID
+ */
+export const resetUserPasswordById = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/users/{id}/reset-password'
+  let body
+  let queryParameters = {}
+  let form = {}
+  path = path.replace('{id}', `${parameters['id']}`)
+  if (parameters['id'] === undefined) {
+    return Promise.reject(new Error('Missing required  parameter: id'))
+  }
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('put', domain + path, body, queryParameters, form, config)
+}
+export const resetUserPasswordById_RAW_URL = function() {
+  return '/api/users/{id}/reset-password'
+}
+export const resetUserPasswordById_TYPE = function() {
+  return 'put'
+}
+export const resetUserPasswordByIdURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/users/{id}/reset-password'
   path = path.replace('{id}', `${parameters['id']}`)
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {

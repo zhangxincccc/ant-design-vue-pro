@@ -28,7 +28,7 @@
                 </a-col>
                 <a-col :md="6" :sm="32">
                   <a-form-item label="创建时间">
-                    <a-range-picker allowClear v-model="searchParameters.interfaceCreatetime" />
+                    <a-range-picker   @change="onChangeData" allowClear v-model="searchParameters.permissionsCreateData" />
                   </a-form-item>
                 </a-col>
               </a-row>
@@ -36,10 +36,10 @@
           </div>
         </div>
         <div class="permissionSearchButton">
-          <a-button style="margin-right:20px" @click="() => (this.searchParameters = {})">重置</a-button>
-          <a-button type="primary" @click="() => this.searchPermissionTableData()">
+          <a-button style="margin-right:20px" type="primary" @click="() => this.searchPermissionTableData()">
             查询
           </a-button>
+          <a-button @click="handleReset">重置</a-button>
         </div>
       </div>
       <div class="permissionsTable">
@@ -85,6 +85,7 @@
           show-quick-jumper
           :page-size-options="pageSizeOptions"
           :total="permissionsTableTotal"
+          :show-total="total => `共 ${permissionsTableTotal} 条`"
           show-size-changer
           :page-size="pageObject.pageSize"
           @change="handlePageNumberChange"
@@ -165,7 +166,7 @@
                       <span style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</span>
                     </template>
                     <a-icon type="menu-unfold" /> </a-popover
-                ></span>
+                  ></span>
               </div>
             </div>
             <div class="modalContentTreeContent">
@@ -200,28 +201,39 @@ import moment from 'moment';
 const columns = [
   {
     title: '权限名称',
-    dataIndex: 'name'
+    dataIndex: 'name',
+    width: '16.6%',
+    ellipsis: true
   },
   {
     title: '权限代码',
-    dataIndex: 'code'
+    dataIndex: 'code',
+    width: '16.6%',
+    ellipsis: true
   },
   {
     title: '权限类型',
-    dataIndex: 'typeName'
+    dataIndex: 'typeName',
+    width: '16.6%',
+    ellipsis: true
   },
   {
     title: '组件地址',
-    dataIndex: 'component'
+    dataIndex: 'component',
+    width: '16.6%',
+    ellipsis: true
   },
   {
     title: '创建时间',
-    dataIndex: 'createTime'
+    dataIndex: 'createTime',
+    width: '16.6%',
+    ellipsis: true
   },
   {
     title: '操作',
     scopedSlots: { customRender: 'action' },
-    width: '200px'
+    width: '16.6%',
+    ellipsis: true
   }
 ];
 export default {
@@ -282,8 +294,8 @@ export default {
 
     permissionsTableTotal() {
       if (this.permissionsTableTotal === this.getExceptCurrentPageTableTotalData && this.permissionsTableTotal !== 0) {
-        this.pageObject.pageNumber = Number(this.currentPage) - 1;
         this.currentPage -= 1;
+         this.pageObject.pageNumber = Number(this.currentPage) - 1;
         this.getPermissionsTableData(this.pageObject, this.searchParameters);
       }
     }
@@ -504,6 +516,15 @@ export default {
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getPermissionsTableData(this.pageObject, this.searchParameters);
     },
+        /**
+     * @description: 日期选择器改变
+     * @param {array} date UI框架自带
+     * @param {array} dateString UI框架自带 时间区间
+     */
+    onChangeData(date, dateString) {
+      this.searchParameters.searchCreateDateBegin = dateString[0];
+      this.searchParameters.searchCreateDateEnd = dateString[1];
+    },
 
     /**
      * @description: 获取分页页数改变后的值
@@ -513,6 +534,13 @@ export default {
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getPermissionsTableData(this.pageObject, this.searchParameters);
+    },
+        /**
+     * @description: 重置搜索条件
+     */
+    handleReset() {
+      this.searchParameters = {};
+      this.searchPermissionTableData();
     }
   }
 };

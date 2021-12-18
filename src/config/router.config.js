@@ -35,8 +35,7 @@ export const asyncRouterMap = [
         redirect: '/system/organizations',
         meta: {
           title: 'menu.system',
-          icon: system,
-          permission: ['system']
+          icon: system
         },
         children: [
           {

@@ -2,11 +2,12 @@
   <page-header-wrapper :title="false">
     <div class="department">
       <div class="departmentList">
-        <department-tree
-          @selectDepartment="selectDepartment"
-          @cancelSelect="cancelSelect"
-          ref="departmentTree"
-        ></department-tree>
+        <organization-mix-tree
+          ref="mixTree"
+          @selectOrganization="selectMixTreeOrganizationData"
+          @selectDepartment="selectMixTreeDepartmentData"
+          @cancelSelect="cancelSelectMixTreeData"
+        ></organization-mix-tree>
       </div>
       <div class="departmentMain">
         <a-spin tip="加载中..." class="position" v-if="departmentLoading"> </a-spin>
@@ -40,7 +41,7 @@
                         }"
                         v-model="searchParameters.searchOrganizationId"
                         style="width: 100%"
-                        :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                        :dropdown-style="{ maxHeight: '400px',maxWidth: '300px', overflow: 'auto' }"
                         :tree-data="organizationTreeData"
                         placeholder="请选择所属组织"
                         tree-default-expand-all
@@ -51,8 +52,8 @@
                   <a-col :md="8" :sm="24">
                     <a-form-item label="状态">
                       <a-select allowClear v-model="searchParameters.searchIsEnable" placeholder="请选择">
-                        <a-select-option value="1">停用</a-select-option>
-                        <a-select-option value="0">启用</a-select-option>
+                        <a-select-option value="0">停用</a-select-option>
+                        <a-select-option value="1">启用</a-select-option>
                       </a-select>
                     </a-form-item>
                   </a-col>
@@ -60,8 +61,8 @@
                 </template>
                 <a-col :md="8" :sm="24" style="display:flex;justify-content: flex-end">
                   <span>
-                    <a-button @click="() => (this.searchParameters = {})">重置</a-button>
-                    <a-button style="margin-left: 8px" type="primary" @click="() => this.searchDepartmentTableData()">查询</a-button>
+                    <a-button type="primary" @click="() => this.searchDepartmentTableData()">查询</a-button>
+                    <a-button style="margin-left: 8px" @click="handleReset">重置</a-button>
                     <a @click="() => (this.advanced = !this.advanced)" style="margin-left: 8px">
                       {{ advanced ? '收起' : '展开' }}
                       <a-icon :type="advanced ? 'up' : 'down'" />
@@ -94,13 +95,27 @@
                   return record.id;
                 }
               "
+              :rowClassName="rowClassName"
               bordered
             >
-              <span slot="name" slot-scope="text">{{ text }}</span>
               <template slot="action" slot-scope="text, record">
-                <a slot="action" href="javascript:;" @click="handleIsEnable(record)" :class="{deactivate:record.isEnable == 1,enable:record.isEnable == 0}">{{
-                  record.isEnable == 1 ? '停用' : '启用'
-                }}</a>
+                <a-popconfirm
+                  slot="action"
+                  title="此操作将停用该条数据，是否继续?"
+                  ok-text="是"
+                  cancel-text="否"
+                  @confirm="handleIsEnable(record)"
+                >
+                  <a href="javascript:;" v-if="record.isEnable == 1" :class="{ deactivate: record.isEnable == 1 }">停用</a>
+                </a-popconfirm>
+                <a
+                  slot="action"
+                  href="javascript:;"
+                  @click="handleIsEnable(record)"
+                  v-if="record.isEnable == 0"
+                  :class="{ enable: record.isEnable == 0 }"
+                  >启用</a
+                >
                 <a slot="action" href="javascript:;" style="margin-left:5px" @click="handleEdit(record)">编辑</a>
                 <a-popconfirm
                   slot="action"
@@ -121,6 +136,7 @@
             show-quick-jumper
             :page-size-options="pageSizeOptions"
             :total="departmentTableTotal"
+            :show-total="total => `共 ${departmentTableTotal} 条`"
             show-size-changer
             :page-size="pageObject.pageSize"
             @change="handlePageNumberChange"
@@ -131,7 +147,7 @@
       </div>
       <a-modal
         v-model="modleVisible"
-        :title="form.id ? '编辑用户' : '新增用户'"
+        :title="form.id ? '编辑部门' : '新增部门'"
         @cancel="() => ((this.modleVisible = false), this.clearFormData())"
         :confirm-loading="formButtonDisableFlag"
         @ok="onSubmit"
@@ -144,10 +160,10 @@
           :wrapper-col="wrapperCol"
         >
           <a-form-model-item ref="name" label="部门名称" prop="name">
-            <a-input v-model="form.name" placeholder="请输入部门名称" />
+            <a-input v-model.trim="form.name" placeholder="请输入部门名称" />
           </a-form-model-item>
           <a-form-model-item ref="code" label="部门编码" prop="code">
-            <a-input v-model="form.code" placeholder="请输入部门编码" />
+            <a-input v-model.trim="form.code" placeholder="请输入部门编码" />
           </a-form-model-item>
           <a-form-model-item label="所属组织" prop="organizationId">
             <a-tree-select
@@ -190,7 +206,7 @@
             </a-radio-group>
           </a-form-model-item>
           <a-form-model-item label="备注">
-            <a-input v-model="form.description" type="textarea" placeholder="请输入备注" />
+            <a-input v-model="form.description" type="textarea" placeholder="请输入备注" :maxLength="500"/>
           </a-form-model-item>
         </a-form-model>
       </a-modal>
@@ -210,33 +226,42 @@ import {
   disableDepartmentById
 } from '@/api/api';
 import moment from 'moment';
-import departmentTree from './components/tree/departmentTree';
+import OrganizationMixTree from './components/tree/OrganizationMixTree';
 const columns = [
   {
     title: '部门名称',
     dataIndex: 'name',
-    scopedSlots: { customRender: 'name' }
+    width: '26%',
+    ellipsis: true
   },
   {
     title: '部门编码',
-    dataIndex: 'code'
+    dataIndex: 'code',
+    width: '11%',
+    ellipsis: true
   },
   {
     title: '所属组织',
-    dataIndex: 'organization.name'
+    dataIndex: 'organization.name',
+    width: '11%',
+    ellipsis: true
   },
   {
     title: '创建时间',
-    dataIndex: 'createTime'
+    dataIndex: 'createTime',
+    width: '16%',
+    ellipsis: true
   },
   {
     title: '备注',
-    dataIndex: 'description'
+    dataIndex: 'description',
+    width: '16%',
+    ellipsis: true
   },
   {
     title: '操作',
     scopedSlots: { customRender: 'action' },
-    width: '200px'
+    width: '16%'
   }
 ];
 export default {
@@ -272,8 +297,14 @@ export default {
       },
       rules: {
         // 规则验证
-        name: [{ required: true, message: '请输入部门名称', trigger: 'blur' }],
-        code: [{ required: true, message: '请输入部门编码', trigger: 'blur' }],
+        name: [
+          { required: true, message: '请输入部门名称', trigger: 'blur' },
+          { max: 50, message: '部门名称长度不能大于50', trigger: 'blur' }
+        ],
+        code: [
+          { required: true, message: '请输入部门编码', trigger: 'blur' },
+          { max: 50, message: '部门编码长度不能大于50', trigger: 'blur' }
+        ],
         organizationId: [{ required: true, message: '请选择所属组织', trigger: 'change' }]
       },
       selectOrganizationId: undefined, // 选中部门的组织ID
@@ -282,7 +313,7 @@ export default {
     };
   },
   components: {
-    departmentTree
+    OrganizationMixTree
   },
   watch: {
     /**
@@ -293,8 +324,8 @@ export default {
      */
     departmentTableTotal() {
       if (this.departmentTableTotal === this.getExceptCurrentPageTableTotalData && this.departmentTableTotal !== 0) {
-        this.pageObject.pageNumber = Number(this.currentPage) - 1;
         this.currentPage -= 1;
+        this.pageObject.pageNumber = Number(this.currentPage) - 1;
         this.getDepartentTableData(this.pageObject, this.searchParameters);
       }
     }
@@ -338,31 +369,54 @@ export default {
         }
       });
     },
-    /**
-     * @description: 选中部门树的数据
-     * @param {object} organizationAnddepartmentId 组织ID部门ID数组
+
+        /**
+     * @description: 选中混合树组织的数据
+     * @param {array} organizationId 组织ID数组
+     * @param {string} organizationType 选中的类型
      */
-    selectDepartment(organizationAnddepartmentId) {
+
+    selectMixTreeOrganizationData(organizationId) {
+      this.selectOrganizationId = organizationId[0];
+      if (organizationId.length > 1) {
+        this.searchParameters.searchOrganizationIds = organizationId;
+        this.searchParameters.searchOrganizationId = undefined;
+      } else {
+        this.searchParameters.searchOrganizationIds = undefined;
+        this.searchParameters.searchOrganizationId = organizationId[0];
+      }
+      this.searchParameters.searchParentId = undefined;
+      this.searchParameters.searchParentIds = undefined;
+      this.searchUserTableData();
+    },
+        /**
+     * @description: 选中混合树组织的数据
+     * @param {array} departmentId 部门ID数组
+     */
+    selectMixTreeDepartmentData(organizationAnddepartmentId) {
       this.selectOrganizationId = organizationAnddepartmentId.organizationId;
       if (organizationAnddepartmentId.departmentId.length > 1) {
-        this.searchParameters.searchParentId = undefined;
-        this.searchParameters.searchParentIds = organizationAnddepartmentId.departmentId;
+         this.searchParameters.searchParentId = undefined;
+          this.searchParameters.searchParentIds = organizationAnddepartmentId.departmentId;
       } else {
-        this.searchParameters.searchParentIds = undefined;
         this.searchParameters.searchParentId = organizationAnddepartmentId.departmentId[0];
+        this.searchParameters.searchParentIds = undefined;
       }
+      this.searchParameters.searchOrganizationIds = undefined;
+      this.searchParameters.searchOrganizationId = undefined;
       this.searchDepartmentTableData();
     },
     /**
-     * @description: 取消选中部门树
+     * @description: 取消选中混合树
      */
-    cancelSelect() {
+    cancelSelectMixTreeData() {
+      this.searchParameters.searchOrganizationIds = undefined;
       this.searchParameters.searchParentIds = undefined;
+      this.searchParameters.searchOrganizationId = undefined;
       this.searchParameters.searchParentId = undefined;
       this.selectOrganizationId = undefined;
       this.searchDepartmentTableData();
     },
-
     /**
      * @description:  获取部门表格数据
      */
@@ -447,7 +501,7 @@ export default {
           this.modleVisible = false;
           this.departmentLoading = true;
           this.getDepartentTableData(this.pageObject, this.searchParameters);
-          this.$refs.departmentTree.getTreeData(); // 刷新子组件部门列表的方法
+          this.$refs.mixTree.getTreeData(); // 刷新子组件部门列表的方法
         }
       });
     },
@@ -514,7 +568,7 @@ export default {
       this.clearFormData();
       this.departmentLoading = true;
       this.getDepartentTableData(this.pageObject, this.searchParameters);
-      this.$refs.departmentTree.getTreeData();
+      this.$refs.mixTree.getTreeData();
     },
 
     /**
@@ -551,6 +605,7 @@ export default {
       departmentsTree(searchParameters).then(res => {
         if (res.code === 200) {
           this.departmentFormTreeData = res.data;
+           this.disabledFormTreeData(this.departmentFormTreeData);
         }
       });
     },
@@ -563,25 +618,52 @@ export default {
       if (departmentTableRowData.isEnable === 1) {
         disableDepartmentById({ id: departmentTableRowData.id }).then(res => {
           if (res.code === 200) {
-            this.$message.success(res.message);
+            this.$message.success('停用成功');
             this.getDepartentTableData(this.pageObject, this.searchParameters);
-            this.$refs.departmentTree.getTreeData();
+           this.$refs.mixTree.getTreeData();
           }
         });
       } else {
         enableDepartmentById({ id: departmentTableRowData.id }).then(res => {
           if (res.code === 200) {
-            this.$message.success(res.message);
+           this.$message.success('启用成功');
             this.getDepartentTableData(this.pageObject, this.searchParameters);
-            this.$refs.departmentTree.getTreeData();
+          this.$refs.mixTree.getTreeData();
           }
         });
       }
+    },
+   /**
+     * @description: 重置搜索条件
+     */
+    handleReset() {
+      const copySearchParameters = JSON.parse(JSON.stringify(this.searchParameters));
+      this.searchParameters = {};
+      this.searchParameters.searchParentIds = copySearchParameters.searchParentIds;
+      this.searchParameters.searchParentId = copySearchParameters.searchParentId;
+      this.searchDepartmentTableData();
+    },
+    /**
+     * @description: 根据isEnable判断表格背景颜色
+     * @param {*} record 当前行数据
+     */
+    rowClassName(record) {
+      let className = 'enableBackground';
+      if (record.isEnable === 1) className = 'deactivateBakcground';
+      console.log(className);
+      return className;
     }
   }
 };
 </script>
-
+<style>
+.deactivateBakcground {
+  background: white !important;
+}
+.enableBackground{
+  background: #FAFAFA !important;
+}
+</style>
 <style lang="less" scoped>
 .deactivate {
   color: red;
@@ -604,6 +686,7 @@ export default {
     background: white;
     border-radius: 5px;
   }
+
   .departmentMain {
     // width: 79%;
     width: calc(100% - 340px);
@@ -667,5 +750,17 @@ export default {
       padding: 0 10px 0 0;
     }
   }
+
+}
+  .departmentMain /deep/ .table-page-search-wrapper .ant-form-inline .ant-form-item .ant-form-item-control-wrapper {
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1;
+    flex: 1 1;
+    display: inline-block;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
 }
 </style>
