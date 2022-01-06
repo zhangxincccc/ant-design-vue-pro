@@ -942,10 +942,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@hangar/pro-layout@^1.0.9":
-  version "1.0.9"
-  resolved "http://43.239.120.231:11381/repository/npm-hangar/@hangar/pro-layout/-/pro-layout-1.0.9.tgz#bdba3c8f372adfca8c76cfc249cf50d3fc71272a"
-  integrity sha512-hA2u28O5I9A81H0LoFhTdi3AWPUZ9dbJRQRpjg2/k2RJbDqMUm4ki0FCdP/mywgAMNDreoc1lXsKutf9pA04+A==
+"@hangar/pro-layout@^1.0.10":
+  version "1.0.12"
+  resolved "http://43.239.120.231:11381/repository/npm/@hangar/pro-layout/-/pro-layout-1.0.11.tgz#6418f48dca65cc7c138ad795af7f52f368ae7372"
+  integrity sha512-LAg3pg3PKdcncwI1+S+mEXRvyNQHEsPiHhsMWbMVOP+SvxiWe22F9eY/aod3yq9t+8GgN3HqZRW8kNKBR8jqXA==
   dependencies:
     ant-design-vue "^1.6.2"
     classnames "^2.2.6"
