@@ -27,6 +27,7 @@
       >
         <template slot="title" slot-scope="{ name }">
           <span
+          :title="name"
             v-html="
               name.replace(
                 new RegExp(organizationSearch, 'g'),
@@ -200,6 +201,7 @@ export default {
   width: 100%;
   display: flex;
   flex-direction: column;
+    height: calc(100vh - 167px);
   .organizationTreeSearch {
     width: 100%;
     height: 46px;
@@ -220,5 +222,23 @@ export default {
   .organizationTreeContent::-webkit-scrollbar {
     display: none;
   }
+    .organizationTreeContent /deep/ .ant-tree li .ant-tree-node-content-wrapper {
+    max-width: 240px;
+    display: inline-block;
+    height: 24px;
+    margin: 0;
+    padding: 0 5px;
+    color: rgba(0, 0, 0, 0.65);
+    line-height: 24px;
+    text-decoration: none;
+    vertical-align: top;
+    border-radius: 2px;
+    cursor: pointer;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 }
 </style>

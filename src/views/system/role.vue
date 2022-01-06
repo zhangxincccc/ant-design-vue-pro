@@ -13,7 +13,7 @@
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="32">
-                  <a-form-item label="角色值">
+                  <a-form-item label="角色代码">
                     <a-input allowClear v-model="searchParameters.searchCode" placeholder="请输入角色值" />
                   </a-form-item>
                 </a-col>
@@ -22,23 +22,15 @@
                     <a-range-picker @change="onChangeData" allowClear v-model="searchParameters.roleDate" />
                   </a-form-item>
                 </a-col>
-                <a-col :md="6" :sm="32">
-                  <a-form-item label="状态">
-                    <a-select allowClear v-model="searchParameters.searchIsEnable" placeholder="请选择">
-                      <a-select-option value="0">停用</a-select-option>
-                      <a-select-option value="1">启用</a-select-option>
-                    </a-select>
-                  </a-form-item>
-                </a-col>
               </a-row>
             </a-form>
           </div>
         </div>
         <div class="roleSearchButton">
-          <a-button style="margin-right:20px" @click="() => (this.searchParameters = {})">重置</a-button>
-          <a-button type="primary" @click="() => this.searchRoleTableData()">
+          <a-button style="margin-right:20px" type="primary" @click="() => this.searchRoleTableData()">
             查询
           </a-button>
+          <a-button @click="handleReset">重置</a-button>
         </div>
       </div>
       <div class="roleTable">
@@ -83,6 +75,7 @@
           v-model="currentPage"
           show-quick-jumper
           :page-size-options="pageSizeOptions"
+          :show-total="total => `共 ${roleTableTotal} 条`"
           :total="roleTableTotal"
           show-size-changer
           :page-size="pageObject.pageSize"
@@ -118,16 +111,6 @@
                 </a-form-model-item>
                 <a-form-model-item ref="code" label="角色代码" prop="code">
                   <a-input v-model="form.code" placeholder="请输入角色代码" />
-                </a-form-model-item>
-                <a-form-model-item label="状态" prop="isEnable">
-                  <a-radio-group v-model="form.isEnable" button-style="solid">
-                    <a-radio-button value="1">
-                      启用
-                    </a-radio-button>
-                    <a-radio-button value="0">
-                      停用
-                    </a-radio-button>
-                  </a-radio-group>
                 </a-form-model-item>
                 <a-form-model-item label="备注">
                   <a-input v-model="form.description" type="textarea" placeholder="请输入备注" />
@@ -184,24 +167,33 @@ import moment from 'moment';
 const columns = [
   {
     title: '角色名称',
-    dataIndex: 'name'
+    dataIndex: 'name',
+    width: '20%',
+    ellipsis: true
   },
   {
-    title: '角色值',
-    dataIndex: 'code'
+    title: '角色代码',
+    dataIndex: 'code',
+    width: '20%',
+    ellipsis: true
   },
   {
     title: '创建时间',
-    dataIndex: 'createTime'
+    dataIndex: 'createTime',
+    width: '20%',
+    ellipsis: true
   },
   {
     title: '备注',
-    dataIndex: 'description'
+    dataIndex: 'description',
+    width: '20%',
+    ellipsis: true
   },
   {
     title: '操作',
     scopedSlots: { customRender: 'action' },
-    width: '200px'
+    width: '20%',
+    ellipsis: true
   }
 ];
 export default {
@@ -254,8 +246,8 @@ export default {
 
     roleTableTotal() {
       if (this.roleTableTotal === this.getExceptCurrentPageTableTotalData && this.roleTableTotal !== 0) {
-        this.pageObject.pageNumber = Number(this.currentPage) - 1;
         this.currentPage -= 1;
+        this.pageObject.pageNumber = Number(this.currentPage) - 1;
         this.getRoleTableData(this.pageObject, this.searchParameters);
       }
     }
@@ -269,7 +261,6 @@ export default {
     }
   },
   created() {
-    this.roleLoading = true;
     this.getRoleTableData(this.pageObject, this.searchParameters); // 获取表格数据
     this.getRolePermissions(); // 获取角色权限
   },
@@ -292,6 +283,7 @@ export default {
      * @param {object} params 搜索参数
      */
     getRoleTableData(page, params) {
+      this.roleLoading = true;
       listRoles(Object.assign({}, page, params)).then(res => {
         if (res.code === 200 && res.data.content) {
           this.roleTableData = res.data.content;
@@ -314,7 +306,6 @@ export default {
     searchRoleTableData() {
       this.currentPage = 1;
       this.pageObject.pageNumber = 0;
-      this.roleLoading = true;
       this.getRoleTableData(this.pageObject, this.searchParameters);
     },
 
@@ -386,7 +377,6 @@ export default {
       this.$message.success(successFormData.message);
       this.modleVisible = false;
       this.clearFormData();
-      this.roleLoading = true;
       this.getRoleTableData(this.pageObject, this.searchParameters);
     },
 
@@ -411,7 +401,6 @@ export default {
         .then(res => {
           if (res.code === 200) {
             this.form = Object.assign({}, this.form, res.data);
-            this.form.isEnable = String(this.form.isEnable);
             this.checkedKeys = res.data.permissions.map(item => {
               return item.id;
             });
@@ -430,7 +419,6 @@ export default {
       deleteRoleById({ id: roleTableRowData.id }).then(res => {
         if (res.code === 200) {
           this.$message.success(res.message);
-          this.roleLoading = true;
           this.getRoleTableData(this.pageObject, this.searchParameters);
         }
       });
@@ -455,7 +443,6 @@ export default {
      * @param {string} pageSize 当前页展示几条
      */
     onPageSizeChange(currentPage, pageSize) {
-      this.roleLoading = true;
       this.currentPage = currentPage;
       this.pageObject.pageSize = pageSize;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
@@ -467,7 +454,6 @@ export default {
      * @param {string} pageNumber UI框架自带
      */
     handlePageNumberChange(pageNumber) {
-      this.roleLoading = true;
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getRoleTableData(this.pageObject, this.searchParameters);
@@ -487,7 +473,6 @@ export default {
      * @param {object} roleTableRowData 某一条表格数据对象
      */
     handleIsEnable(roleTableRowData) {
-      this.roleLoading = true;
       if (roleTableRowData.isEnable === 1) {
         disableRoleById({ id: roleTableRowData.id }).then(res => {
           if (res.code === 200) {
@@ -505,6 +490,13 @@ export default {
           }
         });
       }
+    },
+    /**
+     * @description: 重置搜索条件
+     */
+    handleReset() {
+      this.searchParameters = {};
+      this.searchRoleTableData();
     }
   }
 };
@@ -689,6 +681,24 @@ export default {
       display: flex;
       margin-left: 30%;
     }
+    .modalContentTreeContent /deep/ .ant-tree li .ant-tree-node-content-wrapper {
+    display: inline-block;
+    height: 24px;
+    margin: 0;
+    padding: 0 5px;
+    color: rgba(0, 0, 0, 0.65);
+    line-height: 24px;
+    text-decoration: none;
+    vertical-align: top;
+    border-radius: 2px;
+    cursor: pointer;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 140px;
+  }
     .modalContentTreeContent::-webkit-scrollbar {
       display: none;
     }
