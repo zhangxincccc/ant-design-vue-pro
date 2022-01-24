@@ -11213,6 +11213,11 @@ vue-container-query@^0.1.0:
     resize-observer-lite "^0.2.3"
     vue "^2.5.17"
 
+vue-cookies@^1.7.4:
+  version "1.7.4"
+  resolved "http://43.239.120.231:11381/repository/npm/vue-cookies/-/vue-cookies-1.7.4.tgz#d241d0a0431da0795837651d10b4d73e7c8d3e8d"
+  integrity sha512-mOS5Btr8V9zvAtkmQ7/TfqJIropOx7etDAgBywPCmHjvfJl2gFbH2XgoMghleLoyyMTi5eaJss0mPN7arMoslA==
+
 vue-copy-to-clipboard@^1.0.3:
   version "1.0.3"
   resolved "http://43.239.120.231:11381/repository/npm/vue-copy-to-clipboard/-/vue-copy-to-clipboard-1.0.3.tgz#b415302b343b9185add4fc579c0721a16c8e65ac"

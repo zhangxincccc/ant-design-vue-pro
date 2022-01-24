@@ -4,13 +4,14 @@ import storage from 'store';
 import notification from 'ant-design-vue/es/notification';
 import { VueAxios } from './axios';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
+import VueCookies from 'vue-cookies';
 
 // 异常拦截处理器
 const errorHandler = error => {
   if (error.response) {
     const data = error.response.data;
     // 从 localstorage 获取 token
-    const token = storage.get(ACCESS_TOKEN);
+    const token = storage.get(ACCESS_TOKEN) || VueCookies.get(ACCESS_TOKEN);
     if (error.response.status === 403) {
       notification.error({
         message: 'Forbidden',

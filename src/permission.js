@@ -1,12 +1,12 @@
 import router from './router';
 import store from './store';
-import storage from 'store';
 import NProgress from 'nprogress'; // progress bar
 import '@/components/NProgress/nprogress.less'; // progress bar custom style
 import notification from 'ant-design-vue/es/notification';
 import { domTitle, setDocumentTitle } from '@/utils/domUtil';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { i18nRender } from '@/locales';
+import VueCookies from 'vue-cookies';
 
 NProgress.configure({ showSpinner: false }); // NProgress Configuration
 
@@ -19,7 +19,7 @@ router.beforeEach((to, from, next) => {
   to.meta && typeof to.meta.title !== 'undefined' && setDocumentTitle(`${i18nRender(to.meta.title)} - ${domTitle}`);
   store.dispatch('generateEnumMap');
   /* has token */
-  if (storage.get(ACCESS_TOKEN)) {
+  if (VueCookies.get(ACCESS_TOKEN)) {
     if (to.path === loginRoutePath) {
       next({ path: defaultRoutePath });
       NProgress.done();
@@ -47,7 +47,7 @@ router.beforeEach((to, from, next) => {
               }
             });
           })
-          .catch((err) => {
+          .catch(err => {
             notification.error({
               message: '错误',
               description: err

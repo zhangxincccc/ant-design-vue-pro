@@ -1,14 +1,15 @@
 import storage from 'store';
-import { loginByUsername, logout } from '@/api/auth';
+import { loginByUsername } from '@/api/auth';
 import { userInfo } from '@/api';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { welcome } from '@/utils/util';
+import VueCookies from 'vue-cookies';
 
 const user = {
   state: {
-     // 统一配置分页的选择条数
+    // 统一配置分页的选择条数
     defaultPaginationOptions: ['5', '7', '10'],
-     // 统一配置分页的默认一页条数
+    // 统一配置分页的默认一页条数
     defaultPaginationPagesize: 10,
     welcome: '',
     avatar: '',
@@ -46,6 +47,7 @@ const user = {
         loginByUsername(username, password)
           .then(result => {
             storage.set(ACCESS_TOKEN, result.access_token, 7 * 24 * 60 * 60 * 1000);
+            VueCookies.set(ACCESS_TOKEN, result.access_token, -1);
             commit('SET_TOKEN', result.access_token);
             resolve(result);
           })
@@ -87,18 +89,12 @@ const user = {
     // 登出
     Logout({ commit, state }) {
       return new Promise(resolve => {
-        logout(state.token)
-          .then(() => {
-            commit('SET_TOKEN', '');
-            commit('SET_ROLES', []);
-            commit('SET_PERMISSIONS', []);
-            storage.remove(ACCESS_TOKEN);
-            resolve();
-          })
-          .catch(() => {
-            resolve();
-          })
-          .finally(() => {});
+        commit('SET_TOKEN', '');
+        commit('SET_ROLES', []);
+        commit('SET_PERMISSIONS', []);
+        storage.remove(ACCESS_TOKEN);
+        VueCookies.remove(ACCESS_TOKEN);
+        resolve();
       });
     }
   }
