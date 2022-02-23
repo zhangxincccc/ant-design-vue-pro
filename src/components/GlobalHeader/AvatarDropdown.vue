@@ -104,7 +104,8 @@ export default {
         oldPassword: [{ required: true, message: '请输入密码', trigger: 'blur' }],
         newPassword: [{ required: true, message: '请输入密码', trigger: 'blur' }],
         confirmPassword: [{ required: true, validator: validatePass }]
-      }
+      },
+      authorizationGrantType: process.env.VUE_APP_AUTHORIZATION_GRANT_TYPE
     };
   },
   methods: {
@@ -123,7 +124,12 @@ export default {
           //   setTimeout(Math.random() > 0.5 ? resolve : reject, 1500)
           // }).catch(() => console.log('Oops errors!'))
           return this.$store.dispatch('Logout').then(() => {
-            this.$router.push({ name: 'login' });
+            if (this.authorizationGrantType === 'authorization_code') {
+              window.location.href =
+                process.env.VUE_APP_AUTHORIZATION_URI + process.env.VUE_APP_AUTHORIZATION_LOGOUT_URL;
+            } else {
+              this.$router.push({ name: 'login' });
+            }
           });
         },
         onCancel() {}
