@@ -60,6 +60,5 @@ export const loginByAuthorizationCode = code => {
  * @returns 授权码模式回调地址
  */
 function getRedirectUri() {
-  console.log('环境变量', process.env.VUE_APP_AUTHORIZATION_REDIRECT_URI);
   return process.env.VUE_APP_AUTHORIZATION_REDIRECT_URI || window.location.origin + '/user/login';
 }

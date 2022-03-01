@@ -196,19 +196,19 @@ export default {
     if (this.authorizationGrantType !== 'authorization_code') {
       return;
     }
-    console.log('当前域名', window.location);
     if (this.$route.query.code) {
       this.loading = true;
       loginByAuthorizationCode(this.$route.query.code)
         .then(result => {
           storage.set(ACCESS_TOKEN, result.access_token, 7 * 24 * 60 * 60 * 1000);
-          this.$router.push({ path: '/' });
+          this.$router.push({ path: storage.get('redirectUrl') || '/' });
         })
         .catch(() => {
           this.$message.error('登录失败, 请联系管理员');
         })
         .finally(() => (this.loading = false));
     } else {
+      storage.set('redirectUrl', this.$route.query.redirect);
       clientAuthorize();
     }
   },
