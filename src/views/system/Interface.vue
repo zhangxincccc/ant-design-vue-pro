@@ -1,60 +1,56 @@
 <template>
   <page-header-wrapper :title="false">
-    <div class="permissions">
-      <a-spin tip="加载中..." class="position" v-if="permissionsLoading"> </a-spin>
-      <div class="permissionsSearch">
-        <div class="permissionsSearchInput">
+    <div class="interface">
+      <a-spin tip="加载中..." class="position" v-if="interfaceLoading"> </a-spin>
+      <div class="interfaceSearch">
+        <div class="interfaceSearchInput">
           <div class="table-page-search-wrapper">
             <a-form layout="inline">
               <a-row :gutter="64">
                 <a-col :md="6" :sm="32">
-                  <a-form-item label="权限名称">
+                  <a-form-item label="接口名称">
                     <a-input allowClear v-model="searchParameters.searchName" placeholder="请输入" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="32">
-                  <a-form-item label="权限代码">
+                  <a-form-item label="接口代码">
                     <a-input allowClear v-model="searchParameters.searchCode" placeholder="请输入" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="32">
-                  <a-form-item label="权限类型">
-                    <a-select allowClear v-model="searchParameters.searchType" placeholder="请选择">
-                      <a-select-option v-for="(item, index) in permissionsTypeArray" :key="index" :value="item.value">
-                        {{ item.name }}
-                      </a-select-option>
-                    </a-select>
+                  <a-form-item label="接口地址">
+                    <a-input allowClear v-model="searchParameters.searchUrl" placeholder="请输入" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="32">
                   <a-form-item label="创建时间">
-                    <a-range-picker @change="onChangeData" allowClear v-model="searchParameters.permissionsCreateData" />
+                    <a-range-picker @change="onChangeData" allowClear v-model="searchParameters.interfaceCreatetime" />
                   </a-form-item>
                 </a-col>
               </a-row>
             </a-form>
           </div>
         </div>
-        <div class="permissionSearchButton">
-          <a-button style="margin-right:20px" type="primary" @click="() => this.searchPermissionTableData()">
+        <div class="interfaceSearchButton">
+          <a-button style="margin-right:20px" type="primary" @click="() => this.searchInterfaceTableData()">
             查询
           </a-button>
           <a-button @click="handleReset">重置</a-button>
         </div>
       </div>
-      <div class="permissionsTable">
-        <div class="permissionsTableAdd">
-          <div class="permissionsTableAddTitle">权限列表</div>
-          <div class="permissionsTableAddButton">
-            <a-button type="primary" @click="() => (this.modleVisible = true)">
-              新增权限
+      <div class="interfaceTable">
+        <div class="interfaceTableAdd">
+          <div class="interfaceTableAddTitle">接口列表</div>
+          <div class="interfaceTableAddButton">
+            <a-button type="primary" @click="() => ((this.expandedKeys = []), (this.modleVisible = true))">
+              新增接口
             </a-button>
           </div>
         </div>
-        <div class="permissionsTableContent">
+        <div class="interfaceTableContent">
           <a-table
             :columns="columns"
-            :data-source="permissionsTableData"
+            :data-source="interfaceTableData"
             :pagination="false"
             size="middle"
             :rowKey="
@@ -79,12 +75,12 @@
           </a-table>
         </div>
       </div>
-      <div class="permissionsPagination">
+      <div class="interfacePagination">
         <a-pagination
           v-model="currentPage"
           :page-size-options="pageSizeOptions"
-          :total="permissionsTableTotal"
-          :show-total="total => `共 ${permissionsTableTotal} 条`"
+          :total="interfaceTableTotal"
+          :show-total="total => `共 ${interfaceTableTotal} 条`"
           show-size-changer
           :page-size="pageObject.pageSize"
           @change="handlePageNumberChange"
@@ -96,7 +92,7 @@
       <a-modal
         width="50%"
         v-model="modleVisible"
-        :title="form.id ? '编辑权限' : '新增权限'"
+        :title="form.id ? '编辑接口' : '新增接口'"
         @cancel="() => (this.clearFormData(), (this.modleVisible = false))"
         :confirm-loading="formButtonDisableFlag"
         @ok="onSubmit"
@@ -109,49 +105,50 @@
             <div class="modalContentFormTitle">基础信息</div>
             <div class="modalContentFormContent">
               <a-form-model
-                ref="permissionsRuleForm"
+                ref="interfaceRuleForm"
                 :model="form"
                 :rules="rules"
                 :label-col="labelCol"
                 :wrapper-col="wrapperCol"
               >
-                <a-form-model-item ref="type" label="权限类型" prop="type">
-                  <a-select v-model="form.type" placeholder="请选择权限类型">
-                    <a-select-option v-for="(item, index) in permissionsTypeArray" :key="index" :value="item.value">
-                      {{ item.name }}
-                    </a-select-option>
+                <a-form-model-item ref="name" label="接口名称" prop="name">
+                  <a-input v-model="form.name" placeholder="请输入接口名称" />
+                </a-form-model-item>
+                <a-form-model-item ref="code" label="接口代码" prop="code">
+                  <a-input v-model="form.code" placeholder="请输入接口代码" />
+                </a-form-model-item>
+                <a-form-model-item ref="url" label="接口地址" prop="url">
+                  <a-input v-model="form.url" placeholder="请输入接口地址" />
+                </a-form-model-item>
+                <a-form-model-item label="所属资源" prop="resourceId" ref="resourceId">
+                  <a-select v-model="form.resourceId" placeholder="请选择所属资源" allowClear>
+                    <a-select-option v-for="item in listAllResources" :key="item.id" :value="item.id">{{ item.name }}</a-select-option>
                   </a-select>
                 </a-form-model-item>
-                <a-form-model-item ref="code" label="权限代码" prop="code">
-                  <a-input v-model="form.code" placeholder="请输入权限代码" />
+                <a-form-model-item ref="isPermitAll" label="是否允许访问" prop="isPermitAll">
+                  <a-radio-group default-value="1" button-style="solid" v-model="form.isPermitAll">
+                    <a-radio-button value="1">
+                      允许
+                    </a-radio-button>
+                    <a-radio-button value="2">
+                      不允许
+                    </a-radio-button>
+                  </a-radio-group>
                 </a-form-model-item>
-                <a-form-model-item ref="name" label="权限名称" prop="name">
-                  <a-input v-model="form.name" placeholder="请输入权限名称" />
-                </a-form-model-item>
-                <a-form-model-item label="上级权限" prop="parentId">
-                  <a-tree-select
-                    :replaceFields="{
-                      title: 'name',
-                      value: 'id'
-                    }"
-                    v-model="form.parentId"
-                    style="width: 100%"
-                    :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
-                    :tree-data="permissionsTreeArray"
-                    placeholder="请选择上级权限"
-                    tree-default-expand-all
-                  >
-                  </a-tree-select>
-                </a-form-model-item>
-                <a-form-model-item ref="component" label="组件地址" prop="component">
-                  <a-input v-model="form.component" placeholder="请输入组件地址" />
+                <a-form-model-item ref="method" label="请求方式" prop="method">
+                  <a-select v-model="form.method" placeholder="请选择请求方式" allowClear>
+                    <a-select-option value="GET">GET</a-select-option>
+                    <a-select-option value="POST">POST</a-select-option>
+                    <a-select-option value="PUT">PUT</a-select-option>
+                    <a-select-option value="DELETE">DELETE</a-select-option>
+                  </a-select>
                 </a-form-model-item>
               </a-form-model>
             </div>
           </div>
           <div class="modalContentTree">
             <div class="modalContentTreeTitle">
-              <div class="title">接口分配</div>
+              <div class="title">接口依赖</div>
               <div class="icon">
                 <span>
                   <a-popover placement="bottomRight">
@@ -188,44 +185,36 @@
   </page-header-wrapper>
 </template>
 <script>
-import {
-  listPermissionsTree,
-  listPermissions,
-  createPermission,
-  updatePermission,
-  deletePermissionById,
-  apiTree,
-  loadPermissionById
-} from '@/api/api';
+import { listApis, createApi, updateApi, deleteApiById, listResources, loadApiById } from '@/api/api';
 import moment from 'moment';
 const columns = [
   {
-    title: '权限名称',
+    title: '接口名称',
     dataIndex: 'name',
     width: '16.6%',
     ellipsis: true
   },
   {
-    title: '权限代码',
+    title: '接口代码',
     dataIndex: 'code',
     width: '16.6%',
     ellipsis: true
   },
   {
-    title: '权限类型',
-    dataIndex: 'typeName',
-    width: '16.6%',
-    ellipsis: true
-  },
-  {
-    title: '组件地址',
-    dataIndex: 'component',
+    title: '接口地址',
+    dataIndex: 'url',
     width: '16.6%',
     ellipsis: true
   },
   {
     title: '创建时间',
     dataIndex: 'createTime',
+    width: '16.6%',
+    ellipsis: true
+  },
+  {
+    title: '请求方式',
+    dataIndex: 'method',
     width: '16.6%',
     ellipsis: true
   },
@@ -241,45 +230,43 @@ export default {
   data() {
     return {
       jumper: '',
-      advanced: false, // 控制搜索条件的展开折叠
+      resourceIds: [], // 获取所有资源ID
       editWaitFormLoading: false, // 加载编辑回显数据等待Loading
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
-      permissionsLoading: false, // 加载表格的loading
+      interfaceLoading: false, // 加载表格的loading
       searchParameters: {}, // 表格搜索条件值
       modleVisible: false, // 控制弹框
       columns, // 表格头部
-      permissionsTableData: [], // 表格数据
+      interfaceTableData: [], // 表格数据
       pageSizeOptions: this.$store.state.user.defaultPaginationOptions, // 分页下拉
       currentPage: 1, // 默认分页当前页
       pageObject: {
         pageNumber: 0,
         pageSize: this.$store.state.user.defaultPaginationPagesize // 一页展示多少条数据
       },
-      permissionsTableTotal: 0, // 表格数据总数
-      labelCol: { span: 4 },
+      interfaceTableTotal: 0, // 表格数据总数
+      labelCol: { span: 7 },
       wrapperCol: { span: 14 },
       form: {
         // 表单数据
-        type: undefined,
-        code: undefined,
         name: undefined,
-        parent: undefined,
-        parentId: undefined,
-        component: undefined,
-        apis: [],
-        isSystem: '1',
-        sortIndex: 9010,
-        isEnable: '1'
+        code: undefined,
+        url: undefined,
+        method: undefined,
+        resourceId: undefined,
+        isDelete: 0,
+        isEnable: 1,
+        isPermitAll: '1'
       },
       rules: {
         // 规则验证
-        type: [{ required: true, message: '请输入权限类型', trigger: 'change' }],
-        code: [{ required: true, message: '请输入权限代码', trigger: 'blur' }],
-        name: [{ required: true, message: '请输入权限名称', trigger: 'blur' }]
+        name: [{ required: true, message: '请输入接口名称', trigger: 'blur' }],
+        code: [{ required: true, message: '请输入接口代码', trigger: 'blur' }],
+        url: [{ required: true, message: '请输入接口地址', trigger: 'blur' }],
+        resourceId: [{ required: true, message: '请选择所属资源', trigger: 'change' }]
       },
-      permissionsTreeArray: [], // 表单的权限树形下拉数据
-      permissionsTypeArray: [], // 权限类型数组数据
-      interfacesTreeArray: [], // 表单接口的树形下拉数据
+      interfacesTreeArray: [], // 表单上级接口数组数据
+      listAllResources: [], // 表单资源数组
       expandedKeys: [], // 控制树形下拉 展开收起全选取消全选 功能
       checkedKeys: [], // 树形下拉选中的数据
       interfacesAllids: [] // 获取所有的接口ID
@@ -288,16 +275,15 @@ export default {
   watch: {
     /**
      * @description: 解决删除分页最后一条没数据的BUG
-     * 思路：先获取当前的表格数据总数this.permissionsTableTotal
+     * 思路：先获取当前的表格数据总数this.interfaceTableTotal
      * 在获取除了当前页数据外的表格总数this.getExceptCurrentPageTableTotalData
      * 如果这两个数相等 说明删除的是当前页最后一条数据 然后使当前页-1 请求数据就可以了
      */
-
-    permissionsTableTotal() {
-      if (this.permissionsTableTotal === this.getExceptCurrentPageTableTotalData && this.permissionsTableTotal !== 0) {
+    interfaceTableTotal() {
+      if (this.interfaceTableTotal === this.getExceptCurrentPageTableTotalData && this.interfaceTableTotal !== 0) {
         this.currentPage -= 1;
          this.pageObject.pageNumber = Number(this.currentPage) - 1;
-        this.getPermissionsTableData(this.pageObject, this.searchParameters);
+        this.getInterfaceTableData(this.pageObject, this.searchParameters);
       }
     }
   },
@@ -310,119 +296,126 @@ export default {
     }
   },
   created() {
-    this.permissionsTypeArray = this.$store.state.enums.map.PermissionType; // 获取权限类型
-    this.getPermissionsTableData(this.pageObject, this.searchParameters); // 获取表格数据
-    this.formPermissionsTree(); // 表单的权限树
-    this.getInterfacesTree(); // 表单的接口权限树
+    this.interfaceLoading = true;
+    this.getInterfaceTableData(this.pageObject, this.searchParameters); // 获取表格数据
+    this.getInterfacesTree(); // 表单的接口树
+    this.getListResources(); // 获取资源数组
   },
   methods: {
+    /**
+     * @description: 获取资源数组
+     */
+    getListResources() {
+      listResources().then(res => {
+        this.listAllResources = res.data.content;
+      });
+    },
+    /**
+     * @description: 重置搜索条件
+     */
+    handleReset() {
+      this.searchParameters = {};
+      this.searchInterfaceTableData();
+    },
     /**
      * @description: 获取接口树
      */
     getInterfacesTree() {
-      apiTree().then(res => {
+      listResources({ pageNumber: 0, pageSize: 9999 }).then((res) => {
         if (res.code === 200) {
-          this.interfacesTreeArray = res.data;
+          this.interfacesTreeArray = res.data.content;
+          this.interfacesTreeArray.forEach((item) => {
+            // 一级为资源ID 设置resource防止和接口ID重复
+            item.id = 'resource' + item.id;
+            this.resourceIds.push(item.id);
+            if (item.apis) {
+              item.children = item.apis;
+            }
+          });
           this.getTreeData(this.interfacesTreeArray);
         }
       });
     },
     /**
      * @description: 利用递归获取到所有的节点id
-     * @param {array} interfacesTreeArray 树形下拉的数据
+     * @param {array} interfacesTreeArray 接口树数组
      */
     getTreeData(interfacesTreeArray) {
-      interfacesTreeArray.forEach(item => {
+      interfacesTreeArray.forEach((item) => {
         this.interfacesAllids.push(item.id);
         if (item.children) {
+            item.children.forEach(item => {
+              // children为接口ID设置api前缀防止和资源ID重复
+              item.id = 'api' + item.id;
+            });
           this.getTreeData(item.children);
         }
       });
     },
     /**
-     * @description:表单的权限树
+     * @description: 获取接口表格数据
      */
-    formPermissionsTree() {
-      listPermissionsTree().then(res => {
-        if (res.code === 200) {
-          this.permissionsTreeArray = res.data;
+    getInterfaceTableData(page, params) {
+        this.interfaceLoading = true;
+      listApis(Object.assign({}, page, params)).then(res => {
+        if (res.code === 200 && res.data.content) {
+          this.interfaceTableData = res.data.content;
+          this.interfaceTableData.forEach(res => {
+            res.createTime = moment(res.createTime).format('YYYY-MM-DD HH:mm');
+          });
+          this.interfaceTableTotal = res.data.totalElements;
+        } else {
+          this.interfaceTableTotal = res.data.totalElements;
+          this.interfaceTableData = [];
         }
-      });
-    },
-    /**
-     * @description: 获取表格数据
-     * @param {object} page 分页参数
-     * @param {object} params 搜索参数
-     */
-    getPermissionsTableData(page, params) {
-      this.permissionsLoading = true;
-      listPermissions(Object.assign({}, page, params))
-        .then(res => {
-          if (res.code === 200 && res.data.content) {
-            this.permissionsTableData = res.data.content;
-            this.permissionsTableData.forEach(res => {
-              res.createTime = moment(res.createTime).format('YYYY-MM-DD HH:mm');
-              this.permissionsTypeArray.forEach(item => {
-                if (item.value === res.type) {
-                  res.typeName = item.name;
-                }
-              });
-            });
-            this.permissionsTableTotal = res.data.totalElements;
-          } else {
-            this.permissionsTableTotal = res.data.totalElements;
-            this.permissionsTableData = [];
-          }
-        })
-        .finally(() => {
-          this.permissionsLoading = false;
+      }).finally(() => {
+          this.interfaceLoading = false;
         });
     },
-
     /**
      * @description: 点击表格搜索条件的查询
      */
-    searchPermissionTableData() {
+    searchInterfaceTableData() {
       this.currentPage = 1;
       this.pageObject.pageNumber = 0;
-      this.getPermissionsTableData(this.pageObject, this.searchParameters);
+      this.getInterfaceTableData(this.pageObject, this.searchParameters);
     },
-
     /**
-     * @description: 新增编辑权限表单提交
+     * @description: 表单提交
      */
     onSubmit() {
-      this.$refs.permissionsRuleForm.validate(valid => {
+      this.$refs.interfaceRuleForm.validate(valid => {
         if (valid) {
-          this.form.apis = this.checkedKeys.map(item => {
+          const apisArray = [];
+          // 筛选出选中的接口数据里面符合条件的值
+          this.checkedKeys.forEach(value => {
+            if (this.resourceIds.indexOf(value) === -1) {
+              apisArray.push(value);
+            }
+          });
+          this.form.dependencies = apisArray.map((item) => {
             return {
-              id: item
+              id: item.slice(3)
             };
           });
-          // 判断是否至少选择了一个接口
-          if (this.form.apis.length === 0) {
-            this.$message.error('请选择接口列表');
-            return false;
-          }
-          this.form.parent = { id: this.form.parentId };
-          this.formButtonDisableFlag = true;
-          if (this.form.id) {
-            this.editPermissions(this.form);
-          } else {
-            this.addPermissions(this.form);
-          }
+            this.formButtonDisableFlag = true;
+            this.form.resource = { id: this.form.resourceId };
+            if (this.form.id) {
+              this.editInterface(this.form);
+            } else {
+              this.interfaceAdd(this.form);
+            }
         } else {
           return false;
         }
       });
     },
-
     /**
-     * @description: 新增权限
+     * @description: 新增接口
      * @param {object} addPermission 表单参数
      */
-    addPermissions(addPermission) {
-      createPermission({ body: addPermission })
+    interfaceAdd(addPermission) {
+      createApi({ body: addPermission })
         .then(res => {
           if (res.code === 201) {
             this.formSuccessOperation(res);
@@ -432,13 +425,12 @@ export default {
           this.formButtonDisableFlag = false;
         });
     },
-
     /**
-     * @description: 编辑权限
-     * @param {object} editPermission 表单参数
+     * @description: 编辑接口
+     * @param {object} addOrEditParam 表单参数
      */
-    editPermissions(editPermission) {
-      updatePermission({ body: editPermission, id: editPermission.id })
+    editInterface(editPermission) {
+      updateApi({ body: editPermission, id: editPermission.id })
         .then(res => {
           if (res.code === 200) {
             this.formSuccessOperation(res);
@@ -448,7 +440,6 @@ export default {
           this.formButtonDisableFlag = false;
         });
     },
-
     /**
      * @description: 表单新增编辑成功后的公共的代码 （消息提示 搜索框重置 请求表格数据）
      * @param {object} successFormData 表单请求成功后返回的对象
@@ -457,55 +448,50 @@ export default {
       this.$message.success(successFormData.message);
       this.modleVisible = false;
       this.clearFormData();
-      this.getPermissionsTableData(this.pageObject, this.searchParameters);
+      this.getInterfaceTableData(this.pageObject, this.searchParameters);
     },
-
     /**
      * @description: 重置表单
      */
     clearFormData() {
-      this.$refs.permissionsRuleForm.resetFields();
+      this.$refs.interfaceRuleForm.resetFields();
       this.form = this.$options.data.call(this).form;
-      this.checkedKeys = [];
+       this.checkedKeys = [];
     },
-
     /**
-     * @description: 编辑权限
-     * @param {object} permissionTableRowData 表格某一行的数据对象
+     * @description: 编辑角色
+     * @param {object} interfaceTableRowData 表格某一行的数据对象
      */
-    handleEdit(permissionTableRowData) {
+    handleEdit(interfaceTableRowData) {
       this.editWaitFormLoading = true;
       this.modleVisible = true;
-
-      loadPermissionById({ id: permissionTableRowData.id })
-        .then(res => {
-          if (res.code === 200) {
-            this.form = Object.assign({}, this.form, res.data);
-            this.form.isEnable = String(this.form.isEnable);
-            this.form.parentId = this.form.parent ? this.form.parent.id : undefined;
-            this.checkedKeys = res.data.apis.map(item => {
-              return item.id;
-            });
-          }
-        })
-        .finally(() => {
+      loadApiById({ id: interfaceTableRowData.id }).then(res => {
+        if (res.code === 200) {
+          this.form = Object.assign({}, this.form, res.data);
+          this.form.resourceId = res.data.resource.id;
+          this.form.isPermitAll = String(this.form.isPermitAll);
+          this.checkedKeys = res.data.dependencies.map((item) => {
+              return 'api' + item.id;
+          });
+          this.expandedKeys = this.interfacesAllids;
+        }
+      })
+      .finally(() => {
           this.editWaitFormLoading = false;
         });
     },
-
     /**
      * @description: 点击删除
      * @param {object} roleTableRowData 格某一行的数据对象
      */
-    handleDelete(roleTableRowData) {
-      deletePermissionById({ id: roleTableRowData.id }).then(res => {
+    handleDelete(interfaceTableRowData) {
+      deleteApiById({ id: interfaceTableRowData.id }).then(res => {
         if (res.code === 200) {
           this.$message.success(res.message);
-          this.getPermissionsTableData(this.pageObject, this.searchParameters);
+          this.getInterfaceTableData(this.pageObject, this.searchParameters);
         }
       });
     },
-
     /**
      * @description:  获取分页下拉第几页展示几个
      * @param {string} current 当前页
@@ -515,18 +501,8 @@ export default {
       this.currentPage = current;
       this.pageObject.pageSize = pageSize;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
-      this.getPermissionsTableData(this.pageObject, this.searchParameters);
+      this.getInterfaceTableData(this.pageObject, this.searchParameters);
     },
-        /**
-     * @description: 日期选择器改变
-     * @param {array} date UI框架自带
-     * @param {array} dateString UI框架自带 时间区间
-     */
-    onChangeData(date, dateString) {
-      this.searchParameters.searchCreateDateBegin = dateString[0];
-      this.searchParameters.searchCreateDateEnd = dateString[1];
-    },
-
     /**
      * @description: 获取分页页数改变后的值
      * @param {string} pageNumber UI框架自带
@@ -535,7 +511,7 @@ export default {
       this.jumper = '';
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
-      this.getPermissionsTableData(this.pageObject, this.searchParameters);
+      this.getInterfaceTableData(this.pageObject, this.searchParameters);
     },
     /**
      * @description: 分页跳转输入框改变
@@ -543,28 +519,41 @@ export default {
     blurJumperInput() {
       if (this.jumper !== '') {
         this.currentPage = Number(this.jumper);
-        this.pageObject.pageNumber = Number(this.currentPage) - 1;
-        this.getPermissionsTableData(this.pageObject, this.searchParameters);
+      this.pageObject.pageNumber = Number(this.currentPage) - 1;
+      this.getInterfaceTableData(this.pageObject, this.searchParameters);
       }
     },
-        /**
-     * @description: 重置搜索条件
+    /**
+     * @description: 日期选择器改变
+     * @param {array} date UI框架自带
+     * @param {array} dateString UI框架自带 时间区间
      */
-    handleReset() {
-      this.searchParameters = {};
-      this.searchPermissionTableData();
+    onChangeData(date, dateString) {
+      this.searchParameters.searchCreateDateBegin = dateString[0];
+      this.searchParameters.searchCreateDateEnd = dateString[1];
     }
   }
 };
 </script>
 
 <style lang="less" scoped>
+  #modalContent /deep/.table-page-search-wrapper .ant-form-inline .ant-form-item .ant-form-item-control-wrapper {
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1;
+    flex: 1 1;
+    display: inline-block;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
 .table-page-search-wrapper /deep/ .ant-form-inline .ant-form-item > .ant-form-item-label {
   line-height: 32px;
   padding-right: 8px;
   width: 77px;
 }
-.permissions {
+.interface {
   width: 100%;
   height: calc(100vh - 150px);
   border-radius: 5px;
@@ -581,39 +570,39 @@ export default {
     justify-content: center;
     z-index: 999;
   }
-  .permissionsSearch {
+  .interfaceSearch {
     width: 100%;
     height: 64px;
     background: white;
     border-radius: 5px;
     margin-bottom: 10px;
-    padding: 15px 20px;
     display: flex;
-    .permissionsSearchInput {
+    padding: 15px 20px;
+    .interfaceSearchInput {
       width: 85%;
       height: 100%;
     }
-    .permissionSearchButton {
+    .interfaceSearchButton {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: flex-end;
     }
   }
-  .permissionsTable {
+  .interfaceTable {
     flex: 1;
     background: white;
     border-radius: 5px;
     display: flex;
     flex-direction: column;
-    .permissionsTableAdd {
+    .interfaceTableAdd {
       width: 100%;
       height: 64px;
       display: flex;
       align-items: center;
       border-bottom: 1px solid #ececec;
       padding: 0 20px;
-      .permissionsTableAddTitle {
+      .interfaceTableAddTitle {
         width: 80%;
         height: 100%;
         display: flex;
@@ -621,18 +610,17 @@ export default {
         font-size: 18px;
         font-weight: 550;
       }
-      .permissionsTableAddButton {
+      .interfaceTableAddButton {
         flex: 1;
         display: flex;
         align-items: center;
         justify-content: flex-end;
       }
     }
-    .permissionsTableContent {
+    .interfaceTableContent {
       max-height: calc(100vh - 380px);
       padding: 10px;
       overflow: scroll;
-      scrollbar-width: none;//兼容火狐
       .position {
         width: 100%;
         height: calc(100vh - 380px);
@@ -644,14 +632,14 @@ export default {
         z-index: 999;
       }
     }
-    .permissionsTableContent /deep/ .ant-table-tbody .ant-table-row:nth-child(2n) {
+    .interfaceTableContent /deep/ .ant-table-tbody .ant-table-row:nth-child(2n) {
       background: #fafafa;
     }
-    .permissionsTableContent::-webkit-scrollbar {
+    .interfaceTableContent::-webkit-scrollbar {
       display: none;
     }
   }
-  .permissionsPagination {
+  .interfacePagination {
     width: 100%;
     height: 47px;
     border-radius: 5px;
@@ -705,6 +693,7 @@ export default {
       text-align: right;
       vertical-align: middle;
       width: 100px;
+      overflow:hidden;
     }
   }
   .modalContentTree {
@@ -737,8 +726,25 @@ export default {
       overflow: scroll;
       display: flex;
       margin-left: 30%;
-      scrollbar-width: none;//兼容火狐
     }
+    .modalContentTreeContent /deep/ .ant-tree li .ant-tree-node-content-wrapper {
+    display: inline-block;
+    height: 24px;
+    margin: 0;
+    padding: 0 5px;
+    color: rgba(0, 0, 0, 0.65);
+    line-height: 24px;
+    text-decoration: none;
+    vertical-align: top;
+    border-radius: 2px;
+    cursor: pointer;
+    -webkit-transition: all 0.3s;
+    transition: all 0.3s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 140px;
+  }
     .modalContentTreeContent::-webkit-scrollbar {
       display: none;
     }

@@ -39,51 +39,29 @@ export const asyncRouterMap = [
         },
         children: [
           {
-            path: '/system/organization',
-            name: 'organization',
-            component: () => import('@/views/system/organization'),
+            path: '/system/resources',
+            name: 'resources',
+            component: () => import('@/views/system/resources'),
             meta: {
-              title: '组织机构管理',
-              permission: ['system:organizations'],
+              title: '资源管理',
               icon: workplace
             }
           },
           {
-            path: '/system/department',
-            name: 'department',
-            component: () => import('@/views/system/department'),
+            path: '/system/interface',
+            name: 'interface',
+            component: () => import('@/views/system/Interface'),
             meta: {
-              title: '部门管理',
-              permission: ['system:departments'],
+              title: '接口管理',
               icon: workplace
             }
           },
           {
-            path: '/system/user',
-            name: 'user',
-            component: () => import('@/views/system/user'),
+            path: '/system/router',
+            name: 'router',
+            component: () => import('@/views/system/router'),
             meta: {
-              title: '用户管理',
-              permission: ['system:users'],
-              icon: workplace
-            }
-          },
-          {
-            path: '/system/role',
-            name: 'role',
-            component: () => import('@/views/system/role'),
-            meta: {
-              title: '角色管理',
-              permission: ['system:roles'],
-              icon: workplace
-            }
-          },
-          {
-            path: '/system/permissions',
-            name: 'permissions',
-            component: () => import('@/views/system/permissions'),
-            meta: {
-              title: '权限管理',
+              title: '路由管理',
               icon: workplace
             }
           }
