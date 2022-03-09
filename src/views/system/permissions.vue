@@ -254,7 +254,7 @@ export default {
         pageSize: this.$store.state.user.defaultPaginationPagesize // 一页展示多少条数据
       },
       permissionsTableTotal: 0, // 表格数据总数
-      labelCol: { span: 4 },
+      labelCol: { span: 7 },
       wrapperCol: { span: 14 },
       form: {
         // 表单数据

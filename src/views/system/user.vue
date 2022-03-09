@@ -385,7 +385,7 @@ export default {
       },
       userTableTotal: 0, // 表格数据总数
       isOrganization: -1, // 判断treeSelect选中时的类型(true代表是属于组织 false代表部门)
-      labelCol: { span: 4 },
+      labelCol: { span: 7 },
       wrapperCol: { span: 14 },
       form: {
         // 表单数据
