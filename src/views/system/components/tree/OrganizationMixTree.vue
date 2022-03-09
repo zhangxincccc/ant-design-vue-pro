@@ -27,7 +27,7 @@
       >
         <template slot="title" slot-scope="{ name }">
           <span
-          :title="name"
+            :title="name"
             v-html="
               name.replace(
                 new RegExp(mixTreeSearch, 'g'),
@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import * as api from '@/api/api';
+import { organizationsTree } from '@/api/api';
 export default {
   name: 'OrganizationMixTree',
   data() {
@@ -65,7 +65,7 @@ export default {
      */
 
     getTreeData() {
-      api.organizationsTree().then(res => {
+      organizationsTree().then(res => {
         if (res.code === 200) {
           this.treeData = res.data;
           this.$set(this.defaultSelectedId, 0, this.treeData[0].id);
@@ -144,12 +144,10 @@ export default {
     handleSearch() {
       // 获取符合条件的ID值
       this.expandedKeys = this.getMixTreeId(this.mixTreeSearch, this.treeData, []);
-       console.log(this.expandedKeys);
       // 获取符合条件的ID值得父级ID
       this.expandedKeys.forEach(item => {
         this.getParentKey(item, this.treeData);
       });
-      console.log(this.expandedKeys);
     },
     /**
      * @description:  获取符合条件的ID值
@@ -203,18 +201,16 @@ export default {
             // 判断该节点是否为部门
           } else if (node.type === 6) {
             console.log(node);
-            parentId = node.organization.id;
-            // 数组去重添加
-            if (this.expandedKeys.indexOf(parentId) === -1) {
-              this.expandedKeys.push(parentId);
               // 如果还有父级则拿父级ID重新遍历 如果没有父级说明已经在部门的一级列表 拿organization.id继续向上查找
               if (node.parent) {
                 this.expandedKeys.push(node.parent.id);
+                this.expandedKeys = [...new Set(this.expandedKeys)];
                 this.getParentKey(node.parent.id, this.treeData);
               } else {
+                this.expandedKeys.push(node.organization.id);
+                this.expandedKeys = [...new Set(this.expandedKeys)];
                 this.getParentKey(node.organization.id, this.treeData);
               }
-            }
           }
         }
         // 如果拥有孩子继续遍历
@@ -295,6 +291,7 @@ export default {
     flex: 1;
     overflow: scroll;
     padding: 10px;
+    scrollbar-width: none;//兼容火狐
   }
   .mixTreeContent::-webkit-scrollbar {
     display: none;

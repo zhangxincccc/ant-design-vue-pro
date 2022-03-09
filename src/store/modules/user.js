@@ -6,9 +6,9 @@ import { welcome } from '@/utils/util';
 
 const user = {
   state: {
-    // 统一配置分页的选择条数
+     // 统一配置分页的选择条数
     defaultPaginationOptions: ['5', '7', '10'],
-    // 统一配置分页的默认一页条数
+     // 统一配置分页的默认一页条数
     defaultPaginationPagesize: 10,
     welcome: '',
     avatar: '',
@@ -54,6 +54,7 @@ const user = {
           });
       });
     },
+
     // 获取用户信息
     GetInfo({ commit }) {
       return new Promise((resolve, reject) => {
@@ -86,26 +87,18 @@ const user = {
     // 登出
     Logout({ commit, state }) {
       return new Promise(resolve => {
-        if (process.env.VUE_APP_AUTHORIZATION_GRANT_TYPE !== 'authorization_code') {
-          logout(state.token)
-            .then(() => {
-              commit('SET_TOKEN', '');
-              commit('SET_ROLES', []);
-              commit('SET_PERMISSIONS', []);
-              storage.remove(ACCESS_TOKEN);
-              resolve();
-            })
-            .catch(() => {
-              resolve();
-            })
-            .finally(() => {});
-        } else {
-          commit('SET_TOKEN', '');
-          commit('SET_ROLES', []);
-          commit('SET_PERMISSIONS', []);
-          storage.remove(ACCESS_TOKEN);
-          resolve();
-        }
+        logout(state.token)
+          .then(() => {
+            commit('SET_TOKEN', '');
+            commit('SET_ROLES', []);
+            commit('SET_PERMISSIONS', []);
+            storage.remove(ACCESS_TOKEN);
+            resolve();
+          })
+          .catch(() => {
+            resolve();
+          })
+          .finally(() => {});
       });
     }
   }

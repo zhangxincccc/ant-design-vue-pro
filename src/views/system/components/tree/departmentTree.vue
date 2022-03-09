@@ -9,7 +9,7 @@
             <span style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</span>
           </template>
           <a-icon type="menu-unfold" /> </a-popover
-      ></span>
+        ></span>
     </div>
     <div class="departmentTreeContent">
       <a-tree
@@ -225,6 +225,7 @@ export default {
     flex: 1;
     overflow: scroll;
     padding: 10px;
+    scrollbar-width: none;//兼容火狐
   }
   .departmentTreeContent::-webkit-scrollbar {
     display: none;

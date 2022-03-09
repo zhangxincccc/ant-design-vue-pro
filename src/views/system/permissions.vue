@@ -28,7 +28,7 @@
                 </a-col>
                 <a-col :md="6" :sm="32">
                   <a-form-item label="创建时间">
-                    <a-range-picker   @change="onChangeData" allowClear v-model="searchParameters.permissionsCreateData" />
+                    <a-range-picker @change="onChangeData" allowClear v-model="searchParameters.permissionsCreateData" />
                   </a-form-item>
                 </a-col>
               </a-row>
@@ -82,7 +82,6 @@
       <div class="permissionsPagination">
         <a-pagination
           v-model="currentPage"
-          show-quick-jumper
           :page-size-options="pageSizeOptions"
           :total="permissionsTableTotal"
           :show-total="total => `共 ${permissionsTableTotal} 条`"
@@ -92,6 +91,7 @@
           @showSizeChange="onPageSizeChange"
         >
         </a-pagination>
+        跳至 <a-input v-model="jumper" style="width:50px;margin-left:10px;margin-right:10px" @blur="blurJumperInput()"/>页
       </div>
       <a-modal
         width="50%"
@@ -102,7 +102,7 @@
         @ok="onSubmit"
       >
         <div id="modalContent">
-          <div class="formAspin" v-if="editWaitForLoading">
+          <div class="formAspin" v-if="editWaitFormLoading">
             <a-spin />
           </div>
           <div class="modalContentForm">
@@ -240,8 +240,9 @@ export default {
   name: 'Role',
   data() {
     return {
+      jumper: '',
       advanced: false, // 控制搜索条件的展开折叠
-      editWaitForLoading: false, // 加载编辑回显数据等待Loading
+      editWaitFormLoading: false, // 加载编辑回显数据等待Loading
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
       permissionsLoading: false, // 加载表格的loading
       searchParameters: {}, // 表格搜索条件值
@@ -473,7 +474,7 @@ export default {
      * @param {object} permissionTableRowData 表格某一行的数据对象
      */
     handleEdit(permissionTableRowData) {
-      this.editWaitForLoading = true;
+      this.editWaitFormLoading = true;
       this.modleVisible = true;
 
       loadPermissionById({ id: permissionTableRowData.id })
@@ -488,7 +489,7 @@ export default {
           }
         })
         .finally(() => {
-          this.editWaitForLoading = false;
+          this.editWaitFormLoading = false;
         });
     },
 
@@ -531,9 +532,20 @@ export default {
      * @param {string} pageNumber UI框架自带
      */
     handlePageNumberChange(pageNumber) {
+      this.jumper = '';
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getPermissionsTableData(this.pageObject, this.searchParameters);
+    },
+    /**
+     * @description: 分页跳转输入框改变
+     */
+    blurJumperInput() {
+      if (this.jumper !== '') {
+        this.currentPage = Number(this.jumper);
+        this.pageObject.pageNumber = Number(this.currentPage) - 1;
+        this.getPermissionsTableData(this.pageObject, this.searchParameters);
+      }
     },
         /**
      * @description: 重置搜索条件
@@ -620,6 +632,7 @@ export default {
       max-height: calc(100vh - 380px);
       padding: 10px;
       overflow: scroll;
+      scrollbar-width: none;//兼容火狐
       .position {
         width: 100%;
         height: calc(100vh - 380px);
@@ -724,6 +737,7 @@ export default {
       overflow: scroll;
       display: flex;
       margin-left: 30%;
+      scrollbar-width: none;//兼容火狐
     }
     .modalContentTreeContent::-webkit-scrollbar {
       display: none;

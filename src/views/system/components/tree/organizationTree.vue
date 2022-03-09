@@ -9,7 +9,7 @@
             <span style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</span>
           </template>
           <a-icon type="menu-unfold" /> </a-popover
-      ></span>
+        ></span>
     </div>
     <div class="organizationTreeContent">
       <a-tree
@@ -27,7 +27,7 @@
       >
         <template slot="title" slot-scope="{ name }">
           <span
-          :title="name"
+            :title="name"
             v-html="
               name.replace(
                 new RegExp(organizationSearch, 'g'),
@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import * as api from '@/api/api';
+import { organizationsTree } from '@/api/api';
 export default {
   name: 'OrganizationTree',
   data() {
@@ -64,7 +64,7 @@ export default {
      * @description: 获取组织列表树形结构数据
      */
     getTreeData() {
-      api.organizationsTree().then(res => {
+      organizationsTree().then(res => {
         if (res.code === 200) {
           this.treeData = res.data;
           this.$set(this.defaultSelectedId, 0, this.treeData[0].id);
@@ -218,6 +218,7 @@ export default {
     flex: 1;
     overflow: scroll;
     padding: 10px;
+    scrollbar-width: none;//兼容火狐
   }
   .organizationTreeContent::-webkit-scrollbar {
     display: none;

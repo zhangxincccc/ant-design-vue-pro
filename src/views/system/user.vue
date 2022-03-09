@@ -67,7 +67,7 @@
             <div>用户列表</div>
             <div>
               <a-popconfirm
-              :disabled="batchSelectIdArray.length === 0"
+                :disabled="batchSelectIdArray.length === 0"
                 title="此操作将批量启用数据，是否继续?"
                 ok-text="是"
                 cancel-text="否"
@@ -78,7 +78,7 @@
                 </a-button>
               </a-popconfirm>
               <a-popconfirm
-               :disabled="batchSelectIdArray.length === 0"
+                :disabled="batchSelectIdArray.length === 0"
                 title="此操作将批量停用数据，是否继续?"
                 ok-text="是"
                 cancel-text="否"
@@ -141,7 +141,7 @@
                   @click="handleIsEnable(record)"
                   v-if="record.isEnable == 0"
                   :class="{ enable: record.isEnable == 0 }"
-                  >启用</a
+                >启用</a
                 >
                 <a-popconfirm
                   slot="action"
@@ -169,7 +169,6 @@
         <div class="userMainPag">
           <a-pagination
             v-model="currentPage"
-            show-quick-jumper
             :page-size-options="pageSizeOptions"
             :total="userTableTotal"
             :show-total="total => `共 ${userTableTotal} 条`"
@@ -179,6 +178,7 @@
             @showSizeChange="onPageSizeChange"
           >
           </a-pagination>
+          跳至 <a-input v-model="jumper" style="width:50px;margin-left:10px;margin-right:10px" @blur="blurJumperInput()"/>页
         </div>
       </div>
       <a-modal
@@ -324,6 +324,7 @@ export default {
   name: 'User',
   data() {
     return {
+       jumper: '',
       isBatchButtonDisabled: true, // 判断批量按钮的禁用状态
       selectDepartmentFlagArray: [], // 接受部门列表子组件选中的ID数组 []为未选中状态 有值为选中状态
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
@@ -508,7 +509,6 @@ export default {
               return item;
             }
           });
-          console.log(this.userRoleArray);
         }
       });
     },
@@ -702,14 +702,6 @@ export default {
       } else {
         this.$message.success('删除成功');
       }
-      // switch (type) {
-      //   case 1: this.$message.success('停用成功');
-      //   break;
-      //   case 2: this.$message.success('启用成功');
-      //   break;
-      //   case 3: this.$message.success('删除成功');
-      // }
-      this.$message.success(batchSuccessData.message);
       this.batchSelectIdArray = [];
       this.getUserTableData(this.pageObject, this.searchParameters);
     },
@@ -718,9 +710,20 @@ export default {
      * @param {string} pageNumber UI框架自带
      */
     handlePageNumberChange(pageNumber) {
+      this.jumper = '';
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getUserTableData(this.pageObject, this.searchParameters);
+    },
+            /**
+     * @description: 分页跳转输入框改变
+     */
+    blurJumperInput() {
+      if (this.jumper !== '') {
+        this.currentPage = Number(this.jumper);
+      this.pageObject.pageNumber = Number(this.currentPage) - 1;
+      this.getUserTableData(this.pageObject, this.searchParameters);
+      }
     },
 
     /**
@@ -835,11 +838,13 @@ export default {
     rowClassName(record) {
       let className = 'enableBackground';
       if (record.isEnable === 1) className = 'deactivateBakcground';
-      console.log(className);
       return className;
     },
+    /**
+     * @description: 重置密码
+     * @param {object} userTableRowData 当前表格数据行
+     */
     resetPassword(userTableRowData) {
-       console.log(userTableRowData.id);
       resetUserPasswordById({ id: userTableRowData.id }).then(res => {
           if (res.code === 200) {
             this.$message.success(res.message);
@@ -922,6 +927,7 @@ export default {
         height: calc(100vh - 380px);
         padding: 10px;
         overflow: scroll;
+        scrollbar-width: none;//兼容火狐
       }
       .userMainTableContent /deep/ .ant-table-tbody .ant-table-row:nth-child(2n) {
         background: #fafafa;

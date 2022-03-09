@@ -558,6 +558,7 @@ organization.name,sortIndex,isEnable,createTime,
      * @param searchIsEnable - 查询条件:是否可用，，1：是，0：否，精确匹配
      * @param searchName - 查询条件:部门名称，模糊匹配
      * @param searchOrganizationId - 查询条件:所属组织机构ID，精确匹配
+     * @param searchOrganizationIds - 查询条件:所属组织机构ID数组，精确匹配
      * @param searchOrganizationName - 查询条件:所属组织机构名称，模糊匹配
      * @param searchParentId - 查询条件:上级部门ID，精确匹配
      * @param searchParentIds - 查询条件:上级部门ID数组，精确匹配
@@ -597,6 +598,9 @@ export const listDepartments = function(parameters = {}) {
   }
   if (parameters['searchOrganizationId'] !== undefined) {
     queryParameters['search_organizationId'] = parameters['searchOrganizationId']
+  }
+  if (parameters['searchOrganizationIds'] !== undefined) {
+    queryParameters['search_organizationIds'] = parameters['searchOrganizationIds']
   }
   if (parameters['searchOrganizationName'] !== undefined) {
     queryParameters['search_organizationName'] = parameters['searchOrganizationName']
@@ -656,6 +660,9 @@ export const listDepartmentsURL = function(parameters = {}) {
   }
   if (parameters['searchOrganizationId'] !== undefined) {
     queryParameters['search_organizationId'] = parameters['searchOrganizationId']
+  }
+  if (parameters['searchOrganizationIds'] !== undefined) {
+    queryParameters['search_organizationIds'] = parameters['searchOrganizationIds']
   }
   if (parameters['searchOrganizationName'] !== undefined) {
     queryParameters['search_organizationName'] = parameters['searchOrganizationName']
@@ -1845,6 +1852,48 @@ export const listDictionaryTypesByCodeURL = function(parameters = {}) {
   return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
 }
 /**
+ * 成功：code=200，data对象为包含字典类型条目信息的列表，失败：code!=200
+ * request: listDictionaryTypeItemsByCode
+ * url: listDictionaryTypeItemsByCodeURL
+ * method: listDictionaryTypeItemsByCode_TYPE
+ * raw_url: listDictionaryTypeItemsByCode_RAW_URL
+ * @param code - 字典类型代码，逗号分隔
+ */
+export const listDictionaryTypeItemsByCode = function(parameters = {}) {
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  const config = parameters.$config
+  let path = '/api/dictionaryTypes/{code}/items'
+  let body
+  let queryParameters = {}
+  let form = {}
+  path = path.replace('{code}', `${parameters['code']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    });
+  }
+  return request('get', domain + path, body, queryParameters, form, config)
+}
+export const listDictionaryTypeItemsByCode_RAW_URL = function() {
+  return '/api/dictionaryTypes/{code}/items'
+}
+export const listDictionaryTypeItemsByCode_TYPE = function() {
+  return 'get'
+}
+export const listDictionaryTypeItemsByCodeURL = function(parameters = {}) {
+  let queryParameters = {}
+  const domain = parameters.$domain ? parameters.$domain : getDomain()
+  let path = '/api/dictionaryTypes/{code}/items'
+  path = path.replace('{code}', `${parameters['code']}`)
+  if (parameters.$queryParameters) {
+    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
+      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
+    })
+  }
+  let keys = Object.keys(queryParameters)
+  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
+}
+/**
  * 成功：code=0，data对象为结果数据，失败：code!=0
  * request: loadDictionaryTypeById
  * url: loadDictionaryTypeByIdURL
@@ -2508,52 +2557,21 @@ export const listEnumsByTypeURL = function(parameters = {}) {
   return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
 }
 /**
-* 排序属性：stringProperty,longProperty,enumProperty,isEnable,createTime
-成功：code=200，data对象为包含分页信息的示例列表，失败：code!=200
-* request: listExamples
-* url: listExamplesURL
-* method: listExamples_TYPE
-* raw_url: listExamples_RAW_URL
-     * @param pageNumber - 分页号码,从0开始
-     * @param pageSize - 分页大小
-     * @param searchCreateDateBegin - 查询条件:创建日期起，格式yyyy-mm-dd
-     * @param searchCreateDateEnd - 查询条件:创建日期止，格式yyyy-mm-dd
-     * @param searchEnumProperty - 查询条件:枚举属性，0：否，1：是，精确匹配
-     * @param searchLongProperty - 查询条件:整形属性，匹配匹配
-     * @param searchStringProperty - 查询条件:字符串属性，模糊查询
-     * @param sort - 排序规则，格式: 字段名[,asc|desc]，默认升序，支持多字段排序
-*/
-export const listExamples = function(parameters = {}) {
+ * 成功：code=200，data对象为包含枚举信息的列表，失败：code!=200
+ * request: listEnumItemsByType
+ * url: listEnumItemsByTypeURL
+ * method: listEnumItemsByType_TYPE
+ * raw_url: listEnumItemsByType_RAW_URL
+ * @param type - 枚举类型代码
+ */
+export const listEnumItemsByType = function(parameters = {}) {
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   const config = parameters.$config
-  let path = '/api/examples'
+  let path = '/api/enums/{type}/items'
   let body
   let queryParameters = {}
   let form = {}
-  if (parameters['pageNumber'] !== undefined) {
-    queryParameters['pageNumber'] = parameters['pageNumber']
-  }
-  if (parameters['pageSize'] !== undefined) {
-    queryParameters['pageSize'] = parameters['pageSize']
-  }
-  if (parameters['searchCreateDateBegin'] !== undefined) {
-    queryParameters['search_createDateBegin'] = parameters['searchCreateDateBegin']
-  }
-  if (parameters['searchCreateDateEnd'] !== undefined) {
-    queryParameters['search_createDateEnd'] = parameters['searchCreateDateEnd']
-  }
-  if (parameters['searchEnumProperty'] !== undefined) {
-    queryParameters['search_enumProperty'] = parameters['searchEnumProperty']
-  }
-  if (parameters['searchLongProperty'] !== undefined) {
-    queryParameters['search_longProperty'] = parameters['searchLongProperty']
-  }
-  if (parameters['searchStringProperty'] !== undefined) {
-    queryParameters['search_stringProperty'] = parameters['searchStringProperty']
-  }
-  if (parameters['sort'] !== undefined) {
-    queryParameters['sort'] = parameters['sort']
-  }
+  path = path.replace('{type}', `${parameters['type']}`)
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
       queryParameters[parameterName] = parameters.$queryParameters[parameterName]
@@ -2561,222 +2579,17 @@ export const listExamples = function(parameters = {}) {
   }
   return request('get', domain + path, body, queryParameters, form, config)
 }
-export const listExamples_RAW_URL = function() {
-  return '/api/examples'
+export const listEnumItemsByType_RAW_URL = function() {
+  return '/api/enums/{type}/items'
 }
-export const listExamples_TYPE = function() {
+export const listEnumItemsByType_TYPE = function() {
   return 'get'
 }
-export const listExamplesURL = function(parameters = {}) {
+export const listEnumItemsByTypeURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
-  let path = '/api/examples'
-  if (parameters['pageNumber'] !== undefined) {
-    queryParameters['pageNumber'] = parameters['pageNumber']
-  }
-  if (parameters['pageSize'] !== undefined) {
-    queryParameters['pageSize'] = parameters['pageSize']
-  }
-  if (parameters['searchCreateDateBegin'] !== undefined) {
-    queryParameters['search_createDateBegin'] = parameters['searchCreateDateBegin']
-  }
-  if (parameters['searchCreateDateEnd'] !== undefined) {
-    queryParameters['search_createDateEnd'] = parameters['searchCreateDateEnd']
-  }
-  if (parameters['searchEnumProperty'] !== undefined) {
-    queryParameters['search_enumProperty'] = parameters['searchEnumProperty']
-  }
-  if (parameters['searchLongProperty'] !== undefined) {
-    queryParameters['search_longProperty'] = parameters['searchLongProperty']
-  }
-  if (parameters['searchStringProperty'] !== undefined) {
-    queryParameters['search_stringProperty'] = parameters['searchStringProperty']
-  }
-  if (parameters['sort'] !== undefined) {
-    queryParameters['sort'] = parameters['sort']
-  }
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    })
-  }
-  let keys = Object.keys(queryParameters)
-  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
-}
-/**
- * 成功：code=201，失败：code!=201
- * request: createExample
- * url: createExampleURL
- * method: createExample_TYPE
- * raw_url: createExample_RAW_URL
- * @param body - 示例实体参数
- */
-export const createExample = function(parameters = {}) {
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  const config = parameters.$config
-  let path = '/api/examples'
-  let body
-  let queryParameters = {}
-  let form = {}
-  if (parameters['body'] !== undefined) {
-    body = parameters['body']
-  }
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    });
-  }
-  return request('post', domain + path, body, queryParameters, form, config)
-}
-export const createExample_RAW_URL = function() {
-  return '/api/examples'
-}
-export const createExample_TYPE = function() {
-  return 'post'
-}
-export const createExampleURL = function(parameters = {}) {
-  let queryParameters = {}
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  let path = '/api/examples'
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    })
-  }
-  let keys = Object.keys(queryParameters)
-  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
-}
-/**
- * 成功：code=200，data对象为示例信息，失败：code!=200
- * request: loadExampleById
- * url: loadExampleByIdURL
- * method: loadExampleById_TYPE
- * raw_url: loadExampleById_RAW_URL
- * @param id - 示例ID
- */
-export const loadExampleById = function(parameters = {}) {
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  const config = parameters.$config
-  let path = '/api/examples/{id}'
-  let body
-  let queryParameters = {}
-  let form = {}
-  path = path.replace('{id}', `${parameters['id']}`)
-  if (parameters['id'] === undefined) {
-    return Promise.reject(new Error('Missing required  parameter: id'))
-  }
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    });
-  }
-  return request('get', domain + path, body, queryParameters, form, config)
-}
-export const loadExampleById_RAW_URL = function() {
-  return '/api/examples/{id}'
-}
-export const loadExampleById_TYPE = function() {
-  return 'get'
-}
-export const loadExampleByIdURL = function(parameters = {}) {
-  let queryParameters = {}
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  let path = '/api/examples/{id}'
-  path = path.replace('{id}', `${parameters['id']}`)
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    })
-  }
-  let keys = Object.keys(queryParameters)
-  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
-}
-/**
- * 成功：code=200，失败：code!=200
- * request: updateExample
- * url: updateExampleURL
- * method: updateExample_TYPE
- * raw_url: updateExample_RAW_URL
- * @param body - 示例体参数
- * @param id - 示例id
- */
-export const updateExample = function(parameters = {}) {
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  const config = parameters.$config
-  let path = '/api/examples/{id}'
-  let body
-  let queryParameters = {}
-  let form = {}
-  if (parameters['body'] !== undefined) {
-    body = parameters['body']
-  }
-  path = path.replace('{id}', `${parameters['id']}`)
-  if (parameters['id'] === undefined) {
-    return Promise.reject(new Error('Missing required  parameter: id'))
-  }
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    });
-  }
-  return request('put', domain + path, body, queryParameters, form, config)
-}
-export const updateExample_RAW_URL = function() {
-  return '/api/examples/{id}'
-}
-export const updateExample_TYPE = function() {
-  return 'put'
-}
-export const updateExampleURL = function(parameters = {}) {
-  let queryParameters = {}
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  let path = '/api/examples/{id}'
-  path = path.replace('{id}', `${parameters['id']}`)
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    })
-  }
-  let keys = Object.keys(queryParameters)
-  return domain + path + (keys.length > 0 ? '?' + (keys.map(key => key + '=' + encodeURIComponent(queryParameters[key])).join('&')) : '')
-}
-/**
- * 成功：code=200，失败：code!=200
- * request: deleteExampleById
- * url: deleteExampleByIdURL
- * method: deleteExampleById_TYPE
- * raw_url: deleteExampleById_RAW_URL
- * @param id - 示例ID
- */
-export const deleteExampleById = function(parameters = {}) {
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  const config = parameters.$config
-  let path = '/api/examples/{id}'
-  let body
-  let queryParameters = {}
-  let form = {}
-  path = path.replace('{id}', `${parameters['id']}`)
-  if (parameters['id'] === undefined) {
-    return Promise.reject(new Error('Missing required  parameter: id'))
-  }
-  if (parameters.$queryParameters) {
-    Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
-      queryParameters[parameterName] = parameters.$queryParameters[parameterName]
-    });
-  }
-  return request('delete', domain + path, body, queryParameters, form, config)
-}
-export const deleteExampleById_RAW_URL = function() {
-  return '/api/examples/{id}'
-}
-export const deleteExampleById_TYPE = function() {
-  return 'delete'
-}
-export const deleteExampleByIdURL = function(parameters = {}) {
-  let queryParameters = {}
-  const domain = parameters.$domain ? parameters.$domain : getDomain()
-  let path = '/api/examples/{id}'
-  path = path.replace('{id}', `${parameters['id']}`)
+  let path = '/api/enums/{type}/items'
+  path = path.replace('{type}', `${parameters['type']}`)
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
       queryParameters[parameterName] = parameters.$queryParameters[parameterName]
@@ -3289,6 +3102,7 @@ export const updateApiPatchURL = function(parameters = {}) {
      * @param searchParentId - 查询条件:上级组织机构ID，精确匹配
      * @param searchParentIds - 查询条件:上级组织机构ID数组，精确匹配
      * @param searchParentName - 查询条件:上级组织机构名称，模糊匹配
+     * @param searchSpecificCode - 查询条件:组织机构代码，精确匹配
      * @param sort - 排序规则，格式: 字段名[,asc|desc]，默认升序，支持多字段排序
 */
 export const listOrganizations = function(parameters = {}) {
@@ -3330,6 +3144,9 @@ export const listOrganizations = function(parameters = {}) {
   }
   if (parameters['searchParentName'] !== undefined) {
     queryParameters['search_parentName'] = parameters['searchParentName']
+  }
+  if (parameters['searchSpecificCode'] !== undefined) {
+    queryParameters['search_specificCode'] = parameters['searchSpecificCode']
   }
   if (parameters['sort'] !== undefined) {
     queryParameters['sort'] = parameters['sort']
@@ -3383,6 +3200,9 @@ export const listOrganizationsURL = function(parameters = {}) {
   }
   if (parameters['searchParentName'] !== undefined) {
     queryParameters['search_parentName'] = parameters['searchParentName']
+  }
+  if (parameters['searchSpecificCode'] !== undefined) {
+    queryParameters['search_specificCode'] = parameters['searchSpecificCode']
   }
   if (parameters['sort'] !== undefined) {
     queryParameters['sort'] = parameters['sort']
@@ -3959,6 +3779,7 @@ export const createPermissionURL = function(parameters = {}) {
  * raw_url: listPermissionsTree_RAW_URL
  * @param searchApplicationId - 查询条件:应用id，精确匹配
  * @param searchType - 查询条件:权限类型，精确匹配
+ * @param searchTypes - 查询条件:权限类型，精确匹配
  */
 export const listPermissionsTree = function(parameters = {}) {
   const domain = parameters.$domain ? parameters.$domain : getDomain()
@@ -3972,6 +3793,9 @@ export const listPermissionsTree = function(parameters = {}) {
   }
   if (parameters['searchType'] !== undefined) {
     queryParameters['search_type'] = parameters['searchType']
+  }
+  if (parameters['searchTypes'] !== undefined) {
+    queryParameters['search_types'] = parameters['searchTypes']
   }
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
@@ -3995,6 +3819,9 @@ export const listPermissionsTreeURL = function(parameters = {}) {
   }
   if (parameters['searchType'] !== undefined) {
     queryParameters['search_type'] = parameters['searchType']
+  }
+  if (parameters['searchTypes'] !== undefined) {
+    queryParameters['search_types'] = parameters['searchTypes']
   }
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {

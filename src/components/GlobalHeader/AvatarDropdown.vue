@@ -1,7 +1,7 @@
 <!--
  * @Author: your name
  * @Date: 2021-08-24 11:28:34
- * @LastEditTime: 2021-12-17 14:38:10
+ * @LastEditTime: 2021-12-20 14:52:18
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \ant-design-vue-pro\src\components\GlobalHeader\AvatarDropdown.vue
@@ -42,16 +42,16 @@
     <span v-else>
       <a-spin size="small" :style="{ marginLeft: 8, marginRight: 8 }" />
     </span>
-    <a-modal v-model="visible" title="修改密码" @cancel="handleOk" :footer="null">
+    <a-modal v-model="visible" title="修改密码" @cancel="handleCancel" :footer="null">
       <a-form-model ref="ruleForm" :model="form" :rules="rules" :label-col="labelCol" :wrapper-col="wrapperCol">
         <a-form-model-item ref="oldPassword " label="旧密码" prop="oldPassword">
-          <a-input type="password" placeholder="请输入密码" class="inputs" v-model="form.oldPassword" />
+          <a-input type="password" placeholder="请输入旧密码" class="inputs" v-model="form.oldPassword" />
         </a-form-model-item>
         <a-form-model-item ref="newPassword" label="新密码" prop="newPassword">
-          <a-input type="password" placeholder="请输入密码" class="inputs" v-model="form.newPassword" />
+          <a-input type="password" placeholder="请输入新密码" class="inputs" v-model="form.newPassword" />
         </a-form-model-item>
         <a-form-model-item ref="confirmPassword" label="确认密码" prop="confirmPassword">
-          <a-input type="password" placeholder="请输入密码" class="inputs" v-model="form.confirmPassword" />
+          <a-input type="password" placeholder="请确认密码" class="inputs" v-model="form.confirmPassword" />
         </a-form-model-item>
         <a-form-model-item :wrapper-col="{ span: 14, offset: 4 }">
           <a-button type="primary" @click="onSubmit" style="border-radius:10px;">
@@ -101,11 +101,10 @@ export default {
         confirmPassword: ''
       },
       rules: {
-        oldPassword: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-        newPassword: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+        oldPassword: [{ required: true, message: '请输入旧密码', trigger: 'blur' }],
+        newPassword: [{ required: true, message: '请输入新密码', trigger: 'blur' }],
         confirmPassword: [{ required: true, validator: validatePass }]
-      },
-      authorizationGrantType: process.env.VUE_APP_AUTHORIZATION_GRANT_TYPE
+      }
     };
   },
   methods: {
@@ -124,12 +123,7 @@ export default {
           //   setTimeout(Math.random() > 0.5 ? resolve : reject, 1500)
           // }).catch(() => console.log('Oops errors!'))
           return this.$store.dispatch('Logout').then(() => {
-            if (this.authorizationGrantType === 'authorization_code') {
-              window.location.href =
-                process.env.VUE_APP_AUTHORIZATION_URI + process.env.VUE_APP_AUTHORIZATION_LOGOUT_URL;
-            } else {
-              this.$router.push({ name: 'login' });
-            }
+            this.$router.push({ name: 'login' });
           });
         },
         onCancel() {}
@@ -139,7 +133,7 @@ export default {
       this.visible = true;
       console.log(this.$store.state.user.info.id);
     },
-    handleOk(e) {
+    handleCancel(e) {
       this.clearForm();
     },
     /**
@@ -157,16 +151,13 @@ export default {
       this.$refs.ruleForm.validate(valid => {
         if (valid) {
           this.form.confirmPassword = undefined;
-          console.log(this.form);
           userChangePassword({ body: this.form }).then(resp => {
-            console.log(resp);
             if (resp.code === 200) {
               this.$message.success(resp.message);
               this.clearForm();
             }
           });
         } else {
-          console.log('error submit!!');
           return false;
         }
       });

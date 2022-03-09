@@ -73,7 +73,6 @@
       <div class="rolePagination">
         <a-pagination
           v-model="currentPage"
-          show-quick-jumper
           :page-size-options="pageSizeOptions"
           :show-total="total => `共 ${roleTableTotal} 条`"
           :total="roleTableTotal"
@@ -83,6 +82,7 @@
           @showSizeChange="onPageSizeChange"
         >
         </a-pagination>
+        跳至 <a-input v-model="jumper" style="width:50px;margin-left:10px;margin-right:10px" @blur="blurJumperInput()"/>页
       </div>
       <a-modal
         width="45%"
@@ -93,7 +93,7 @@
         @ok="onSubmit"
       >
         <div id="modalContent">
-          <div class="formAspin" v-if="editWaitForLoading">
+          <div class="formAspin" v-if="editWaitFormLoading">
             <a-spin />
           </div>
           <div class="modalContentForm">
@@ -125,13 +125,17 @@
                 <span>
                   <a-popover placement="bottomRight">
                     <template slot="content">
-                      <p style="cursor: pointer;" @click="() => (this.checkedKeys = this.permissionsAllids)">选择全部</p>
+                      <p style="cursor: pointer;" @click="() => (this.checkedKeys = this.permissionsAllids)">
+                        选择全部
+                      </p>
                       <p style="cursor: pointer;" @click="() => (this.checkedKeys = [])">取消选择</p>
-                      <p style="cursor: pointer;" @click="() => (this.expandedKeys = this.permissionsAllids)">展开全部</p>
+                      <p style="cursor: pointer;" @click="() => (this.expandedKeys = this.permissionsAllids)">
+                        展开全部
+                      </p>
                       <span style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</span>
                     </template>
                     <a-icon type="menu-unfold" /> </a-popover
-                ></span>
+                  ></span>
               </div>
             </div>
             <div class="modalContentTreeContent">
@@ -140,6 +144,7 @@
                   title: 'name',
                   key: 'id'
                 }"
+                @check="getHalfCheck"
                 v-model="checkedKeys"
                 checkable
                 :expanded-keys.sync="expandedKeys"
@@ -153,16 +158,7 @@
   </page-header-wrapper>
 </template>
 <script>
-import {
-  listPermissionsTree,
-  listRoles,
-  createRole,
-  updateRole,
-  loadRoleById,
-  deleteRoleById,
-  disableRoleById,
-  enableRoleById
-} from '@/api/api';
+import { listPermissionsTree, listRoles, createRole, updateRole, loadRoleById, deleteRoleById } from '@/api/api';
 import moment from 'moment';
 const columns = [
   {
@@ -200,8 +196,9 @@ export default {
   name: 'Role',
   data() {
     return {
+       jumper: '',
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
-      editWaitForLoading: false, // 加载编辑回显数据等待Loading
+      editWaitFormLoading: false, // 加载编辑回显数据等待Loading
       roleLoading: false, // 加载表格的loading
       searchParameters: {}, // 表格搜索条件值
       modleVisible: false, // 控制弹框
@@ -230,6 +227,7 @@ export default {
         name: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
         code: [{ required: true, message: '请输入角色值', trigger: 'change' }]
       },
+      halfCheckArray: [], // 半选状态的数组
       permissionsTreeArray: [], // 表单的树形下拉数据
       expandedKeys: [], // 控制树形下拉 展开收起全选取消全选 功能
       checkedKeys: [], // 树形下拉选中的数据
@@ -284,20 +282,22 @@ export default {
      */
     getRoleTableData(page, params) {
       this.roleLoading = true;
-      listRoles(Object.assign({}, page, params)).then(res => {
-        if (res.code === 200 && res.data.content) {
-          this.roleTableData = res.data.content;
-          this.roleTableData.forEach(item => {
-            item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
-          });
-          this.roleTableTotal = res.data.totalElements;
-        } else {
-          this.roleTableTotal = res.data.totalElements;
-          this.roleTableData = [];
-        }
-      }).finally(() => {
-        this.roleLoading = false;
-      });
+      listRoles(Object.assign({}, page, params))
+        .then(res => {
+          if (res.code === 200 && res.data.content) {
+            this.roleTableData = res.data.content;
+            this.roleTableData.forEach(item => {
+              item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
+            });
+            this.roleTableTotal = res.data.totalElements;
+          } else {
+            this.roleTableTotal = res.data.totalElements;
+            this.roleTableData = [];
+          }
+        })
+        .finally(() => {
+          this.roleLoading = false;
+        });
     },
 
     /**
@@ -317,9 +317,11 @@ export default {
         if (valid) {
           this.form.permissions = this.checkedKeys.map(item => {
             return {
-              id: item
+              id: item,
+              isHalfCheck: 0
             };
           });
+          this.form.permissions = this.form.permissions.concat(this.halfCheckArray);
           // 判断是否至少选择了一个权限
           if (this.form.permissions.length === 0) {
             this.$message.error('请选择权限列表');
@@ -394,7 +396,7 @@ export default {
      * @param {object} roleTableRowData 表格某一行的数据对象
      */
     handleEdit(roleTableRowData) {
-      this.editWaitForLoading = true;
+      this.editWaitFormLoading = true;
       this.modleVisible = true;
       // 根据ID请求相应角色的权限 进行回显
       loadRoleById({ id: roleTableRowData.id })
@@ -407,7 +409,7 @@ export default {
           }
         })
         .finally(() => {
-          this.editWaitForLoading = false;
+          this.editWaitFormLoading = false;
         });
     },
 
@@ -438,6 +440,17 @@ export default {
     },
 
     /**
+     * @description: 获取权限树半选的值
+     * @param {*} checkedKeys
+     * @param {object} event event对象
+     */
+    getHalfCheck(checkedKeys, event) {
+      this.halfCheckArray = event.halfCheckedKeys.map(item => {
+        return { id: item, isHalfCheck: 1 };
+      });
+    },
+
+    /**
      * @description:  获取分页下拉第几页展示几个
      * @param {string} currentPage 当前页
      * @param {string} pageSize 当前页展示几条
@@ -449,11 +462,23 @@ export default {
       this.getRoleTableData(this.pageObject, this.searchParameters);
     },
 
+        /**
+     * @description: 分页跳转输入框改变
+     */
+    blurJumperInput() {
+      if (this.jumper !== '') {
+        this.currentPage = Number(this.jumper);
+        this.pageObject.pageNumber = Number(this.currentPage) - 1;
+        this.getRoleTableData(this.pageObject, this.searchParameters);
+      }
+    },
+
     /**
      * @description: 获取分页页数改变后的值
      * @param {string} pageNumber UI框架自带
      */
     handlePageNumberChange(pageNumber) {
+      this.jumper = '';
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getRoleTableData(this.pageObject, this.searchParameters);
@@ -467,29 +492,6 @@ export default {
     onChangeData(date, dateString) {
       this.searchParameters.searchCreateDateBegin = dateString[0];
       this.searchParameters.searchCreateDateEnd = dateString[1];
-    },
-    /**
-     * @description: 停用/启用表格数据的某一条
-     * @param {object} roleTableRowData 某一条表格数据对象
-     */
-    handleIsEnable(roleTableRowData) {
-      if (roleTableRowData.isEnable === 1) {
-        disableRoleById({ id: roleTableRowData.id }).then(res => {
-          if (res.code === 200) {
-            this.$message.success(res.message);
-            this.modleVisible = false;
-            this.getRoleTableData(this.pageObject, this.searchParameters);
-          }
-        });
-      } else {
-        enableRoleById({ id: roleTableRowData.id }).then(res => {
-          if (res.code === 200) {
-            this.$message.success(res.message);
-            this.modleVisible = false;
-            this.getRoleTableData(this.pageObject, this.searchParameters);
-          }
-        });
-      }
     },
     /**
      * @description: 重置搜索条件
@@ -576,6 +578,7 @@ export default {
       max-height: calc(100vh - 380px);
       padding: 10px;
       overflow: scroll;
+      scrollbar-width: none; //兼容火狐
       .position {
         width: 100%;
         height: calc(100vh - 380px);
@@ -678,27 +681,28 @@ export default {
       width: 100%;
       height: 334px;
       overflow: scroll;
+      scrollbar-width: none; //兼容火狐
       display: flex;
       margin-left: 30%;
     }
     .modalContentTreeContent /deep/ .ant-tree li .ant-tree-node-content-wrapper {
-    display: inline-block;
-    height: 24px;
-    margin: 0;
-    padding: 0 5px;
-    color: rgba(0, 0, 0, 0.65);
-    line-height: 24px;
-    text-decoration: none;
-    vertical-align: top;
-    border-radius: 2px;
-    cursor: pointer;
-    -webkit-transition: all 0.3s;
-    transition: all 0.3s;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    width: 140px;
-  }
+      display: inline-block;
+      height: 24px;
+      margin: 0;
+      padding: 0 5px;
+      color: rgba(0, 0, 0, 0.65);
+      line-height: 24px;
+      text-decoration: none;
+      vertical-align: top;
+      border-radius: 2px;
+      cursor: pointer;
+      -webkit-transition: all 0.3s;
+      transition: all 0.3s;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 140px;
+    }
     .modalContentTreeContent::-webkit-scrollbar {
       display: none;
     }

@@ -50,14 +50,7 @@
                     </a-form-model-item>
                   </a-col>
                   <a-col :md="8" :sm="24">
-                    <a-form-item label="状态">
-                      <a-select allowClear v-model="searchParameters.searchIsEnable" placeholder="请选择">
-                        <a-select-option value="0">停用</a-select-option>
-                        <a-select-option value="1">启用</a-select-option>
-                      </a-select>
-                    </a-form-item>
                   </a-col>
-                  <a-col :md="8" :sm="24"> </a-col>
                 </template>
                 <a-col :md="8" :sm="24" style="display:flex;justify-content: flex-end">
                   <span>
@@ -99,23 +92,6 @@
               bordered
             >
               <template slot="action" slot-scope="text, record">
-                <a-popconfirm
-                  slot="action"
-                  title="此操作将停用该条数据，是否继续?"
-                  ok-text="是"
-                  cancel-text="否"
-                  @confirm="handleIsEnable(record)"
-                >
-                  <a href="javascript:;" v-if="record.isEnable == 1" :class="{ deactivate: record.isEnable == 1 }">停用</a>
-                </a-popconfirm>
-                <a
-                  slot="action"
-                  href="javascript:;"
-                  @click="handleIsEnable(record)"
-                  v-if="record.isEnable == 0"
-                  :class="{ enable: record.isEnable == 0 }"
-                  >启用</a
-                >
                 <a slot="action" href="javascript:;" style="margin-left:5px" @click="handleEdit(record)">编辑</a>
                 <a-popconfirm
                   slot="action"
@@ -133,7 +109,6 @@
         <div class="departmentMainPag">
           <a-pagination
             v-model="currentPage"
-            show-quick-jumper
             :page-size-options="pageSizeOptions"
             :total="departmentTableTotal"
             :show-total="total => `共 ${departmentTableTotal} 条`"
@@ -143,6 +118,7 @@
             @showSizeChange="onPageSizeChange"
           >
           </a-pagination>
+          跳至 <a-input v-model="jumper" style="width:50px;margin-left:10px;margin-right:10px" @blur="blurJumperInput()"/>页
         </div>
       </div>
       <a-modal
@@ -195,15 +171,8 @@
             >
             </a-tree-select>
           </a-form-model-item>
-          <a-form-model-item label="状态" prop="isEnable">
-            <a-radio-group v-model="form.isEnable" button-style="solid">
-              <a-radio-button value="1">
-                启用
-              </a-radio-button>
-              <a-radio-button value="0">
-                停用
-              </a-radio-button>
-            </a-radio-group>
+          <a-form-model-item ref="sortIndex" label="排序索引" prop="sortIndex">
+            <a-input type="number" v-model="form.sortIndex" placeholder="请输入排序索引" />
           </a-form-model-item>
           <a-form-model-item label="备注">
             <a-input v-model="form.description" type="textarea" placeholder="请输入备注" :maxLength="500"/>
@@ -221,9 +190,7 @@ import {
   deleteDepartmentById,
   organizationsTree,
   departmentsTree,
-  loadDepartmentById,
-  enableDepartmentById,
-  disableDepartmentById
+  loadDepartmentById
 } from '@/api/api';
 import moment from 'moment';
 import OrganizationMixTree from './components/tree/OrganizationMixTree';
@@ -268,6 +235,7 @@ export default {
   name: 'Department',
   data() {
     return {
+      jumper: '',
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
       departmentLoading: false, // 加载表格的loading
       modleVisible: false, // 控制弹框显示隐藏
@@ -286,6 +254,7 @@ export default {
       wrapperCol: { span: 14 },
       form: {
         // 表单数据
+        sortIndex: undefined,
         name: undefined, // 名字
         code: undefined, // 编码
         isEnable: '1', // 状态
@@ -387,7 +356,7 @@ export default {
       }
       this.searchParameters.searchParentId = undefined;
       this.searchParameters.searchParentIds = undefined;
-      this.searchUserTableData();
+      this.searchDepartmentTableData();
     },
         /**
      * @description: 选中混合树组织的数据
@@ -445,7 +414,9 @@ export default {
       this.$refs.departmentRuleForm.validate(valid => {
         if (valid) {
           this.formButtonDisableFlag = true;
-          this.form.parent = { id: this.form.parentId };
+          if (this.form.parentId) {
+            this.form.parent = { id: this.form.parentId };
+          }
           this.form.organization = { id: this.form.organizationId };
           if (this.form.id) {
             this.departmentUpdate(this.form);
@@ -519,11 +490,23 @@ export default {
       this.getDepartentTableData(this.pageObject, this.searchParameters);
     },
 
+            /**
+     * @description: 分页跳转输入框改变
+     */
+    blurJumperInput() {
+      if (this.jumper !== '') {
+        this.currentPage = Number(this.jumper);
+      this.pageObject.pageNumber = Number(this.currentPage) - 1;
+      this.getDepartentTableData(this.pageObject, this.searchParameters);
+      }
+    },
+
     /**
      * @description: 获取分页页数改变后的值
      * @param {string} pageNumber UI框架自带
      */
     handlePageNumberChange(pageNumber) {
+      this.jumper = '';
       this.departmentLoading = true;
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
@@ -551,9 +534,24 @@ export default {
           this.form = Object.assign({}, this.form, res.data);
           this.form.organizationId = this.form.organization.id;
           this.form.parentId = this.form.parent ? this.form.parent.id : undefined;
-          this.form.isEnable = String(this.form.isEnable);
-          this.getDepartmentTree({ searchOrganizationId: this.form.organizationId });
+          this.getDepartmentTree({ searchOrganizationId: this.form.organizationId }, departmentTableRowData.id);
           this.modleVisible = true;
+        }
+      });
+    },
+
+    /**
+     * @description: 编辑用户时禁用自己
+     * @param {string} selectId 选中ID
+     * @param {array} departmentFormTreeData 部门下拉树
+     */
+    disableSelectIdData(selectId, departmentFormTreeData) {
+      departmentFormTreeData.forEach(item => {
+        if (item.id === selectId) {
+           item.disabled = true;
+        }
+        if (item.children) {
+          this.disableSelectIdData(selectId, item.children);
         }
       });
     },
@@ -598,40 +596,18 @@ export default {
     },
     /**
      * @description: 根据组织ID获取对应的部门树
-     * @param {object} searchOrganizationId 组织ID
+     * @param {object} searchParameters 组织ID
+     *  @param {string} selectRowDepartemntId 选中部门ID
      * @return {*}
      */
-    getDepartmentTree(searchParameters) {
+    getDepartmentTree(searchParameters, selectRowDepartemntId) {
       departmentsTree(searchParameters).then(res => {
         if (res.code === 200) {
           this.departmentFormTreeData = res.data;
-           this.disabledFormTreeData(this.departmentFormTreeData);
+          this.disabledFormTreeData(this.departmentFormTreeData);
+           this.disableSelectIdData(selectRowDepartemntId, this.departmentFormTreeData);
         }
       });
-    },
-    /**
-     * @description: 停用/启用表格数据的某一条
-     * @param {object} departmentTableRowData 某一条表格数据对象
-     */
-    handleIsEnable(departmentTableRowData) {
-      this.departmentLoading = true;
-      if (departmentTableRowData.isEnable === 1) {
-        disableDepartmentById({ id: departmentTableRowData.id }).then(res => {
-          if (res.code === 200) {
-            this.$message.success('停用成功');
-            this.getDepartentTableData(this.pageObject, this.searchParameters);
-           this.$refs.mixTree.getTreeData();
-          }
-        });
-      } else {
-        enableDepartmentById({ id: departmentTableRowData.id }).then(res => {
-          if (res.code === 200) {
-           this.$message.success('启用成功');
-            this.getDepartentTableData(this.pageObject, this.searchParameters);
-          this.$refs.mixTree.getTreeData();
-          }
-        });
-      }
     },
    /**
      * @description: 重置搜索条件
@@ -650,7 +626,6 @@ export default {
     rowClassName(record) {
       let className = 'enableBackground';
       if (record.isEnable === 1) className = 'deactivateBakcground';
-      console.log(className);
       return className;
     }
   }
@@ -731,6 +706,7 @@ export default {
         height: calc(100vh - 380px);
         padding: 10px;
         overflow: scroll;
+        scrollbar-width: none;//兼容火狐
       }
       .departmentMainTableContent /deep/ .ant-table-tbody .ant-table-row:nth-child(2n) {
         background: #fafafa;
