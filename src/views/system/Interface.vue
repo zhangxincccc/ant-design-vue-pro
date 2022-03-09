@@ -296,7 +296,6 @@ export default {
     }
   },
   created() {
-    this.interfaceLoading = true;
     this.getInterfaceTableData(this.pageObject, this.searchParameters); // 获取表格数据
     this.getInterfacesTree(); // 表单的接口树
     this.getListResources(); // 获取资源数组
