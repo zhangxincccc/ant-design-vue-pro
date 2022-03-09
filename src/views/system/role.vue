@@ -27,7 +27,7 @@
           </div>
         </div>
         <div class="roleSearchButton">
-          <a-button style="margin-right:20px" type="primary" @click="() => this.searchRoleTableData()">
+          <a-button style="margin-right: 20px" type="primary" @click="() => this.searchRoleTableData()">
             查询
           </a-button>
           <a-button @click="handleReset">重置</a-button>
@@ -37,9 +37,7 @@
         <div class="roleTableAdd">
           <div class="roleTableAddTitle">角色列表</div>
           <div class="roleTableAddButton">
-            <a-button type="primary" @click="() => (this.modleVisible = true)">
-              新增角色
-            </a-button>
+            <a-button type="primary" @click="() => (this.modleVisible = true)"> 新增角色 </a-button>
           </div>
         </div>
         <div class="roleTableContent">
@@ -56,7 +54,7 @@
             bordered
           >
             <template slot="action" slot-scope="text, record">
-              <a slot="action" href="javascript:;" style="margin-left:5px" @click="handleEdit(record)">编辑</a>
+              <a slot="action" href="javascript:;" style="margin-left: 5px" @click="handleEdit(record)">编辑</a>
               <a-popconfirm
                 slot="action"
                 title="此操作将删除该条数据，是否继续?"
@@ -64,7 +62,7 @@
                 cancel-text="否"
                 @confirm="handleDelete(record)"
               >
-                <a href="javascript:;" style="margin-left:5px">删除</a>
+                <a href="javascript:;" style="margin-left: 5px">删除</a>
               </a-popconfirm>
             </template>
           </a-table>
@@ -74,7 +72,7 @@
         <a-pagination
           v-model="currentPage"
           :page-size-options="pageSizeOptions"
-          :show-total="total => `共 ${roleTableTotal} 条`"
+          :show-total="(total) => `共 ${roleTableTotal} 条`"
           :total="roleTableTotal"
           show-size-changer
           :page-size="pageObject.pageSize"
@@ -112,27 +110,38 @@
                 <a-form-model-item ref="code" label="角色代码" prop="code">
                   <a-input v-model="form.code" placeholder="请输入角色代码" />
                 </a-form-model-item>
+                <a-form-model-item ref="applicationId" label="应用名称" prop="applicationId">
+                  <a-select
+                    @change="changeApplicationId"
+                    allowClear
+                    v-model="form.applicationId"
+                    size="default"
+                    placeholder="请选择应用名称"
+                  >
+                    <a-select-option v-for="item in applicationArray" :key="item.id">
+                      {{ item.name }}
+                    </a-select-option>
+                  </a-select>
+                </a-form-model-item>
                 <a-form-model-item label="备注">
-                  <a-input v-model="form.description" type="textarea" placeholder="请输入备注" />
+                  <a-input v-model="form.description" type="textarea" placeholder="请输入备注" :maxLength="500"/>
                 </a-form-model-item>
               </a-form-model>
             </div>
           </div>
           <div class="modalContentTree">
             <div class="modalContentTreeTitle">
-              <div class="title">菜单分配</div>
+              <div class="title">权限分配</div>
               <div class="icon">
                 <span>
                   <a-popover placement="bottomRight">
                     <template slot="content">
-                      <p style="cursor: pointer;" @click="() => (this.checkedKeys = this.permissionsAllids)">
-                        选择全部
-                      </p>
-                      <p style="cursor: pointer;" @click="() => (this.checkedKeys = [])">取消选择</p>
-                      <p style="cursor: pointer;" @click="() => (this.expandedKeys = this.permissionsAllids)">
+                      <p style="cursor: pointer" @click="() => (this.checkedKeys = this.permissionsAllids)">选择全部</p>
+                      <p style="cursor: pointer" @click="() => (this.checkedKeys = [])">取消选择</p>
+                      <p style="cursor: pointer" @click="() => (this.expandedKeys = this.permissionsAllids)">
                         展开全部
                       </p>
-                      <span style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</span>
+                      <span style="cursor: pointer" @click="() => (this.expandedKeys = [])">折叠全部</span>
                     </template>
                     <a-icon type="menu-unfold" /> </a-popover
                   ></span>
@@ -142,7 +151,7 @@
               <a-tree
                 :replaceFields="{
                   title: 'name',
-                  key: 'id'
+                  key: 'id',
                 }"
                 @check="getHalfCheck"
                 v-model="checkedKeys"
@@ -158,7 +167,15 @@
   </page-header-wrapper>
 </template>
 <script>
-import { listPermissionsTree, listRoles, createRole, updateRole, loadRoleById, deleteRoleById } from '@/api/api';
+import {
+  listPermissionsTree,
+  listRoles,
+  createRole,
+  updateRole,
+  loadRoleById,
+  deleteRoleById,
+  listApplications
+} from '@/api/api';
 import moment from 'moment';
 const columns = [
   {
@@ -196,7 +213,7 @@ export default {
   name: 'Role',
   data() {
     return {
-       jumper: '',
+      jumper: '',
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
       editWaitFormLoading: false, // 加载编辑回显数据等待Loading
       roleLoading: false, // 加载表格的loading
@@ -218,20 +235,29 @@ export default {
         name: undefined, // 名字
         code: undefined, // 角色
         isEnable: '1', // 状态
-        isSystem: '0',
+        isSystem: '1',
         description: undefined,
-        permissions: []
+        permissions: [],
+        applicationId: undefined
       },
       rules: {
         // 规则验证
-        name: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
-        code: [{ required: true, message: '请输入角色值', trigger: 'change' }]
+        name: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' },
+          { max: 50, message: '角色名称长度不能大于50', trigger: 'blur' }
+        ],
+        code: [
+          { required: true, message: '请输入角色代码', trigger: 'change' },
+          { max: 200, message: '角色代码长度不能大于200', trigger: 'blur' }
+        ],
+        applicationId: [{ required: true, message: '请选择应用名称', trigger: 'change' }]
       },
-      halfCheckArray: [], // 半选状态的数组
+      halfCheckArray: [],
       permissionsTreeArray: [], // 表单的树形下拉数据
       expandedKeys: [], // 控制树形下拉 展开收起全选取消全选 功能
       checkedKeys: [], // 树形下拉选中的数据
-      permissionsAllids: [] // 获取所有的权限ID
+      permissionsAllids: [], // 获取所有的权限ID
+      applicationArray: [] // 应用下拉数组数据
     };
   },
   watch: {
@@ -260,21 +286,57 @@ export default {
   },
   created() {
     this.getRoleTableData(this.pageObject, this.searchParameters); // 获取表格数据
-    this.getRolePermissions(); // 获取角色权限
+    this.getApplication(); // 获取应用ID
   },
   methods: {
     /**
-     * @description: 获取角色权限
+     * @description: 获取选中应用ID
+     * @param {string} applicationId 选中ID
      */
-    getRolePermissions() {
-      listPermissionsTree({ searchUserId: this.$store.getters.userInfo.roles[0].id }).then(res => {
-        if (res.code === 200) {
-          this.permissionsTreeArray = res.data;
-          this.getTreeData(this.permissionsTreeArray);
+    changeApplicationId(applicationId) {
+      this.editWaitFormLoading = true;
+      this.getRolePermissions(applicationId); // 获取角色权限
+    },
+    /**
+     * @description: 获取角色权限
+     * @param {string} applicationId 选中ID
+     */
+    getRolePermissions(applicationId) {
+      listPermissionsTree({ searchApplicationId: applicationId })
+        .then((res) => {
+          if (res.code === 200 && res.data) {
+            this.permissionsTreeArray = res.data;
+            this.getTreeData(this.permissionsTreeArray);
+          } else {
+            this.permissionsTreeArray = [];
+          }
+        })
+        .finally(() => {
+          this.editWaitFormLoading = false;
+        });
+    },
+
+    /**
+     * @description: 利用递归获取到所有的节点id
+     * @param {array} permissionsTreeArray 树形下拉的数据
+     */
+    getTreeData(permissionsTreeArray) {
+      permissionsTreeArray.forEach((item) => {
+        this.permissionsAllids.push(item.id);
+        if (item.children) {
+          this.getTreeData(item.children);
         }
       });
     },
 
+    /**
+     * @description: 获取应用数据
+     */
+    getApplication() {
+      listApplications().then((res) => {
+        this.applicationArray = res.data.content;
+      });
+    },
     /**
      * @description: 获取表格数据
      * @param {object} page 分页参数
@@ -283,10 +345,10 @@ export default {
     getRoleTableData(page, params) {
       this.roleLoading = true;
       listRoles(Object.assign({}, page, params))
-        .then(res => {
+        .then((res) => {
           if (res.code === 200 && res.data.content) {
             this.roleTableData = res.data.content;
-            this.roleTableData.forEach(item => {
+            this.roleTableData.forEach((item) => {
               item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
             });
             this.roleTableTotal = res.data.totalElements;
@@ -298,6 +360,16 @@ export default {
         .finally(() => {
           this.roleLoading = false;
         });
+    },
+
+    /**
+     * @description: 获取半选状态的数组
+     * @param {object} event event对象
+     */
+    getHalfCheck(checkedKeys, event) {
+      this.halfCheckArray = event.halfCheckedKeys.map((item) => {
+        return { id: item, isHalfCheck: 1 };
+      });
     },
 
     /**
@@ -313,15 +385,16 @@ export default {
      * @description: 新增编辑角色表单提交
      */
     onSubmit() {
-      this.$refs.roleRuleForm.validate(valid => {
+      this.$refs.roleRuleForm.validate((valid) => {
         if (valid) {
-          this.form.permissions = this.checkedKeys.map(item => {
+          this.form.permissions = this.checkedKeys.map((item) => {
             return {
               id: item,
               isHalfCheck: 0
             };
           });
           this.form.permissions = this.form.permissions.concat(this.halfCheckArray);
+          this.form.application = { id: this.form.applicationId };
           // 判断是否至少选择了一个权限
           if (this.form.permissions.length === 0) {
             this.$message.error('请选择权限列表');
@@ -345,7 +418,7 @@ export default {
      */
     roleAdd(addRoleParam) {
       createRole({ body: addRoleParam })
-        .then(res => {
+        .then((res) => {
           if (res.code === 200) {
             this.formSuccessOperation(res);
           }
@@ -361,7 +434,7 @@ export default {
      */
     editRole(editRoleParam) {
       updateRole({ body: editRoleParam, id: editRoleParam.id })
-        .then(res => {
+        .then((res) => {
           if (res.code === 200) {
             this.formSuccessOperation(res);
           }
@@ -389,6 +462,7 @@ export default {
       this.$refs.roleRuleForm.resetFields();
       this.form = this.$options.data.call(this).form;
       this.checkedKeys = [];
+      this.permissionsTreeArray = [];
     },
 
     /**
@@ -399,18 +473,17 @@ export default {
       this.editWaitFormLoading = true;
       this.modleVisible = true;
       // 根据ID请求相应角色的权限 进行回显
-      loadRoleById({ id: roleTableRowData.id })
-        .then(res => {
-          if (res.code === 200) {
-            this.form = Object.assign({}, this.form, res.data);
-            this.checkedKeys = res.data.permissions.map(item => {
-              return item.id;
-            });
-          }
-        })
-        .finally(() => {
-          this.editWaitFormLoading = false;
-        });
+      loadRoleById({ id: roleTableRowData.id }).then((res) => {
+        if (res.code === 200) {
+          this.form = Object.assign({}, this.form, res.data);
+          this.form.isEnable = String(this.form.isEnable);
+          this.form.applicationId = this.form.application.id;
+          this.checkedKeys = res.data.permissions.map((item) => {
+            return item.id;
+          });
+          this.getRolePermissions(this.form.applicationId); // 获取角色权限
+        }
+      });
     },
 
     /**
@@ -418,35 +491,11 @@ export default {
      * @param {object} roleTableRowData 格某一行的数据对象
      */
     handleDelete(roleTableRowData) {
-      deleteRoleById({ id: roleTableRowData.id }).then(res => {
+      deleteRoleById({ id: roleTableRowData.id }).then((res) => {
         if (res.code === 200) {
           this.$message.success(res.message);
           this.getRoleTableData(this.pageObject, this.searchParameters);
         }
-      });
-    },
-
-    /**
-     * @description: 利用递归获取到所有的节点id
-     * @param {array} permissionsTreeArray 树形下拉的数据
-     */
-    getTreeData(permissionsTreeArray) {
-      permissionsTreeArray.forEach(item => {
-        this.permissionsAllids.push(item.id);
-        if (item.children) {
-          this.getTreeData(item.children);
-        }
-      });
-    },
-
-    /**
-     * @description: 获取权限树半选的值
-     * @param {*} checkedKeys
-     * @param {object} event event对象
-     */
-    getHalfCheck(checkedKeys, event) {
-      this.halfCheckArray = event.halfCheckedKeys.map(item => {
-        return { id: item, isHalfCheck: 1 };
       });
     },
 
@@ -462,17 +511,6 @@ export default {
       this.getRoleTableData(this.pageObject, this.searchParameters);
     },
 
-        /**
-     * @description: 分页跳转输入框改变
-     */
-    blurJumperInput() {
-      if (this.jumper !== '') {
-        this.currentPage = Number(this.jumper);
-        this.pageObject.pageNumber = Number(this.currentPage) - 1;
-        this.getRoleTableData(this.pageObject, this.searchParameters);
-      }
-    },
-
     /**
      * @description: 获取分页页数改变后的值
      * @param {string} pageNumber UI框架自带
@@ -484,6 +522,17 @@ export default {
       this.getRoleTableData(this.pageObject, this.searchParameters);
     },
 
+                    /**
+     * @description: 分页跳转输入框改变
+     */
+    blurJumperInput() {
+      if (this.jumper !== '') {
+        this.currentPage = Number(this.jumper);
+        this.pageObject.pageNumber = Number(this.currentPage) - 1;
+        this.getApplicationTableData(this.pageObject, this.searchParameters);
+      }
+    },
+
     /**
      * @description: 日期选择器改变
      * @param {array} date UI框架自带
@@ -493,6 +542,7 @@ export default {
       this.searchParameters.searchCreateDateBegin = dateString[0];
       this.searchParameters.searchCreateDateEnd = dateString[1];
     },
+
     /**
      * @description: 重置搜索条件
      */
@@ -578,7 +628,6 @@ export default {
       max-height: calc(100vh - 380px);
       padding: 10px;
       overflow: scroll;
-      scrollbar-width: none; //兼容火狐
       .position {
         width: 100%;
         height: calc(100vh - 380px);
@@ -681,7 +730,6 @@ export default {
       width: 100%;
       height: 334px;
       overflow: scroll;
-      scrollbar-width: none; //兼容火狐
       display: flex;
       margin-left: 30%;
     }

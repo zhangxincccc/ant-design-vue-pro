@@ -3965,7 +3965,7 @@ export const setPermissionsURL = function(parameters = {}) {
 export const userInfo = function(parameters = {}) {
   const domain = parameters.$domain ? parameters.$domain : getDomain()
   const config = parameters.$config
-  let path = '/api/user'
+  let path = '/unified-identity-server/api/user'
   let body
   let queryParameters = {}
   let form = {}
@@ -3977,7 +3977,7 @@ export const userInfo = function(parameters = {}) {
   return request('get', domain + path, body, queryParameters, form, config)
 }
 export const userInfo_RAW_URL = function() {
-  return '/api/user'
+  return '/unified-identity-server/api/user'
 }
 export const userInfo_TYPE = function() {
   return 'get'
@@ -3985,7 +3985,7 @@ export const userInfo_TYPE = function() {
 export const userInfoURL = function(parameters = {}) {
   let queryParameters = {}
   const domain = parameters.$domain ? parameters.$domain : getDomain()
-  let path = '/api/user'
+  let path = '/unified-identity-server/api/user'
   if (parameters.$queryParameters) {
     Object.keys(parameters.$queryParameters).forEach(function(parameterName) {
       queryParameters[parameterName] = parameters.$queryParameters[parameterName]

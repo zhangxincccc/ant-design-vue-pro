@@ -1,8 +1,8 @@
 /*
  * @Author: your name
- * @Date: 2021-08-24 11:28:34
- * @LastEditTime: 2022-01-05 14:36:51
- * @LastEditors: your name
+ * @Date: 2021-12-14 13:59:34
+ * @LastEditTime: 2022-02-14 14:25:35
+ * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \ant-design-vue-pro\src\utils\request.js
  */
@@ -12,13 +12,13 @@ import storage from 'store';
 import notification from 'ant-design-vue/es/notification';
 import { VueAxios } from './axios';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
-
+import VueCookies from 'vue-cookies';
 // 异常拦截处理器
 const errorHandler = error => {
   if (error.response) {
     const data = error.response.data;
+    const token = storage.get(ACCESS_TOKEN) || VueCookies.get(ACCESS_TOKEN);
     // 从 localstorage 获取 token
-    const token = storage.get(ACCESS_TOKEN);
     if (error.response.status === 403) {
       notification.error({
         message: 'Forbidden',
@@ -32,10 +32,10 @@ const errorHandler = error => {
       });
     }
     if (error.response.status === 401 && !(data.result && data.result.isLogin)) {
-      // notification.error({
-      //   message: 'Unauthorized',
-      //   description: 'Authorization verification failed'
-      // });
+      notification.error({
+        message: 'Unauthorized',
+        description: 'Authorization verification failed'
+      });
       if (token) {
         store.dispatch('Logout').then(() => {
           setTimeout(() => {

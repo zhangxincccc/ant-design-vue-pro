@@ -1,7 +1,7 @@
 <template>
   <div class="departmentTreeMain">
     <div class="departmentTreeSearch">
-      <span><a-input placeholder="搜索部门" style="width: 275px" @change="handleSearch" v-model="departmentSearch"/></span>
+      <span><a-input placeholder="搜索" style="width: 275px" @change="handleSearch" v-model="departmentSearch"/></span>
       <span>
         <a-popover placement="bottomRight">
           <template slot="content">
@@ -9,7 +9,7 @@
             <span style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</span>
           </template>
           <a-icon type="menu-unfold" /> </a-popover
-        ></span>
+      ></span>
     </div>
     <div class="departmentTreeContent">
       <a-tree
@@ -27,7 +27,6 @@
       >
         <template slot="title" slot-scope="{ name }">
           <span
-            :title="name"
             v-html="
               name.replace(new RegExp(departmentSearch, 'g'), '<span style=color:#f50>' + departmentSearch + '</span>')
             "
@@ -208,7 +207,6 @@ export default {
   width: 100%;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 167px);
   .departmentTreeSearch {
     width: 100%;
     height: 46px;
@@ -225,28 +223,9 @@ export default {
     flex: 1;
     overflow: scroll;
     padding: 10px;
-    scrollbar-width: none;//兼容火狐
   }
   .departmentTreeContent::-webkit-scrollbar {
     display: none;
   }
-    .departmentTreeContent /deep/ .ant-tree li .ant-tree-node-content-wrapper {
-    max-width: 240px;
-    display: inline-block;
-    height: 24px;
-    margin: 0;
-    padding: 0 5px;
-    color: rgba(0, 0, 0, 0.65);
-    line-height: 24px;
-    text-decoration: none;
-    vertical-align: top;
-    border-radius: 2px;
-    cursor: pointer;
-    -webkit-transition: all 0.3s;
-    transition: all 0.3s;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
 }
 </style>

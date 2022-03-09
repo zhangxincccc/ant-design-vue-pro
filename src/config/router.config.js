@@ -44,7 +44,7 @@ export const asyncRouterMap = [
             component: () => import('@/views/system/organization'),
             meta: {
               title: '组织机构管理',
-              permission: ['system:organizations'],
+              // permission: ['system:organizations'],
               icon: workplace
             }
           },
@@ -54,7 +54,7 @@ export const asyncRouterMap = [
             component: () => import('@/views/system/department'),
             meta: {
               title: '部门管理',
-              permission: ['system:departments'],
+              // permission: ['system:departments'],
               icon: workplace
             }
           },
@@ -64,7 +64,7 @@ export const asyncRouterMap = [
             component: () => import('@/views/system/user'),
             meta: {
               title: '用户管理',
-              permission: ['system:users'],
+              // permission: ['system:users'],
               icon: workplace
             }
           },
@@ -74,7 +74,7 @@ export const asyncRouterMap = [
             component: () => import('@/views/system/role'),
             meta: {
               title: '角色管理',
-              permission: ['system:roles'],
+              // permission: ['system:roles'],
               icon: workplace
             }
           },
@@ -84,6 +84,24 @@ export const asyncRouterMap = [
             component: () => import('@/views/system/permissions'),
             meta: {
               title: '权限管理',
+              icon: workplace
+            }
+          },
+          {
+            path: '/system/application',
+            name: 'application',
+            component: () => import('@/views/system/application'),
+            meta: {
+              title: '应用管理',
+              icon: workplace
+            }
+          },
+          {
+            path: '/system/registeredClients',
+            name: 'registeredClients',
+            component: () => import('@/views/system/registeredClients'),
+            meta: {
+              title: '客户端管理',
               icon: workplace
             }
           }

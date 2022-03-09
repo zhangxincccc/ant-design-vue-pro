@@ -36,6 +36,12 @@
                     </a-form-item>
                   </a-col>
                   <a-col :md="8" :sm="24">
+                    <a-form-item label="状态">
+                      <a-select v-model="searchParameters.searchIsEnable" placeholder="请选择" allowClear>
+                        <a-select-option value="1">启用</a-select-option>
+                        <a-select-option value="0">停用</a-select-option>
+                      </a-select>
+                    </a-form-item>
                   </a-col>
                   <a-col :md="8" :sm="24"> </a-col>
                 </template>
@@ -68,6 +74,7 @@
               :data-source="organizationTableData"
               :pagination="false"
               size="middle"
+              :rowClassName="rowClassName"
               :rowKey="
                 (record, index) => {
                   return index;
@@ -76,6 +83,21 @@
               bordered
             >
               <template slot="action" slot-scope="text, record">
+                <a-popconfirm
+                  slot="action"
+                  title="此操作将停用该条数据，是否继续?"
+                  ok-text="是"
+                  cancel-text="否"
+                  @confirm="handleIsEnable(record)"
+                >
+                  <a href="javascript:;" v-if="record.isEnable == 1" :class="{ deactivate: record.isEnable == 1 }">停用</a>
+                </a-popconfirm>
+                <a
+                  slot="action"
+                  href="javascript:;"
+                  @click="handleIsEnable(record)"
+                  v-if="record.isEnable == 0"
+                  :class="{ enable: record.isEnable == 0 }">启用</a>
                 <a slot="action" href="javascript:;" style="margin-left:5px" @click="handleEdit(record)">编辑</a>
                 <a-popconfirm
                   slot="action"
@@ -139,8 +161,15 @@
               >
               </a-tree-select>
             </a-form-model-item>
-            <a-form-model-item ref="sortIndex" label="排序索引" prop="sortIndex">
-              <a-input type="number" v-model="form.sortIndex" placeholder="请输入排序索引" />
+            <a-form-model-item label="状态" prop="isEnable">
+              <a-radio-group v-model="form.isEnable" button-style="solid">
+                <a-radio-button value="1">
+                  启用
+                </a-radio-button>
+                <a-radio-button value="0">
+                  停用
+                </a-radio-button>
+              </a-radio-group>
             </a-form-model-item>
             <a-form-model-item label="备注">
               <a-input v-model.trim="form.description" type="textarea" placeholder="请输入备注" :maxLength="500" />
@@ -157,6 +186,8 @@ import {
   createOrganization,
   updateOrganization,
   deleteOrganizationById,
+  disableOrganizationById,
+  enableOrganizationById,
   loadOrganizationById
 } from '@/api/api';
 import moment from 'moment';
@@ -196,7 +227,7 @@ export default {
   name: 'Organization',
   data() {
     return {
-       jumper: '',
+      jumper: '',
       advanced: false, // 控制搜索条件的展开折叠
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
       organizationloading: false, // 加载表格的loading
@@ -211,7 +242,7 @@ export default {
         pageSize: this.$store.state.user.defaultPaginationPagesize // 一页展示多少条数据
       },
       organizationTableTotal: 0, // 表格数据总数
-      labelCol: { span: 4 },
+      labelCol: { span: 7 },
       wrapperCol: { span: 14 },
       form: {
         // 表单数据
@@ -219,7 +250,6 @@ export default {
         parent: undefined, // 配合后台接口的字段
         parentId: undefined, // 上级组织ID
         code: undefined, // 组织代码
-        sortIndex: undefined,
         isEnable: '1', // 状态
         description: undefined // 组织描述
       },
@@ -344,9 +374,7 @@ export default {
       this.$refs.organizationRuleForm.validate(valid => {
         if (valid) {
           this.formButtonDisableFlag = true;
-          if (this.form.parentId) {
-              this.form.parent = { id: this.form.parentId };
-          }
+          this.form.parent = { id: this.form.parentId };
           if (this.form.id) {
             this.organizationUpdate(this.form);
           } else {
@@ -422,7 +450,7 @@ export default {
           this.form = Object.assign({}, this.form, res.data);
           this.form.parentId = this.form.parent ? this.form.parent.id : undefined;
           this.form.isEnable = String(this.form.isEnable);
-          this.disableSelectIdData(organizationTableRowData.id, this.formOrganizationTreeData);
+           this.disableSelectIdData(organizationTableRowData.id, this.formOrganizationTreeData);
           this.modleVisible = true;
         }
       });
@@ -469,14 +497,15 @@ export default {
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getOrganizationTableData(this.pageObject, this.searchParameters);
     },
-        /**
+
+    /**
      * @description: 分页跳转输入框改变
      */
     blurJumperInput() {
       if (this.jumper !== '') {
         this.currentPage = Number(this.jumper);
-      this.pageObject.pageNumber = Number(this.currentPage) - 1;
-      this.getOrganizationTableData(this.pageObject, this.searchParameters);
+        this.pageObject.pageNumber = Number(this.currentPage) - 1;
+        this.getOrganizationTableData(this.pageObject, this.searchParameters);
       }
     },
 
@@ -498,6 +527,29 @@ export default {
     onChangeData(date, dateString) {
       this.searchParameters.searchCreateDateBegin = dateString[0];
       this.searchParameters.searchCreateDateEnd = dateString[1];
+    },
+    /**
+     * @description: 停用/启用表格数据的某一条
+     * @param {object} organizationTableRowData 某一条表格数据对象
+     */
+    handleIsEnable(organizationTableRowData) {
+      if (organizationTableRowData.isEnable === 1) {
+        disableOrganizationById({ id: organizationTableRowData.id }).then(res => {
+          if (res.code === 200) {
+            this.$message.success('停用成功');
+            this.getOrganizationTableData(this.pageObject, this.searchParameters);
+            this.$refs.organizationTree.getTreeData();
+          }
+        });
+      } else {
+        enableOrganizationById({ id: organizationTableRowData.id }).then(res => {
+          if (res.code === 200) {
+            this.$message.success('启用成功');
+            this.getOrganizationTableData(this.pageObject, this.searchParameters);
+            this.$refs.organizationTree.getTreeData();
+          }
+        });
+      }
     },
 
     /**
@@ -523,10 +575,27 @@ export default {
       this.searchParameters.searchParentIds = copySearchParameters.searchParentIds;
       this.searchParameters.searchParentId = copySearchParameters.searchParentId;
       this.searchOrganizationTableData();
+    },
+    /**
+     * @description: 根据isEnable判断表格背景颜色
+     * @param {object} record 当前行数据
+     */
+    rowClassName(record) {
+      let className = 'enableBackground';
+      if (record.isEnable === 1) className = 'deactivateBakcground';
+      return className;
     }
   }
 };
 </script>
+<style>
+.deactivateBakcground {
+  background: white !important;
+}
+.enableBackground {
+  background: #fafafa !important;
+}
+</style>
 <style lang="less" scoped>
 .deactivate {
   color: red;
@@ -588,7 +657,6 @@ export default {
         height: calc(100vh - 380px);
         padding: 10px;
         overflow: scroll;
-        scrollbar-width: none;//兼容火狐
       }
       .organizationTableContent /deep/ .ant-table-tbody .ant-table-row:nth-child(2n) {
         background: #fafafa;

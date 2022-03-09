@@ -28,7 +28,11 @@
                 </a-col>
                 <a-col :md="6" :sm="32">
                   <a-form-item label="创建时间">
-                    <a-range-picker @change="onChangeData" allowClear v-model="searchParameters.permissionsCreateData" />
+                    <a-range-picker
+                      @change="onChangeData"
+                      allowClear
+                      v-model="searchParameters.permissionsCreateData"
+                    />
                   </a-form-item>
                 </a-col>
               </a-row>
@@ -36,7 +40,7 @@
           </div>
         </div>
         <div class="permissionSearchButton">
-          <a-button style="margin-right:20px" type="primary" @click="() => this.searchPermissionTableData()">
+          <a-button style="margin-right: 20px" type="primary" @click="() => this.searchPermissionTableData()">
             查询
           </a-button>
           <a-button @click="handleReset">重置</a-button>
@@ -46,9 +50,7 @@
         <div class="permissionsTableAdd">
           <div class="permissionsTableAddTitle">权限列表</div>
           <div class="permissionsTableAddButton">
-            <a-button type="primary" @click="() => (this.modleVisible = true)">
-              新增权限
-            </a-button>
+            <a-button type="primary" @click="() => (this.modleVisible = true)"> 新增权限 </a-button>
           </div>
         </div>
         <div class="permissionsTableContent">
@@ -65,7 +67,7 @@
             bordered
           >
             <template slot="action" slot-scope="text, record">
-              <a slot="action" href="javascript:;" style="margin-left:5px" @click="handleEdit(record)">编辑</a>
+              <a slot="action" href="javascript:;" style="margin-left: 5px" @click="handleEdit(record)">编辑</a>
               <a-popconfirm
                 slot="action"
                 title="此操作将删除该条数据，是否继续?"
@@ -73,7 +75,7 @@
                 cancel-text="否"
                 @confirm="handleDelete(record)"
               >
-                <a href="javascript:;" style="margin-left:5px">删除</a>
+                <a href="javascript:;" style="margin-left: 5px">删除</a>
               </a-popconfirm>
             </template>
           </a-table>
@@ -84,7 +86,7 @@
           v-model="currentPage"
           :page-size-options="pageSizeOptions"
           :total="permissionsTableTotal"
-          :show-total="total => `共 ${permissionsTableTotal} 条`"
+          :show-total="(total) => `共 ${permissionsTableTotal} 条`"
           show-size-changer
           :page-size="pageObject.pageSize"
           @change="handlePageNumberChange"
@@ -94,7 +96,7 @@
         跳至 <a-input v-model="jumper" style="width:50px;margin-left:10px;margin-right:10px" @blur="blurJumperInput()"/>页
       </div>
       <a-modal
-        width="50%"
+        width="956.5px"
         v-model="modleVisible"
         :title="form.id ? '编辑权限' : '新增权限'"
         @cancel="() => (this.clearFormData(), (this.modleVisible = false))"
@@ -132,11 +134,11 @@
                   <a-tree-select
                     :replaceFields="{
                       title: 'name',
-                      value: 'id'
+                      value: 'id',
                     }"
                     v-model="form.parentId"
                     style="width: 100%"
-                    :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                    :dropdown-style="{ width: '214px', maxHeight: '400px', overflow: 'auto' }"
                     :tree-data="permissionsTreeArray"
                     placeholder="请选择上级权限"
                     tree-default-expand-all
@@ -156,14 +158,10 @@
                 <span>
                   <a-popover placement="bottomRight">
                     <template slot="content">
-                      <p style="cursor: pointer;" @click="() => (this.checkedKeys = this.interfacesAllids)">
-                        选择全部
-                      </p>
-                      <p style="cursor: pointer;" @click="() => (this.checkedKeys = [])">取消选择</p>
-                      <p style="cursor: pointer;" @click="() => (this.expandedKeys = this.interfacesAllids)">
-                        展开全部
-                      </p>
-                      <span style="cursor: pointer;" @click="() => (this.expandedKeys = [])">折叠全部</span>
+                      <p style="cursor: pointer" @click="() => (this.checkedKeys = this.interfacesAllids)">选择全部</p>
+                      <p style="cursor: pointer" @click="() => (this.checkedKeys = [])">取消选择</p>
+                      <p style="cursor: pointer" @click="() => (this.expandedKeys = this.interfacesAllids)">展开全部</p>
+                      <span style="cursor: pointer" @click="() => (this.expandedKeys = [])">折叠全部</span>
                     </template>
                     <a-icon type="menu-unfold" /> </a-popover
                   ></span>
@@ -173,7 +171,7 @@
               <a-tree
                 :replaceFields="{
                   title: 'name',
-                  key: 'id'
+                  key: 'id',
                 }"
                 v-model="checkedKeys"
                 checkable
@@ -194,7 +192,7 @@ import {
   createPermission,
   updatePermission,
   deletePermissionById,
-  apiTree,
+  listResources,
   loadPermissionById
 } from '@/api/api';
 import moment from 'moment';
@@ -237,11 +235,11 @@ const columns = [
   }
 ];
 export default {
-  name: 'Role',
+  name: 'Permissions',
   data() {
     return {
       jumper: '',
-      advanced: false, // 控制搜索条件的展开折叠
+      resourceIds: [], // 获取所有资源ID
       editWaitFormLoading: false, // 加载编辑回显数据等待Loading
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
       permissionsLoading: false, // 加载表格的loading
@@ -274,8 +272,14 @@ export default {
       rules: {
         // 规则验证
         type: [{ required: true, message: '请输入权限类型', trigger: 'change' }],
-        code: [{ required: true, message: '请输入权限代码', trigger: 'blur' }],
-        name: [{ required: true, message: '请输入权限名称', trigger: 'blur' }]
+        code: [
+          { required: true, message: '请输入权限代码', trigger: 'blur' },
+          { max: 200, message: '权限代码长度不能大于200', trigger: 'blur' }
+        ],
+        name: [
+          { required: true, message: '请输入权限名称', trigger: 'blur' },
+          { max: 50, message: '权限名称长度不能大于50', trigger: 'blur' }
+        ]
       },
       permissionsTreeArray: [], // 表单的权限树形下拉数据
       permissionsTypeArray: [], // 权限类型数组数据
@@ -292,11 +296,10 @@ export default {
      * 在获取除了当前页数据外的表格总数this.getExceptCurrentPageTableTotalData
      * 如果这两个数相等 说明删除的是当前页最后一条数据 然后使当前页-1 请求数据就可以了
      */
-
     permissionsTableTotal() {
       if (this.permissionsTableTotal === this.getExceptCurrentPageTableTotalData && this.permissionsTableTotal !== 0) {
         this.currentPage -= 1;
-         this.pageObject.pageNumber = Number(this.currentPage) - 1;
+        this.pageObject.pageNumber = Number(this.currentPage) - 1;
         this.getPermissionsTableData(this.pageObject, this.searchParameters);
       }
     }
@@ -310,7 +313,7 @@ export default {
     }
   },
   created() {
-    this.permissionsTypeArray = this.$store.state.enums.map.PermissionType; // 获取权限类型
+    this.permissionsTypeArray = this.$store.state.enums.map.PermissionType; // 获取权限类型数组
     this.getPermissionsTableData(this.pageObject, this.searchParameters); // 获取表格数据
     this.formPermissionsTree(); // 表单的权限树
     this.getInterfacesTree(); // 表单的接口权限树
@@ -320,21 +323,33 @@ export default {
      * @description: 获取接口树
      */
     getInterfacesTree() {
-      apiTree().then(res => {
+      listResources({ pageNumber: 0, pageSize: 9999 }).then((res) => {
         if (res.code === 200) {
-          this.interfacesTreeArray = res.data;
+          this.interfacesTreeArray = res.data.content;
+          this.interfacesTreeArray.forEach((item) => {
+            // 一级为资源ID 设置resource防止和接口ID重复
+            item.id = 'resource' + item.id;
+            this.resourceIds.push(item.id);
+            if (item.apis) {
+              item.children = item.apis;
+            }
+          });
           this.getTreeData(this.interfacesTreeArray);
         }
       });
     },
     /**
      * @description: 利用递归获取到所有的节点id
-     * @param {array} interfacesTreeArray 树形下拉的数据
+     * @param {array} interfacesTreeArray 接口树数组
      */
     getTreeData(interfacesTreeArray) {
-      interfacesTreeArray.forEach(item => {
+      interfacesTreeArray.forEach((item) => {
         this.interfacesAllids.push(item.id);
         if (item.children) {
+            item.children.forEach(item => {
+              // children为接口ID设置api前缀防止和资源ID重复
+              item.id = 'api' + item.id;
+            });
           this.getTreeData(item.children);
         }
       });
@@ -343,7 +358,7 @@ export default {
      * @description:表单的权限树
      */
     formPermissionsTree() {
-      listPermissionsTree().then(res => {
+      listPermissionsTree().then((res) => {
         if (res.code === 200) {
           this.permissionsTreeArray = res.data;
         }
@@ -357,12 +372,12 @@ export default {
     getPermissionsTableData(page, params) {
       this.permissionsLoading = true;
       listPermissions(Object.assign({}, page, params))
-        .then(res => {
+        .then((res) => {
           if (res.code === 200 && res.data.content) {
             this.permissionsTableData = res.data.content;
-            this.permissionsTableData.forEach(res => {
+            this.permissionsTableData.forEach((res) => {
               res.createTime = moment(res.createTime).format('YYYY-MM-DD HH:mm');
-              this.permissionsTypeArray.forEach(item => {
+              this.permissionsTypeArray.forEach((item) => {
                 if (item.value === res.type) {
                   res.typeName = item.name;
                 }
@@ -392,11 +407,18 @@ export default {
      * @description: 新增编辑权限表单提交
      */
     onSubmit() {
-      this.$refs.permissionsRuleForm.validate(valid => {
+      this.$refs.permissionsRuleForm.validate((valid) => {
         if (valid) {
-          this.form.apis = this.checkedKeys.map(item => {
+          const apisArray = [];
+          // 筛选出选中的接口数据里面符合条件的值
+          this.checkedKeys.forEach(value => {
+            if (this.resourceIds.indexOf(value) === -1) {
+              apisArray.push(value);
+            }
+          });
+          this.form.apis = apisArray.map((item) => {
             return {
-              id: item
+              id: item.slice(3)
             };
           });
           // 判断是否至少选择了一个接口
@@ -423,7 +445,7 @@ export default {
      */
     addPermissions(addPermission) {
       createPermission({ body: addPermission })
-        .then(res => {
+        .then((res) => {
           if (res.code === 201) {
             this.formSuccessOperation(res);
           }
@@ -439,7 +461,7 @@ export default {
      */
     editPermissions(editPermission) {
       updatePermission({ body: editPermission, id: editPermission.id })
-        .then(res => {
+        .then((res) => {
           if (res.code === 200) {
             this.formSuccessOperation(res);
           }
@@ -478,13 +500,13 @@ export default {
       this.modleVisible = true;
 
       loadPermissionById({ id: permissionTableRowData.id })
-        .then(res => {
+        .then((res) => {
           if (res.code === 200) {
             this.form = Object.assign({}, this.form, res.data);
             this.form.isEnable = String(this.form.isEnable);
             this.form.parentId = this.form.parent ? this.form.parent.id : undefined;
-            this.checkedKeys = res.data.apis.map(item => {
-              return item.id;
+            this.checkedKeys = res.data.apis.map((item) => {
+              return 'api' + item.id;
             });
           }
         })
@@ -498,7 +520,7 @@ export default {
      * @param {object} roleTableRowData 格某一行的数据对象
      */
     handleDelete(roleTableRowData) {
-      deletePermissionById({ id: roleTableRowData.id }).then(res => {
+      deletePermissionById({ id: roleTableRowData.id }).then((res) => {
         if (res.code === 200) {
           this.$message.success(res.message);
           this.getPermissionsTableData(this.pageObject, this.searchParameters);
@@ -517,7 +539,7 @@ export default {
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getPermissionsTableData(this.pageObject, this.searchParameters);
     },
-        /**
+    /**
      * @description: 日期选择器改变
      * @param {array} date UI框架自带
      * @param {array} dateString UI框架自带 时间区间
@@ -537,6 +559,7 @@ export default {
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getPermissionsTableData(this.pageObject, this.searchParameters);
     },
+
     /**
      * @description: 分页跳转输入框改变
      */
@@ -544,10 +567,11 @@ export default {
       if (this.jumper !== '') {
         this.currentPage = Number(this.jumper);
         this.pageObject.pageNumber = Number(this.currentPage) - 1;
-        this.getPermissionsTableData(this.pageObject, this.searchParameters);
+        this.getApplicationTableData(this.pageObject, this.searchParameters);
       }
     },
-        /**
+
+    /**
      * @description: 重置搜索条件
      */
     handleReset() {
@@ -632,7 +656,6 @@ export default {
       max-height: calc(100vh - 380px);
       padding: 10px;
       overflow: scroll;
-      scrollbar-width: none;//兼容火狐
       .position {
         width: 100%;
         height: calc(100vh - 380px);
@@ -705,6 +728,7 @@ export default {
       text-align: right;
       vertical-align: middle;
       width: 100px;
+      overflow: hidden;
     }
   }
   .modalContentTree {
@@ -737,7 +761,24 @@ export default {
       overflow: scroll;
       display: flex;
       margin-left: 30%;
-      scrollbar-width: none;//兼容火狐
+    }
+    .modalContentTreeContent /deep/ .ant-tree li .ant-tree-node-content-wrapper {
+      display: inline-block;
+      height: 24px;
+      margin: 0;
+      padding: 0 5px;
+      color: rgba(0, 0, 0, 0.65);
+      line-height: 24px;
+      text-decoration: none;
+      vertical-align: top;
+      border-radius: 2px;
+      cursor: pointer;
+      -webkit-transition: all 0.3s;
+      transition: all 0.3s;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 150px;
     }
     .modalContentTreeContent::-webkit-scrollbar {
       display: none;
