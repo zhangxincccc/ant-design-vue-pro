@@ -10,7 +10,7 @@
         ></organization-mix-tree>
       </div>
       <div class="departmentMain">
-        <a-spin tip="加载中..." class="position" v-if="departmentLoading"> </a-spin>
+        <a-spin tip="加载中...aa" class="position" v-if="departmentLoading"> </a-spin>
         <div class="departmentMainSearch">
           <div class="table-page-search-wrapper">
             <a-form layout="inline">
