@@ -250,7 +250,7 @@ export default {
         pageSize: this.$store.state.user.defaultPaginationPagesize // 一页展示多少条数据
       },
       departmentTableTotal: 0, // 表格数据总数
-      labelCol: { span: 4 },
+      labelCol: { span: 7 },
       wrapperCol: { span: 14 },
       form: {
         // 表单数据
@@ -308,7 +308,6 @@ export default {
     }
   },
   created() {
-    this.departmentLoading = true;
     this.getDepartentTableData(this.pageObject, this.searchParameters); // 获取部门表格数据
     this.getOrganizationTree(); // 获取组织树结构数据
   },
@@ -470,7 +469,6 @@ export default {
         if (res.code === 200) {
           this.$message.success(res.message);
           this.modleVisible = false;
-          this.departmentLoading = true;
           this.getDepartentTableData(this.pageObject, this.searchParameters);
           this.$refs.mixTree.getTreeData(); // 刷新子组件部门列表的方法
         }
@@ -483,7 +481,6 @@ export default {
      * @param {string} pageSize UI框架自带
      */
     onPageSizeChange(currentPage, pageSize) {
-      this.departmentLoading = true;
       this.currentPage = currentPage;
       this.pageObject.pageSize = pageSize;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
@@ -507,7 +504,6 @@ export default {
      */
     handlePageNumberChange(pageNumber) {
       this.jumper = '';
-      this.departmentLoading = true;
       this.currentPage = pageNumber;
       this.pageObject.pageNumber = Number(this.currentPage) - 1;
       this.getDepartentTableData(this.pageObject, this.searchParameters);
@@ -564,7 +560,6 @@ export default {
       this.$message.success(formSuccessData.message);
       this.modleVisible = false;
       this.clearFormData();
-      this.departmentLoading = true;
       this.getDepartentTableData(this.pageObject, this.searchParameters);
       this.$refs.mixTree.getTreeData();
     },

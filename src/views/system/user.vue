@@ -343,7 +343,7 @@ export default {
       },
       userTableTotal: 0, // 表格数据总数
       isOrganization: -1, // 判断treeSelect选中时的类型(true代表是属于组织 false代表部门)
-      labelCol: { span: 4 },
+      labelCol: { span: 7 },
       wrapperCol: { span: 14 },
       form: {
         // 表单数据
@@ -659,7 +659,6 @@ export default {
      * @description: 点击批量停用
      */
     handleBatchDisable() {
-      this.userLoading = true;
       batchDisableUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
           this.afterBatchActions(res, 1);
@@ -670,7 +669,6 @@ export default {
      * @description: 点击批量启用
      */
     handleBatchEnable() {
-      this.userLoading = true;
       batchEnableUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
           this.afterBatchActions(res, 2);
@@ -681,7 +679,6 @@ export default {
      * @description: 点击批量删除
      */
     handleBatchDelete() {
-      this.userLoading = true;
       batchDeleteUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
           this.afterBatchActions(res, 3);
