@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-    <a-form
+    <!-- <a-form
       id="formLogin"
       class="user-layout-login"
       ref="formLogin"
@@ -26,90 +26,141 @@
             >
               <a-icon slot="prefix" type="user" :style="{ color: 'rgba(0,0,0,.25)' }"/>
             </a-input>
-          </a-form-item>
+          </a-form-item> -->
+    <a-spin :spinning="loading" :tip="loadingTip">
+      <a-form id="formLogin" class="user-layout-login" ref="formLogin" :form="form" @submit="handleSubmit">
+        <a-tabs
+          :activeKey="customActiveKey"
+          :tabBarStyle="{ textAlign: 'center', borderBottom: 'unset' }"
+          @change="handleTabClick"
+        >
+          <a-tab-pane key="tab1" tab="账号密码登录">
+            <a-alert
+              v-if="isLoginError"
+              type="error"
+              showIcon
+              style="margin-bottom: 24px;"
+              message="账户或密码错误（admin/ant.design )"
+            />
+            <a-form-item>
+              <a-input
+                size="large"
+                type="text"
+                placeholder="账户: admin"
+                v-decorator="[
+                  'username',
+                  {
+                    rules: [
+                      { required: true, message: '请输入帐户名或邮箱地址' },
+                      { validator: handleUsernameOrEmail }
+                    ],
+                    validateTrigger: 'change'
+                  }
+                ]"
+              >
+                <a-icon slot="prefix" type="user" :style="{ color: 'rgba(0,0,0,.25)' }" />
+              </a-input>
+            </a-form-item>
+            <a-form-item>
+              <a-input-password
+                size="large"
+                placeholder="密码: admin or ant.design"
+                v-decorator="[
+                  'password',
+                  { rules: [{ required: true, message: '请输入密码' }], validateTrigger: 'blur' }
+                ]"
+              >
+                <a-icon slot="prefix" type="lock" :style="{ color: 'rgba(0,0,0,.25)' }" />
+              </a-input-password>
+            </a-form-item>
+          </a-tab-pane>
+          <a-tab-pane key="tab2" tab="手机号登录">
+            <a-form-item>
+              <a-input
+                size="large"
+                type="text"
+                placeholder="手机号"
+                v-decorator="[
+                  'mobile',
+                  {
+                    rules: [{ required: true, pattern: /^1[34578]\d{9}$/, message: '请输入正确的手机号' }],
+                    validateTrigger: 'change'
+                  }
+                ]"
+              >
+                <a-icon slot="prefix" type="mobile" :style="{ color: 'rgba(0,0,0,.25)' }" />
+              </a-input>
+            </a-form-item>
+            <a-row :gutter="16">
+              <a-col class="gutter-row" :span="16">
+                <a-form-item>
+                  <a-input
+                    size="large"
+                    type="text"
+                    placeholder="验证码"
+                    v-decorator="[
+                      'captcha',
+                      { rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur' }
+                    ]"
+                  >
+                    <a-icon slot="prefix" type="mail" :style="{ color: 'rgba(0,0,0,.25)' }" />
+                  </a-input>
+                </a-form-item>
+              </a-col>
+              <a-col class="gutter-row" :span="8">
+                <a-button
+                  class="getCaptcha"
+                  tabindex="-1"
+                  :disabled="state.smsSendBtn"
+                  @click.stop.prevent="getCaptcha"
+                  v-text="(!state.smsSendBtn && '获取验证码') || state.time + ' s'"
+                ></a-button>
+              </a-col>
+            </a-row>
+          </a-tab-pane>
+        </a-tabs>
+        <a-form-item>
+          <a-checkbox v-decorator="['rememberMe', { valuePropName: 'checked' }]">自动登录</a-checkbox>
+          <router-link
+            :to="{ name: 'recover', params: { user: 'aaa' } }"
+            class="forge-password"
+            style="float: right;"
+          >忘记密码</router-link
+          >
+        </a-form-item>
+        <a-form-item style="margin-top:24px">
+          <a-button
+            size="large"
+            type="primary"
+            htmlType="submit"
+            class="login-button"
+            :loading="state.loginBtn"
+            :disabled="state.loginBtn"
+          >确定</a-button
+          >
+        </a-form-item>
+        <div class="user-login-other">
+          <span>其他登录方式</span>
+          <a>
+            <a-icon class="item-icon" type="alipay-circle"></a-icon>
+          </a>
+          <a>
+            <a-icon class="item-icon" type="taobao-circle"></a-icon>
+          </a>
+          <a>
+            <a-icon class="item-icon" type="weibo-circle"></a-icon>
+          </a>
+          <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>
+        </div>
+      </a-form>
 
-          <a-form-item>
-            <a-input-password
-              size="large"
-              placeholder="密码: admin or ant.design"
-              v-decorator="[
-                'password',
-                {rules: [{ required: true, message: '请输入密码' }], validateTrigger: 'blur'}
-              ]"
-            >
-              <a-icon slot="prefix" type="lock" :style="{ color: 'rgba(0,0,0,.25)' }"/>
-            </a-input-password>
-          </a-form-item>
-        </a-tab-pane>
-        <a-tab-pane key="tab2" tab="手机号登录">
-          <a-form-item>
-            <a-input size="large" type="text" placeholder="手机号" v-decorator="['mobile', {rules: [{ required: true, pattern: /^1[34578]\d{9}$/, message: '请输入正确的手机号' }], validateTrigger: 'change'}]">
-              <a-icon slot="prefix" type="mobile" :style="{ color: 'rgba(0,0,0,.25)' }"/>
-            </a-input>
-          </a-form-item>
-
-          <a-row :gutter="16">
-            <a-col class="gutter-row" :span="16">
-              <a-form-item>
-                <a-input size="large" type="text" placeholder="验证码" v-decorator="['captcha', {rules: [{ required: true, message: '请输入验证码' }], validateTrigger: 'blur'}]">
-                  <a-icon slot="prefix" type="mail" :style="{ color: 'rgba(0,0,0,.25)' }"/>
-                </a-input>
-              </a-form-item>
-            </a-col>
-            <a-col class="gutter-row" :span="8">
-              <a-button
-                class="getCaptcha"
-                tabindex="-1"
-                :disabled="state.smsSendBtn"
-                @click.stop.prevent="getCaptcha"
-                v-text="!state.smsSendBtn && '获取验证码' || (state.time+' s')"
-              ></a-button>
-            </a-col>
-          </a-row>
-        </a-tab-pane>
-      </a-tabs>
-
-      <a-form-item>
-        <a-checkbox v-decorator="['rememberMe', { valuePropName: 'checked' }]">自动登录</a-checkbox>
-        <router-link
-          :to="{ name: 'recover', params: { user: 'aaa'} }"
-          class="forge-password"
-          style="float: right;"
-        >忘记密码</router-link>
-      </a-form-item>
-
-      <a-form-item style="margin-top:24px">
-        <a-button
-          size="large"
-          type="primary"
-          htmlType="submit"
-          class="login-button"
-          :loading="state.loginBtn"
-          :disabled="state.loginBtn"
-        >确定</a-button>
-      </a-form-item>
-
-      <div class="user-login-other">
-        <span>其他登录方式</span>
-        <a>
-          <a-icon class="item-icon" type="alipay-circle"></a-icon>
-        </a>
-        <a>
-          <a-icon class="item-icon" type="taobao-circle"></a-icon>
-        </a>
-        <a>
-          <a-icon class="item-icon" type="weibo-circle"></a-icon>
-        </a>
-        <router-link class="register" :to="{ name: 'register' }">注册账户</router-link>
-      </div>
-    </a-form>
-
-    <two-step-captcha
-      v-if="requiredTwoStepCaptcha"
-      :visible="stepCaptchaVisible"
-      @success="stepCaptchaSuccess"
-      @cancel="stepCaptchaCancel"
-    ></two-step-captcha>
+      <two-step-captcha
+        v-if="requiredTwoStepCaptcha"
+        :visible="stepCaptchaVisible"
+        @success="stepCaptchaSuccess"
+        @cancel="stepCaptchaCancel"
+      ></two-step-captcha>
+    </a-spin>
   </div>
 </template>
 
@@ -119,6 +170,9 @@ import TwoStepCaptcha from '@/components/tools/TwoStepCaptcha';
 import { mapActions } from 'vuex';
 import { timeFix } from '@/utils/util';
 import { getSmsCaptcha, get2step } from '@/api/login';
+import { clientAuthorize, loginByAuthorizationCode } from '@/api/auth';
+import storage from 'store';
+import { ACCESS_TOKEN } from '@/store/mutation-types';
 
 export default {
   components: {
@@ -126,6 +180,7 @@ export default {
   },
   data() {
     return {
+      authorizationGrantType: process.env.VUE_APP_AUTHORIZATION_GRANT_TYPE,
       customActiveKey: 'tab1',
       loginBtn: false,
       // login type: 0 email, 1 username, 2 telephone
@@ -140,11 +195,13 @@ export default {
         // login type: 0 email, 1 username, 2 telephone
         loginType: 0,
         smsSendBtn: false
-      }
+      },
+      loading: false,
+      loadingTip: '登录中...'
     };
   },
   created() {
-    get2step({ })
+    get2step({})
       .then(res => {
         this.requiredTwoStepCaptcha = res.result.stepCode;
       })
@@ -152,6 +209,30 @@ export default {
         this.requiredTwoStepCaptcha = false;
       });
     // this.requiredTwoStepCaptcha = true
+  },
+    /**
+   * 如果是授权码模式登录, 自动进行跳转
+   * 如果是授权码模式登录成功回调, 自动获取token
+   */
+  mounted() {
+    if (this.authorizationGrantType !== 'authorization_code') {
+      return;
+    }
+    if (this.$route.query.code) {
+      this.loading = true;
+      loginByAuthorizationCode(this.$route.query.code)
+        .then(result => {
+          storage.set(ACCESS_TOKEN, result.access_token, 7 * 24 * 60 * 60 * 1000);
+          this.$router.push({ path: storage.get('redirectUrl') || '/' });
+        })
+        .catch(() => {
+          this.$message.error('登录失败, 请联系管理员');
+        })
+        .finally(() => (this.loading = false));
+    } else {
+      storage.set('redirectUrl', this.$route.query.redirect);
+      clientAuthorize();
+    }
   },
   methods: {
     ...mapActions(['Login', 'Logout']),
@@ -191,7 +272,7 @@ export default {
           // loginParams.password = md5(values.password);
           loginParams.password = values.password;
           Login(loginParams)
-            .then((res) => this.loginSuccess(res))
+             .then(res => this.loginSuccess(res))
             .catch(err => this.requestFailed(err))
             .finally(() => {
               state.loginBtn = false;
@@ -220,20 +301,22 @@ export default {
           }, 1000);
 
           const hide = this.$message.loading('验证码发送中..', 0);
-          getSmsCaptcha({ mobile: values.mobile }).then(res => {
-            setTimeout(hide, 2500);
-            this.$notification['success']({
-              message: '提示',
-              description: '验证码获取成功，您的验证码为：' + res.result.captcha,
-              duration: 8
+          getSmsCaptcha({ mobile: values.mobile })
+            .then(res => {
+              setTimeout(hide, 2500);
+              this.$notification['success']({
+                message: '提示',
+                description: '验证码获取成功，您的验证码为：' + res.result.captcha,
+                duration: 8
+              });
+            })
+            .catch(err => {
+              setTimeout(hide, 1);
+              clearInterval(interval);
+              state.time = 60;
+              state.smsSendBtn = false;
+              this.requestFailed(err);
             });
-          }).catch(err => {
-            setTimeout(hide, 1);
-            clearInterval(interval);
-            state.time = 60;
-            state.smsSendBtn = false;
-            this.requestFailed(err);
-          });
         }
       });
     },
@@ -247,18 +330,6 @@ export default {
       });
     },
     loginSuccess(res) {
-      console.log(res);
-      // check res.homePage define, set $router.push name res.homePage
-      // Why not enter onComplete
-      /*
-      this.$router.push({ name: 'analysis' }, () => {
-        console.log('onComplete')
-        this.$notification.success({
-          message: '欢迎',
-          description: `${timeFix()}，欢迎回来`
-        })
-      })
-      */
       this.$router.push({ path: '/' });
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
