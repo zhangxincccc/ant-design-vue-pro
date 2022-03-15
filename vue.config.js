@@ -109,7 +109,12 @@ const vueConfig = {
     // If you want to turn on the proxy, please remove the mockjs /src/main.jsL11
     proxy: {
       '/oauth2': {
-        target: authorizationUrl
+        target: process.env.VUE_APP_AUTHORIZATION_URI || authorizationUrl
+      },
+      '/gateway': {
+        target: url,
+        ws: true,
+        changeOrigin: true
       },
       '/unified-identity-server': {
         target: url,
@@ -152,7 +157,6 @@ const vueConfig = {
 
 // preview.pro.loacg.com only do not use in your production;
 if (process.env.VUE_APP_PREVIEW === 'true') {
-  console.log('VUE_APP_PREVIEW', true);
   // add `ThemeColorReplacer` plugin to webpack plugins
   vueConfig.configureWebpack.plugins.push(createThemeColorReplacerPlugin());
 }
