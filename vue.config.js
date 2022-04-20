@@ -107,8 +107,8 @@ const vueConfig = {
     port: 8001,
     // If you want to turn on the proxy, please remove the mockjs /src/main.jsL11
     proxy: {
-      '/oauth': {
-        target: url
+      '/oauth2': {
+        target: process.env.VUE_APP_AUTHORIZATION_URI || url
       },
       '/api': {
         target: url,

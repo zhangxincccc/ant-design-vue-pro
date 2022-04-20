@@ -1,13 +1,21 @@
+/*
+ * @Author: your name
+ * @Date: 2022-01-06 09:06:29
+ * @LastEditTime: 2022-03-16 13:35:28
+ * @LastEditors: Please set LastEditors
+ * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ * @FilePath: \ceshi\src\permission.js
+ */
 import router from './router';
 import store from './store';
-import storage from 'store';
 import NProgress from 'nprogress'; // progress bar
 import '@/components/NProgress/nprogress.less'; // progress bar custom style
 import notification from 'ant-design-vue/es/notification';
 import { domTitle, setDocumentTitle } from '@/utils/domUtil';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { i18nRender } from '@/locales';
-
+// import VueCookies from 'vue-cookies';
+import storage from 'store';
 NProgress.configure({ showSpinner: false }); // NProgress Configuration
 
 const allowList = ['login', 'register', 'registerResult']; // no redirect allowList
