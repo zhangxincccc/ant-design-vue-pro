@@ -9,17 +9,17 @@
               <a-row :gutter="64">
                 <a-col :md="6" :sm="32">
                   <a-form-item label="权限名称">
-                    <a-input allowClear v-model="searchParameters.searchName" placeholder="请输入" />
+                    <a-input allowClear v-model="searchParameters.searchName" placeholder="请输入权限名称" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="32">
                   <a-form-item label="权限代码">
-                    <a-input allowClear v-model="searchParameters.searchCode" placeholder="请输入" />
+                    <a-input allowClear v-model="searchParameters.searchCode" placeholder="请输入权限代码" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="32">
                   <a-form-item label="权限类型">
-                    <a-select allowClear v-model="searchParameters.searchType" placeholder="请选择">
+                    <a-select allowClear v-model="searchParameters.searchType" placeholder="请选择权限类型">
                       <a-select-option v-for="(item, index) in permissionsTypeArray" :key="index" :value="item.value">
                         {{ item.name }}
                       </a-select-option>
