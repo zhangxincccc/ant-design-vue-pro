@@ -2,12 +2,11 @@
   <page-header-wrapper :title="false">
     <div class="department">
       <div class="departmentList">
-        <organization-mix-tree
-          ref="mixTree"
-          @selectOrganization="selectMixTreeOrganizationData"
-          @selectDepartment="selectMixTreeDepartmentData"
-          @cancelSelect="cancelSelectMixTreeData"
-        ></organization-mix-tree>
+        <organization-tree
+          ref="organizationTree"
+          @organizationTreeData="getFormOrganizationTreeData"
+          @selectOrganization="selectOrganization"
+        ></organization-tree>
       </div>
       <div class="departmentMain">
         <a-spin tip="加载中..." class="position" v-if="departmentLoading"> </a-spin>
@@ -15,51 +14,25 @@
           <div class="table-page-search-wrapper">
             <a-form layout="inline">
               <a-row :gutter="48">
-                <a-col :md="8" :sm="24">
+                <a-col :md="6" :sm="24">
                   <a-form-item label="部门名称">
                     <a-input v-model="searchParameters.searchName" placeholder="请输入" allowClear />
                   </a-form-item>
                 </a-col>
-                <a-col :md="8" :sm="24">
+                <a-col :md="6" :sm="24">
                   <a-form-item label="部门编码">
                     <a-input allowClear v-model="searchParameters.searchCode" placeholder="请输入" />
                   </a-form-item>
                 </a-col>
-                <template v-if="advanced">
-                  <a-col :md="8" :sm="24">
-                    <a-form-item label="创建时间">
-                      <a-range-picker @change="onChangeData" v-model="searchParameters.departmentDate" />
-                    </a-form-item>
-                  </a-col>
-                  <a-col :md="8" :sm="24">
-                    <a-form-model-item label="所属组织">
-                      <a-tree-select
-                        allowClear
-                        :replaceFields="{
-                          title: 'name',
-                          value: 'id'
-                        }"
-                        v-model="searchParameters.searchOrganizationId"
-                        style="width: 100%"
-                        :dropdown-style="{ maxHeight: '400px',maxWidth: '300px', overflow: 'auto' }"
-                        :tree-data="organizationTreeData"
-                        placeholder="请选择所属组织"
-                        tree-default-expand-all
-                      >
-                      </a-tree-select>
-                    </a-form-model-item>
-                  </a-col>
-                  <a-col :md="8" :sm="24">
-                  </a-col>
-                </template>
-                <a-col :md="8" :sm="24" style="display:flex;justify-content: flex-end">
+                <a-col :md="6" :sm="24">
+                  <a-form-item label="创建时间">
+                    <a-range-picker @change="onChangeData" v-model="searchParameters.departmentDate" />
+                  </a-form-item>
+                </a-col>
+                <a-col :md="6" :sm="24" style="display:flex;justify-content: flex-end">
                   <span>
                     <a-button type="primary" @click="() => this.searchDepartmentTableData()">查询</a-button>
                     <a-button style="margin-left: 8px" @click="handleReset">重置</a-button>
-                    <a @click="() => (this.advanced = !this.advanced)" style="margin-left: 8px">
-                      {{ advanced ? '收起' : '展开' }}
-                      <a-icon :type="advanced ? 'up' : 'down'" />
-                    </a>
                   </span>
                 </a-col>
               </a-row>
@@ -81,6 +54,7 @@
             <a-table
               :columns="columns"
               :data-source="departmentTableData"
+              :expanded-row-keys.sync="expandedRowKeys"
               :pagination="false"
               size="middle"
               :rowKey="
@@ -143,12 +117,12 @@
           </a-form-model-item>
           <a-form-model-item label="所属组织" prop="organizationId">
             <a-tree-select
+              :disabled="true"
               :replaceFields="{
                 title: 'name',
                 value: 'id'
               }"
               v-model="form.organizationId"
-              @change="organizationId => (this.getDepartmentTree({ searchOrganizationId: organizationId }),form.parentId = undefined)"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
               :tree-data="organizationTreeData"
               placeholder="请选择所属组织"
@@ -158,10 +132,13 @@
           </a-form-model-item>
           <a-form-model-item label="上级部门" prop="parentId">
             <a-tree-select
+              :disabled="isChildren"
+              allowClear
               :replaceFields="{
                 title: 'name',
                 value: 'id'
               }"
+              @change="getDepartmentData"
               v-model="form.parentId"
               style="width: 100%"
               :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
@@ -184,16 +161,14 @@
 </template>
 <script>
 import {
-  listDepartments,
+  departmentTree,
   createDepartment,
   updateDepartment,
   deleteDepartmentById,
-  organizationsTree,
-  departmentsTree,
   loadDepartmentById
 } from '@/api/api';
 import moment from 'moment';
-import OrganizationMixTree from './components/tree/OrganizationMixTree';
+import OrganizationTree from './components/tree/organizationTree';
 const columns = [
   {
     title: '部门名称',
@@ -237,9 +212,9 @@ export default {
     return {
       jumper: '',
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
+      isChildren: false, // 判断部门下是否有子级 有的话不能编辑
       departmentLoading: false, // 加载表格的loading
       modleVisible: false, // 控制弹框显示隐藏
-      advanced: false, // 控制搜索条件的展开折叠
       searchParameters: {}, // 部门表格查询参数
       departmentTableData: [], // 表格数据
       columns, // 表格头部
@@ -250,6 +225,7 @@ export default {
         pageSize: this.$store.state.user.defaultPaginationPagesize // 一页展示多少条数据
       },
       departmentTableTotal: 0, // 表格数据总数
+      expandedRowKeys: [],
       labelCol: { span: 7 },
       wrapperCol: { span: 14 },
       form: {
@@ -259,9 +235,9 @@ export default {
         code: undefined, // 编码
         isEnable: '1', // 状态
         parentId: undefined, // 上级部门
-        parent: undefined, // 传给后台接口的上级部门字段
+        parent: { leftValue: undefined, rightValue: undefined, level: undefined, id: undefined, rootId: undefined }, // 传给后台接口的上级部门字段
         organizationId: undefined, // 所属组织
-        organization: undefined, // 传给后台接口的所属组织字段
+        organization: { leftValue: undefined, rightValue: undefined, level: undefined, id: undefined }, // 传给后台接口的所属组织字段
         description: undefined // 备注
       },
       rules: {
@@ -282,7 +258,7 @@ export default {
     };
   },
   components: {
-    OrganizationMixTree
+    OrganizationTree
   },
   watch: {
     /**
@@ -309,93 +285,36 @@ export default {
   },
   created() {
     this.getDepartentTableData(this.pageObject, this.searchParameters); // 获取部门表格数据
-    this.getOrganizationTree(); // 获取组织树结构数据
   },
   methods: {
     /**
-     * @description: 获取组织树结构数据
-     */
-    getOrganizationTree() {
-      organizationsTree().then(res => {
-        if (res.code === 200) {
-          this.organizationTreeData = res.data;
-          this.disabledFormTreeData(this.organizationTreeData);
-          this.departmentFormTreeData = [];
-        }
-      });
-    },
-
-    /**
-     * @description: 利用递归找出停用状态的数据 添加disabled字段属性
-     * @param {array} formTreeData 组织树形结构数据
-     */
-    disabledFormTreeData(formTreeData) {
-      formTreeData.forEach(item => {
-        item.disabled = item.isEnable === 0;
-        if (item.children) {
-          this.disabledFormTreeData(item.children);
-        }
-      });
-    },
-
-        /**
-     * @description: 选中混合树组织的数据
-     * @param {array} organizationId 组织ID数组
-     * @param {string} organizationType 选中的类型
+     * @description: 获取子组件的组织结构树数据
+     * @param {object} organizationData 组织树
      */
 
-    selectMixTreeOrganizationData(organizationId) {
-      this.selectOrganizationId = organizationId[0];
-      if (organizationId.length > 1) {
-        this.searchParameters.searchOrganizationIds = organizationId;
-        this.searchParameters.searchOrganizationId = undefined;
-      } else {
-        this.searchParameters.searchOrganizationIds = undefined;
-        this.searchParameters.searchOrganizationId = organizationId[0];
-      }
-      this.searchParameters.searchParentId = undefined;
-      this.searchParameters.searchParentIds = undefined;
-      this.searchDepartmentTableData();
+    getFormOrganizationTreeData(organizationData) {
+      this.organizationTreeData = organizationData;
     },
-        /**
-     * @description: 选中混合树组织的数据
-     * @param {array} departmentId 部门ID数组
+
+      /**
+     * @description: 获取子组件组织列表选中数据
+     * @param {string} selectOrganizationData 选中的组织ID
      */
-    selectMixTreeDepartmentData(organizationAnddepartmentId) {
-      this.selectOrganizationId = organizationAnddepartmentId.organizationId;
-      if (organizationAnddepartmentId.departmentId.length > 1) {
-         this.searchParameters.searchParentId = undefined;
-          this.searchParameters.searchParentIds = organizationAnddepartmentId.departmentId;
-      } else {
-        this.searchParameters.searchParentId = organizationAnddepartmentId.departmentId[0];
-        this.searchParameters.searchParentIds = undefined;
-      }
-      this.searchParameters.searchOrganizationIds = undefined;
-      this.searchParameters.searchOrganizationId = undefined;
+    selectOrganization(selectOrganizationData) {
+      this.searchParameters = {};
+      this.searchParameters.searchOrganizationId = selectOrganizationData;
       this.searchDepartmentTableData();
     },
-    /**
-     * @description: 取消选中混合树
-     */
-    cancelSelectMixTreeData() {
-      this.searchParameters.searchOrganizationIds = undefined;
-      this.searchParameters.searchParentIds = undefined;
-      this.searchParameters.searchOrganizationId = undefined;
-      this.searchParameters.searchParentId = undefined;
-      this.selectOrganizationId = undefined;
-      this.searchDepartmentTableData();
-    },
+
     /**
      * @description:  获取部门表格数据
      */
     getDepartentTableData(page, params) {
       this.departmentLoading = true;
-      listDepartments(Object.assign({}, page, params)).then(res => {
+      departmentTree(Object.assign({}, page, params)).then(res => {
         if (res.code === 200 && res.data.content) {
           this.departmentTableData = res.data.content;
-          this.departmentTableData.forEach(item => {
-            item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
-          });
+          this.getTableCreateTime(this.departmentTableData);
           this.departmentTableTotal = res.data.totalElements;
         } else {
           this.departmentTableTotal = res.data.totalElements;
@@ -407,6 +326,28 @@ export default {
     },
 
     /**
+     * @description: 递归转换表格数据时间
+     * @param {array} departmentTableData
+     */
+    getTableCreateTime(departmentTableData) {
+        departmentTableData.forEach(item => {
+          item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
+          if (item.children) {
+            this.getTableCreateTime(item.children);
+          }
+        });
+    },
+        /**
+     * @description: 表单下拉获取部门数据
+     * @param {object} extra
+     */
+    getDepartmentData(value, label, extra) {
+      this.form.parent.leftValue = extra.triggerNode.dataRef.leftValue;
+      this.form.parent.rightValue = extra.triggerNode.dataRef.rightValue;
+      this.form.parent.level = extra.triggerNode.dataRef.level;
+      this.form.parent.rootId = extra.triggerNode.dataRef.rootId;
+    },
+    /**
      * @description: 新增编辑弹框 （提交数据）
      */
     onSubmit() {
@@ -414,9 +355,11 @@ export default {
         if (valid) {
           this.formButtonDisableFlag = true;
           if (this.form.parentId) {
-            this.form.parent = { id: this.form.parentId };
+            this.form.parent.id = this.form.parentId;
+          } else {
+              this.form.parent = null;
           }
-          this.form.organization = { id: this.form.organizationId };
+          this.form.organization.id = this.form.organizationId;
           if (this.form.id) {
             this.departmentUpdate(this.form);
           } else {
@@ -470,7 +413,6 @@ export default {
           this.$message.success(res.message);
           this.modleVisible = false;
           this.getDepartentTableData(this.pageObject, this.searchParameters);
-          this.$refs.mixTree.getTreeData(); // 刷新子组件部门列表的方法
         }
       });
     },
@@ -515,8 +457,11 @@ export default {
     handleAddDepartment() {
       this.form.id = undefined;
       this.modleVisible = true;
-      this.form.organizationId = this.selectOrganizationId;
-      this.form.parentId = this.searchParameters.searchParentIds ? this.searchParameters.searchParentIds[0] : this.searchParameters.searchParentId ? this.searchParameters.searchParentId : undefined;
+      this.isChildren = false;
+      this.form.organizationId = this.searchParameters.searchOrganizationId === undefined ? this.organizationTreeData[0].id : this.searchParameters.searchOrganizationId;
+      this.form.organization.leftValue = this.organizationTreeData[0].leftValue;
+      this.form.organization.rightValue = this.organizationTreeData[0].rightValue;
+      this.form.organization.level = this.organizationTreeData[0].level;
       this.getDepartmentTree({ searchOrganizationId: this.form.organizationId });
     },
 
@@ -527,17 +472,18 @@ export default {
     handleEdit(departmentTableRowData) {
       loadDepartmentById({ id: departmentTableRowData.id }).then(res => {
         if (res.code === 200) {
+          this.isChildren = !!departmentTableRowData.children;
           this.form = Object.assign({}, this.form, res.data);
-          this.form.organizationId = this.form.organization.id;
-          this.form.parentId = this.form.parent ? this.form.parent.id : undefined;
-          this.getDepartmentTree({ searchOrganizationId: this.form.organizationId }, departmentTableRowData.id);
-          this.modleVisible = true;
+          this.form.organizationId = res.data.organization.id;
+          this.form.parentId = res.data.parent ? res.data.parent.id : undefined;
+          this.getDepartmentTree({ searchOrganizationId: this.form.organizationId }, res.data.id);
+         this.modleVisible = true;
         }
       });
     },
 
     /**
-     * @description: 编辑用户时禁用自己
+     * @description: 编辑部门时禁用自己
      * @param {string} selectId 选中ID
      * @param {array} departmentFormTreeData 部门下拉树
      */
@@ -561,7 +507,6 @@ export default {
       this.modleVisible = false;
       this.clearFormData();
       this.getDepartentTableData(this.pageObject, this.searchParameters);
-      this.$refs.mixTree.getTreeData();
     },
 
     /**
@@ -592,15 +537,18 @@ export default {
     /**
      * @description: 根据组织ID获取对应的部门树
      * @param {object} searchParameters 组织ID
-     *  @param {string} selectRowDepartemntId 选中部门ID
+     *  @param {string} departmentId 选中部门ID
      * @return {*}
      */
-    getDepartmentTree(searchParameters, selectRowDepartemntId) {
-      departmentsTree(searchParameters).then(res => {
+    getDepartmentTree(searchParameters, departmentId) {
+      departmentTree(searchParameters).then(res => {
         if (res.code === 200) {
-          this.departmentFormTreeData = res.data;
-          this.disabledFormTreeData(this.departmentFormTreeData);
-           this.disableSelectIdData(selectRowDepartemntId, this.departmentFormTreeData);
+          if (res.data.content) {
+            this.departmentFormTreeData = res.data.content;
+          } else {
+            this.departmentFormTreeData = [];
+          }
+           this.disableSelectIdData(departmentId, this.departmentFormTreeData);
         }
       });
     },
@@ -608,10 +556,7 @@ export default {
      * @description: 重置搜索条件
      */
     handleReset() {
-      const copySearchParameters = JSON.parse(JSON.stringify(this.searchParameters));
       this.searchParameters = {};
-      this.searchParameters.searchParentIds = copySearchParameters.searchParentIds;
-      this.searchParameters.searchParentId = copySearchParameters.searchParentId;
       this.searchDepartmentTableData();
     },
     /**

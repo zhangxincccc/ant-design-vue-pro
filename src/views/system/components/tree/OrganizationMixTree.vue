@@ -1,7 +1,7 @@
 <template>
   <div class="mixTreeMain">
     <div class="mixTreeSearch">
-      <span><a-input placeholder="搜索组织/部门" style="width: 275px" @change="handleSearch" v-model="mixTreeSearch"/></span>
+      <span><a-input placeholder="搜索组织/部门" style="width: 255px" @change="handleSearch" v-model="mixTreeSearch"/></span>
       <span>
         <a-popover placement="bottomRight">
           <template slot="content">
@@ -10,13 +10,16 @@
           </template>
           <a-icon type="menu-unfold" /> </a-popover
         ></span>
+      <span>
+        <a-icon type="plus" />
+      </span>
     </div>
     <div class="mixTreeContent">
       <a-tree
         v-if="isMixTreeShow"
         ref="tree"
         :replaceFields="{
-          title: 'name',
+          title: 'type',
           key: 'id'
         }"
         defaultExpandAll
@@ -25,7 +28,7 @@
         :defaultSelectedKeys.sync="defaultSelectedId"
         @select="handleSelect"
       >
-        <template slot="title" slot-scope="{ name }">
+        <!-- <template slot="title" slot-scope="{ name }">
           <span
             :title="name"
             v-html="
@@ -35,14 +38,14 @@
               )
             "
           ></span>
-        </template>
+        </template> -->
       </a-tree>
     </div>
   </div>
 </template>
 
 <script>
-import { organizationsTree } from '@/api/api';
+import { addressBookTree } from '@/api/api';
 export default {
   name: 'OrganizationMixTree',
   data() {
@@ -53,7 +56,7 @@ export default {
       allIds: [], // 用来保存树形所有节点ID
       mixTreeSearch: '', // 混合树搜索
       treeData: [], // 混合树形结构数据
-      selectMixTreeAllIds: [] // 选中组织或部门后下面包含的所有组织ID
+      currentId: '' // 当前选中ID
     };
   },
   created() {
@@ -65,13 +68,14 @@ export default {
      */
 
     getTreeData() {
-      organizationsTree().then(res => {
+      this.treeData = [];
+      addressBookTree().then(res => {
         if (res.code === 200) {
-          this.treeData = res.data;
+          this.treeData.push(res.data);
           this.$set(this.defaultSelectedId, 0, this.treeData[0].id);
-          this.setOrganizationType(this.treeData);
-          this.initTreeData(this.treeData);
           this.getMixTreeAllId(this.treeData);
+          // 初始化页面默认选中第一条数据 将数据传给子组件
+          this.$emit('getDefaultData', this.treeData[0].data);
         }
       });
     },
@@ -186,7 +190,7 @@ export default {
         const node = treeData[i];
         if (node.id === id) {
           // 判断该节点是否有父级
-          if (node.type === 7) {
+          if (node.type === 'Organization') {
             // 一级的组织没有parent字段
             if (!node.parent) {
               return false;
@@ -199,7 +203,7 @@ export default {
               this.getParentKey(node.parent.id, this.treeData);
             }
             // 判断该节点是否为部门
-          } else if (node.type === 6) {
+          } else if (node.type === 'Department') {
             console.log(node);
               // 如果还有父级则拿父级ID重新遍历 如果没有父级说明已经在部门的一级列表 拿organization.id继续向上查找
               if (node.parent) {
@@ -226,44 +230,22 @@ export default {
      */
 
     handleSelect(selectedKeys, rowData) {
-      this.selectMixTreeAllIds = [];
+      console.log('selectedKeys, rowData', rowData.node.dataRef.data);
       // 取消选中
       if (selectedKeys.length === 0) {
         this.isMixTreeShow = false;
         this.$nextTick(() => {
-          this.$set(this.defaultSelectedId, 0, this.treeData[0].id);
+          this.$set(this.defaultSelectedId, 0, this.currentId);
           this.isMixTreeShow = true;
         });
-        this.$emit('cancelSelect');
         return false;
       }
-      if (rowData.node.dataRef.type === 7) {
-        if (rowData.node.dataRef.children && rowData.node.dataRef.children.length !== 0) {
-          this.getSelectMixTreeAllIds(rowData.node.dataRef.children, 7);
-        }
-        this.selectMixTreeAllIds.unshift(selectedKeys[0]);
-        this.$emit('selectOrganization', this.selectMixTreeAllIds, true);
-      } else if (rowData.node.dataRef.type === 6) {
-        if (rowData.node.dataRef.children && rowData.node.dataRef.children.length !== 0) {
-          this.getSelectMixTreeAllIds(rowData.node.dataRef.children, 6);
-        }
-        this.selectMixTreeAllIds.unshift(selectedKeys[0]);
-        const selecOrganizationAnddepartmentId = {
-          organizationId: rowData.node.dataRef.organization.id,
-          departmentId: this.selectMixTreeAllIds
-        };
-        this.$emit('selectDepartment', selecOrganizationAnddepartmentId, false);
+      this.currentId = rowData.node.dataRef.id;
+      if (rowData.node.dataRef.type === 'Organization') {
+        this.$emit('selectOrganization', rowData.node.dataRef.data, true);
+      } else if (rowData.node.dataRef.type === 'Department') {
+        this.$emit('selectDepartment', rowData.node.dataRef.data, false);
       }
-    },
-    getSelectMixTreeAllIds(treeData, type) {
-      treeData.forEach(item => {
-        if (item.type === type) {
-          this.selectMixTreeAllIds.push(item.id);
-        }
-        if (item.children) {
-          this.getSelectMixTreeAllIds(item.children, type);
-        }
-      });
     }
   }
 };

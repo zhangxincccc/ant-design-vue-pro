@@ -5,7 +5,7 @@
         <organization-mix-tree
           @selectOrganization="selectMixTreeOrganizationData"
           @selectDepartment="selectMixTreeDepartmentData"
-          @cancelSelect="cancelSelectMixTreeData"
+          @getDefaultData="getDefaultData"
         ></organization-mix-tree>
       </div>
       <div class="userMain">
@@ -228,6 +228,7 @@
           </a-form-model-item>
           <a-form-model-item label="所属部门" prop="departmentId">
             <a-tree-select
+              allowClear
               :replaceFields="{
                 title: 'name',
                 value: 'id'
@@ -268,7 +269,7 @@ import {
   batchDisableUserByIds,
   batchEnableUserByIds,
   batchDeleteUserByIds,
-  departmentsTree,
+  departmentTree,
   listAllRoles,
   loadUserById,
   resetUserPasswordById
@@ -324,7 +325,7 @@ export default {
   name: 'User',
   data() {
     return {
-       jumper: '',
+      jumper: '',
       isBatchButtonDisabled: true, // 判断批量按钮的禁用状态
       selectDepartmentFlagArray: [], // 接受部门列表子组件选中的ID数组 []为未选中状态 有值为选中状态
       formButtonDisableFlag: false, // 表单确定禁用按钮 防止多次点击多次保存
@@ -336,6 +337,7 @@ export default {
       tableData, // 表格数据
       columns, // 表格头部
       currentPage: 1, // 默认分页当前页
+      mixTreeDefaultData: undefined,
       pageSizeOptions: this.$store.state.user.defaultPaginationOptions, // 分页下拉
       pageObject: {
         pageNumber: 0,
@@ -424,52 +426,37 @@ export default {
     },
     /**
      * @description: 选中混合树组织的数据
-     * @param {array} organizationId 组织ID数组
+     * @param {array} organizationData 组织数据
      * @param {string} organizationType 选中的类型
      */
 
-    selectMixTreeOrganizationData(organizationId, organizationType) {
-      if (organizationId.length > 1) {
-        this.searchParameters.searchOrganizationIds = organizationId;
-        this.searchParameters.searchOrganizationId = undefined;
-      } else {
-        this.searchParameters.searchOrganizationIds = undefined;
-        this.searchParameters.searchOrganizationId = organizationId[0];
-      }
-      this.searchParameters.searchDepartmentIds = undefined;
+    selectMixTreeOrganizationData(organizationData, organizationType) {
+      console.log('organizationDataorganizationDataorganizationData', organizationData);
+      this.searchParameters.searchOrganizationId = organizationData.id;
       this.searchParameters.searchDepartmentId = undefined;
       this.isOrganization = organizationType;
       this.searchUserTableData();
     },
     /**
      * @description: 选中混合树组织的数据
-     * @param {array} departmentId 部门ID数组
+     * @param {array} departmentData 部门数据
      * @param {string} departmentType 选中的类型
      */
-    selectMixTreeDepartmentData(organizationAnddepartmentId, departmentType) {
-      this.selectMixTreeOrganizationId = organizationAnddepartmentId.organizationId;
-      if (organizationAnddepartmentId.departmentId.length > 1) {
-        this.searchParameters.searchDepartmentIds = organizationAnddepartmentId.departmentId;
-        this.searchParameters.searchDepartmentId = undefined;
-      } else {
-        this.searchParameters.searchDepartmentIds = undefined;
-        this.searchParameters.searchDepartmentId = organizationAnddepartmentId.departmentId[0];
-      }
-      this.searchParameters.searchOrganizationIds = undefined;
+    selectMixTreeDepartmentData(departmentData, departmentType) {
+      this.selectMixTreeOrganizationId = departmentData.organization.id;
+      this.searchParameters.searchDepartmentId = departmentData.id;
       this.searchParameters.searchOrganizationId = undefined;
       this.isOrganization = departmentType;
       this.searchUserTableData();
     },
+
     /**
-     * @description: 取消选中混合树
+     * @description: 获取默认的第一条数据
+     * @param {Object} defaultData 混合树的第一条数据
      */
-    cancelSelectMixTreeData() {
-      this.searchParameters.searchOrganizationIds = undefined;
-      this.searchParameters.searchDepartmentIds = undefined;
-      this.searchParameters.searchOrganizationId = undefined;
-      this.searchParameters.searchDepartmentId = undefined;
-      this.isOrganization = -1;
-      this.searchUserTableData();
+    getDefaultData(defaultData) {
+      this.mixTreeDefaultData = defaultData;
+      console.log('defaultDatadefaultData', defaultData);
     },
     /**
      * @description: 获取表格数据
@@ -539,9 +526,9 @@ export default {
      * @return {*}
      */
     getUserDepartmentTree(searchParameters) {
-      departmentsTree(searchParameters).then(res => {
+      departmentTree(searchParameters).then(res => {
         if (res.code === 200) {
-          this.formDepartmentTreeData = res.data;
+          this.formDepartmentTreeData = res.data.content;
         }
       });
     },
@@ -739,9 +726,10 @@ export default {
      * @description: 获取表单树结构数据
      */
     getFormOrganizationsTree() {
+      this.formOrganizationTreeData = [];
       organizationsTree().then(res => {
         if (res.code === 200) {
-          this.formOrganizationTreeData = res.data;
+          this.formOrganizationTreeData.push(res.data);
           this.disabledFormTreeData(this.formOrganizationTreeData);
           this.formDepartmentTreeData = [];
         }
@@ -796,6 +784,7 @@ export default {
           this.form.roleIds = this.form.roles.map(item => {
             return item.id;
           });
+          console.log('this.formthis.formthis.form', this.form);
           this.form.organizationId = this.form.organization.id;
           if (this.form.department) {
             this.form.departmentId = this.form.department.id;
@@ -803,7 +792,7 @@ export default {
             this.form.department = undefined;
           }
           this.form.isEnable = String(this.form.isEnable);
-          this.getUserDepartmentTree({ searchOrganizationId: this.form.organization });
+          this.getUserDepartmentTree({ searchOrganizationId: this.form.organizationId });
           this.modleVisible = true;
         }
       });

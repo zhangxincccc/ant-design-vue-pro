@@ -5,7 +5,8 @@ const GitRevision = new GitRevisionPlugin();
 const buildDate = JSON.stringify(new Date().toLocaleString());
 const createThemeColorReplacerPlugin = require('./config/plugin.config');
 // const url = 'http://localhost:9998';
-const url = 'http://10.10.10.118:9999';
+// const url = 'http://10.10.10.118:9999';
+const url = 'http://192.168.100.77:9999';
 function resolve(dir) {
   return path.join(__dirname, dir);
 }
@@ -107,8 +108,8 @@ const vueConfig = {
     port: 8001,
     // If you want to turn on the proxy, please remove the mockjs /src/main.jsL11
     proxy: {
-      '/oauth2': {
-        target: process.env.VUE_APP_AUTHORIZATION_URI || url
+      '/oauth': {
+        target: url
       },
       '/api': {
         target: url,
