@@ -32,22 +32,12 @@ export const asyncRouterMap = [
         path: '/system',
         name: 'system',
         component: RouteView,
-        redirect: '/system/organizations',
+        redirect: '/system/department',
         meta: {
           title: 'menu.system',
           icon: system
         },
         children: [
-          {
-            path: '/system/organization',
-            name: 'organization',
-            component: () => import('@/views/system/organization'),
-            meta: {
-              title: '组织机构管理',
-              permission: ['system:organizations'],
-              icon: workplace
-            }
-          },
           {
             path: '/system/department',
             name: 'department',

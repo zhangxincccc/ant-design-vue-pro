@@ -59,7 +59,7 @@
               size="middle"
               :rowKey="
                 (record, index) => {
-                  return record.id;
+                  return record.onlyId;
                 }
               "
               :rowClassName="rowClassName"
@@ -165,7 +165,8 @@ import {
   createDepartment,
   updateDepartment,
   deleteDepartmentById,
-  loadDepartmentById
+  loadDepartmentById,
+  listOrganizationDepartmentTreeById
 } from '@/api/api';
 import moment from 'moment';
 import OrganizationTree from './components/tree/organizationTree';
@@ -283,9 +284,6 @@ export default {
       return (this.currentPage - 1) * this.pageObject.pageSize;
     }
   },
-  created() {
-    this.getDepartentTableData(this.pageObject, this.searchParameters); // 获取部门表格数据
-  },
   methods: {
     /**
      * @description: 获取子组件的组织结构树数据
@@ -293,7 +291,11 @@ export default {
      */
 
     getFormOrganizationTreeData(organizationData) {
+      this.searchParameters = {};
       this.organizationTreeData = organizationData;
+      this.searchParameters.searchOrganizationId = organizationData[0].id;
+      this.searchParameters.searchDepartmentId = undefined;
+      this.searchDepartmentTableData();
     },
 
       /**
@@ -330,7 +332,9 @@ export default {
      * @param {array} departmentTableData
      */
     getTableCreateTime(departmentTableData) {
-        departmentTableData.forEach(item => {
+        departmentTableData.forEach((item, index) => {
+          // 因为目前数据返回会有相同的数据 防止报错  所以设置一个唯一id
+          item.onlyId = index + '@' + item.id;
           item.createTime = moment(item.createTime).format('YYYY-MM-DD HH:mm');
           if (item.children) {
             this.getTableCreateTime(item.children);
@@ -462,7 +466,7 @@ export default {
       this.form.organization.leftValue = this.organizationTreeData[0].leftValue;
       this.form.organization.rightValue = this.organizationTreeData[0].rightValue;
       this.form.organization.level = this.organizationTreeData[0].level;
-      this.getDepartmentTree({ searchOrganizationId: this.form.organizationId });
+      this.getDepartmentTree({ id: this.form.organizationId });
     },
 
     /**
@@ -476,7 +480,7 @@ export default {
           this.form = Object.assign({}, this.form, res.data);
           this.form.organizationId = res.data.organization.id;
           this.form.parentId = res.data.parent ? res.data.parent.id : undefined;
-          this.getDepartmentTree({ searchOrganizationId: this.form.organizationId }, res.data.id);
+          this.getDepartmentTree({ id: this.form.organizationId }, res.data.id);
          this.modleVisible = true;
         }
       });
@@ -541,10 +545,10 @@ export default {
      * @return {*}
      */
     getDepartmentTree(searchParameters, departmentId) {
-      departmentTree(searchParameters).then(res => {
+      listOrganizationDepartmentTreeById(searchParameters).then(res => {
         if (res.code === 200) {
-          if (res.data.content) {
-            this.departmentFormTreeData = res.data.content;
+          if (res.data) {
+            this.departmentFormTreeData = res.data;
           } else {
             this.departmentFormTreeData = [];
           }

@@ -10,16 +10,13 @@
           </template>
           <a-icon type="menu-unfold" /> </a-popover
         ></span>
-      <span>
-        <a-icon type="plus" />
-      </span>
     </div>
     <div class="mixTreeContent">
       <a-tree
         v-if="isMixTreeShow"
         ref="tree"
         :replaceFields="{
-          title: 'type',
+          title: 'name',
           key: 'id'
         }"
         defaultExpandAll
@@ -28,7 +25,7 @@
         :defaultSelectedKeys.sync="defaultSelectedId"
         @select="handleSelect"
       >
-        <!-- <template slot="title" slot-scope="{ name }">
+        <template slot="title" slot-scope="{ name }">
           <span
             :title="name"
             v-html="
@@ -38,7 +35,7 @@
               )
             "
           ></span>
-        </template> -->
+        </template>
       </a-tree>
     </div>
   </div>
@@ -72,23 +69,13 @@ export default {
       addressBookTree().then(res => {
         if (res.code === 200) {
           this.treeData.push(res.data);
+          // 默认选中第一条
           this.$set(this.defaultSelectedId, 0, this.treeData[0].id);
+          this.currentId = this.treeData[0].id;
           this.getMixTreeAllId(this.treeData);
+          this.initTreeData(this.treeData);
           // 初始化页面默认选中第一条数据 将数据传给子组件
           this.$emit('getDefaultData', this.treeData[0].data);
-        }
-      });
-    },
-
-    /**
-     * @description: 设置组织的type 为了区分组织和部门
-     * @param {array} organizationData 组织数据
-     */
-    setOrganizationType(organizationData) {
-      organizationData.forEach(item => {
-        item.type = 7;
-        if (item.children) {
-          this.setOrganizationType(item.children);
         }
       });
     },
@@ -118,29 +105,12 @@ export default {
         if (!item.children) {
           item.children = [];
         }
-        if (item.departments) {
-          item.departments.forEach(value => {
-            this.setDepartmentType(item.departments);
-            item.children.push(value);
-          });
-        }
         if (item.children) {
           this.initTreeData(item.children);
         }
       });
     },
-    /**
-     * @description: 利用递归将部门的数据添加上一个type的唯一字段
-     * @param {array} departmentsChildrenData 部门的子数据
-     */
-    setDepartmentType(departmentsChildrenData) {
-      departmentsChildrenData.forEach(value => {
-        value.type = 6;
-        if (value.children) {
-          this.setDepartmentType(value.children);
-        }
-      });
-    },
+
     /**
      * @description: 混合树列表搜索
      */
@@ -191,29 +161,24 @@ export default {
         if (node.id === id) {
           // 判断该节点是否有父级
           if (node.type === 'Organization') {
-            // 一级的组织没有parent字段
-            if (!node.parent) {
+            // 一级的组织没有parentId字段
+            if (!node.parentId) {
               return false;
             }
-            parentId = node.parent.id;
+            parentId = node.parentId;
             // 数组去重添加
             if (this.expandedKeys.indexOf(parentId) === -1) {
               this.expandedKeys.push(parentId);
               // 如果还有父级则拿父级ID重新遍历
-              this.getParentKey(node.parent.id, this.treeData);
+              this.getParentKey(node.parentId, this.treeData);
             }
             // 判断该节点是否为部门
           } else if (node.type === 'Department') {
-            console.log(node);
-              // 如果还有父级则拿父级ID重新遍历 如果没有父级说明已经在部门的一级列表 拿organization.id继续向上查找
-              if (node.parent) {
-                this.expandedKeys.push(node.parent.id);
+              // 如果还有父级则拿父级ID重新遍历
+              if (node.parentId) {
+                this.expandedKeys.push(node.parentId);
                 this.expandedKeys = [...new Set(this.expandedKeys)];
-                this.getParentKey(node.parent.id, this.treeData);
-              } else {
-                this.expandedKeys.push(node.organization.id);
-                this.expandedKeys = [...new Set(this.expandedKeys)];
-                this.getParentKey(node.organization.id, this.treeData);
+                this.getParentKey(node.parentId, this.treeData);
               }
           }
         }
@@ -230,8 +195,7 @@ export default {
      */
 
     handleSelect(selectedKeys, rowData) {
-      console.log('selectedKeys, rowData', rowData.node.dataRef.data);
-      // 取消选中
+      // 要做取消选中 因为selectedKeys为0时 组件会取消选中 这里判断点击相同的节点时 默认选中当前选中节点
       if (selectedKeys.length === 0) {
         this.isMixTreeShow = false;
         this.$nextTick(() => {

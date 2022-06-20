@@ -215,7 +215,7 @@
               style="width: 100%"
               @change="
                 organizationId => (
-                  this.getUserDepartmentTree({ searchOrganizationId: organizationId }),
+                  this.getUserDepartmentTree({ id: organizationId }),
                   (this.form.departmentId = undefined)
                 )
               "
@@ -266,11 +266,11 @@ import {
   updateUser,
   disableUserById,
   enableUserById,
-  batchDisableUserByIds,
-  batchEnableUserByIds,
-  batchDeleteUserByIds,
-  departmentTree,
-  listAllRoles,
+  disableUserByIds,
+  enableUserByIds,
+  deleteUserByIds,
+  listOrganizationDepartmentTreeById,
+  listRoles,
   loadUserById,
   resetUserPasswordById
 } from '@/api/api';
@@ -411,7 +411,6 @@ export default {
     }
   },
   created() {
-    this.getUserTableData(this.pageObject, this.searchParameters); // 获取表格数据
     this.getRoles(); // 获取角色数据列表
     this.getFormOrganizationsTree(); // 获取表单组织树结构数据
   },
@@ -431,7 +430,6 @@ export default {
      */
 
     selectMixTreeOrganizationData(organizationData, organizationType) {
-      console.log('organizationDataorganizationDataorganizationData', organizationData);
       this.searchParameters.searchOrganizationId = organizationData.id;
       this.searchParameters.searchDepartmentId = undefined;
       this.isOrganization = organizationType;
@@ -455,8 +453,11 @@ export default {
      * @param {Object} defaultData 混合树的第一条数据
      */
     getDefaultData(defaultData) {
-      this.mixTreeDefaultData = defaultData;
-      console.log('defaultDatadefaultData', defaultData);
+      this.searchParameters.searchOrganizationId = defaultData.id;
+      this.searchParameters.searchDepartmentId = undefined;
+      // this.mixTreeDefaultData = defaultData;
+      this.isOrganization = true;
+      this.searchUserTableData();
     },
     /**
      * @description: 获取表格数据
@@ -488,9 +489,9 @@ export default {
      * @description: 获取角色数据列表
      */
     getRoles() {
-      listAllRoles().then(res => {
+      listRoles({ pageNumber: 0, pageSize: 9999 }).then(res => {
         if (res.code === 200) {
-          this.userRoleArray = res.data;
+          this.userRoleArray = res.data.content;
           this.userRoleArray = this.userRoleArray.filter(item => {
             if (item.isEnable === 1) {
               return item;
@@ -526,9 +527,9 @@ export default {
      * @return {*}
      */
     getUserDepartmentTree(searchParameters) {
-      departmentTree(searchParameters).then(res => {
+      listOrganizationDepartmentTreeById(searchParameters).then(res => {
         if (res.code === 200) {
-          this.formDepartmentTreeData = res.data.content;
+          this.formDepartmentTreeData = res.data;
         }
       });
     },
@@ -546,7 +547,9 @@ export default {
               id: item
             };
           });
-          this.form.department = { id: this.form.departmentId };
+          if (this.form.departmentId) {
+            this.form.department = { id: this.form.departmentId };
+          }
           this.form.organization = { id: this.form.organizationId };
 
           // 编辑
@@ -646,7 +649,7 @@ export default {
      * @description: 点击批量停用
      */
     handleBatchDisable() {
-      batchDisableUserByIds({ body: this.batchSelectIdArray }).then(res => {
+      disableUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
           this.afterBatchActions(res, 1);
         }
@@ -656,7 +659,7 @@ export default {
      * @description: 点击批量启用
      */
     handleBatchEnable() {
-      batchEnableUserByIds({ body: this.batchSelectIdArray }).then(res => {
+      enableUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
           this.afterBatchActions(res, 2);
         }
@@ -666,7 +669,7 @@ export default {
      * @description: 点击批量删除
      */
     handleBatchDelete() {
-      batchDeleteUserByIds({ body: this.batchSelectIdArray }).then(res => {
+      deleteUserByIds({ body: this.batchSelectIdArray }).then(res => {
         if (res.code === 200) {
           this.afterBatchActions(res, 3);
         }
@@ -743,20 +746,12 @@ export default {
       this.form.id = undefined;
       this.modleVisible = true;
       if (this.isOrganization === true) {
-        this.form.organizationId = this.searchParameters.searchOrganizationIds
-          ? this.searchParameters.searchOrganizationIds[0]
-          : this.searchParameters.searchOrganizationId
-          ? this.searchParameters.searchOrganizationId
-          : undefined;
-          this.getUserDepartmentTree({ searchOrganizationId: this.form.organizationId });
+          this.form.organizationId = this.searchParameters.searchOrganizationId;
+          this.getUserDepartmentTree({ id: this.form.organizationId });
       } else if (this.isOrganization === false) {
-        this.form.organizationId = this.selectMixTreeOrganizationId;
-        this.form.departmentId = this.searchParameters.searchDepartmentIds
-          ? this.searchParameters.searchDepartmentIds[0]
-          : this.searchParameters.searchDepartmentId
-          ? this.searchParameters.searchDepartmentId
-          : undefined;
-          this.getUserDepartmentTree({ searchOrganizationId: this.form.organizationId });
+          this.form.organizationId = this.selectMixTreeOrganizationId;
+          this.form.departmentId = this.searchParameters.searchDepartmentId;
+          this.getUserDepartmentTree({ id: this.form.organizationId });
       }
     },
 
@@ -784,7 +779,6 @@ export default {
           this.form.roleIds = this.form.roles.map(item => {
             return item.id;
           });
-          console.log('this.formthis.formthis.form', this.form);
           this.form.organizationId = this.form.organization.id;
           if (this.form.department) {
             this.form.departmentId = this.form.department.id;
@@ -792,7 +786,7 @@ export default {
             this.form.department = undefined;
           }
           this.form.isEnable = String(this.form.isEnable);
-          this.getUserDepartmentTree({ searchOrganizationId: this.form.organizationId });
+          this.getUserDepartmentTree({ id: this.form.organizationId });
           this.modleVisible = true;
         }
       });

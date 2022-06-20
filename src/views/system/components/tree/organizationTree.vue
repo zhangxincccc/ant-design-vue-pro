@@ -371,14 +371,12 @@ export default {
     handleEdit(nodeData) {
       loadOrganizationById({ id: nodeData.id }).then(res => {
         if (res.code === 200) {
-          console.log('nodeDatanodeDatanodeData', nodeData.dataRef.children);
           this.isChildren = !!nodeData.dataRef.children;
           this.form = Object.assign({}, this.form, res.data);
           this.form.parentId = this.form.parent ? this.form.parent.id : undefined;
           this.form.isEnable = String(this.form.isEnable);
           this.disableSelectIdData(nodeData.id, this.formOrganizationTreeData);
           this.modleVisible = true;
-          console.log('nodeDatanodeDatanodeData', this.form);
         }
       });
     },

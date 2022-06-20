@@ -739,6 +739,24 @@ export default {
       margin-left: 30%;
       scrollbar-width: none;//兼容火狐
     }
+    .modalContentTreeContent /deep/ .ant-tree li .ant-tree-node-content-wrapper {
+      display: inline-block;
+      height: 24px;
+      margin: 0;
+      padding: 0 5px;
+      color: rgba(0, 0, 0, 0.65);
+      line-height: 24px;
+      text-decoration: none;
+      vertical-align: top;
+      border-radius: 2px;
+      cursor: pointer;
+      -webkit-transition: all 0.3s;
+      transition: all 0.3s;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 140px;
+    }
     .modalContentTreeContent::-webkit-scrollbar {
       display: none;
     }
